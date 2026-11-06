@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Youth Information Centre – SDIS Bogotá</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Anton&family=Antonio:wght@700&family=Figtree:wght@400;500;600;700;800&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Figtree', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #fff;
+      color: #333;
+    }
+
+    .footer-marca { display: block; width: 100%; height: auto; }
+
+    /* Botones de guía e información, flotando en la esquina — antes vivían en la barra
+       institucional que se quitó, se mantienen como accesos flotantes sobre el fondo blanco. */
+    .header-right {
+      display: flex;
+      gap: 8px;
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      z-index: 10;
+    }
+    .icon-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 2px solid #888;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: #555;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .icon-btn:hover { border-color: #333; color: #333; }
+
+    /* Contenido principal */
+    .main-content {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 2rem;
+      min-height: 100vh;
+      align-items: center;
+    }
+    @media (max-width: 850px) {
+      .main-content { grid-template-columns: 1fr; }
+    }
+
+    /* Lado izquierdo */
+    .left {
+      padding-top: 1rem;
+    }
+    .titulo-row {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .titulo-imagen { height: 400px; width: auto; flex-shrink: 0; }
+    .titulo {
+      font-family: 'Anton', 'Segoe UI', sans-serif;
+      font-weight: 400;
+      text-transform: uppercase;
+      font-size: 3.4rem;
+      color: #2f3e3c;
+      line-height: 1.15;
+      letter-spacing: 0.01em;
+    }
+    @media (max-width: 600px) {
+      .titulo { font-size: 2.4rem; }
+      .titulo-row { gap: 0.8rem; }
+      .titulo-imagen { height: 150px; }
+    }
+
+    /* Sección de estadísticas */
+    .stats-section h2 {
+      font-family: 'Antonio', 'Segoe UI', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      font-size: 1.15rem;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+    .stats-cards {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 1.2rem;
+    }
+    .stat-card {
+      border: 1.5px solid #ddd;
+      border-radius: 8px;
+      padding: 12px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 180px;
+    }
+    .stat-icon {
+      font-size: 2.2rem;
+      color: #333;
+      flex-shrink: 0;
+    }
+    .stat-icon svg {
+      width: 42px;
+      height: 42px;
+      fill: #333;
+    }
+    .stat-number {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #333;
+      line-height: 1.3;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: #555;
+      font-weight: 400;
+    }
+
+
+    /* Lado derecho */
+    .right {
+      padding-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    .dim-intro {
+      font-size: 0.9rem;
+      color: #333;
+      margin-bottom: 1.2rem;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* Cintas con pseudo-elementos */
+    .dim-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 340px;
+      margin: 0 auto;
+    }
+    .dim-arrow {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: #fff;
+      font-family: 'Antonio', 'Segoe UI', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      height: 48px;
+      text-align: center;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+      transition: transform 0.15s;
+      margin-left: 20px;
+      margin-right: 20px;
+    }
+    .dim-arrow::before,
+    .dim-arrow::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 0;
+      height: 0;
+      border-top: 24px solid transparent;
+      border-bottom: 24px solid transparent;
+    }
+    /* Impares: punta a la derecha → */
+    .dim-arrow:nth-child(odd) {
+      border-radius: 2px 0 0 2px;
+    }
+    .dim-arrow:nth-child(odd)::after {
+      right: -20px;
+      border-left: 20px solid;
+      border-left-color: inherit;
+    }
+    .dim-arrow:nth-child(odd)::before { display: none; }
+    /* Pares: punta a la izquierda ← */
+    .dim-arrow:nth-child(even) {
+      border-radius: 0 2px 2px 0;
+    }
+    .dim-arrow:nth-child(even)::before {
+      left: -20px;
+      border-right: 20px solid;
+      border-right-color: inherit;
+    }
+    .dim-arrow:nth-child(even)::after { display: none; }
+    .dim-arrow:hover {
+      transform: scale(1.03);
+    }
+
+    /* Colores — mapeo fijo de los 7 colores oficiales Distrito Joven a las 7 dimensiones.
+       Cada dimensión conserva este mismo color en su propia página (ver Notes del tablero). */
+    .dim-arrow:nth-child(1) { background: #f4676e; } /* Ser joven — rosa coral */
+    .dim-arrow:nth-child(2) { background: #1eaf76; } /* Educación — verde */
+    .dim-arrow:nth-child(3) { background: #663a93; } /* Inclusión Productiva — morado */
+    .dim-arrow:nth-child(4) { background: #1e9da3; } /* Salud Integral y Autocuidado — teal */
+    .dim-arrow:nth-child(5) { background: #f58b53; } /* Cultura, Recreación y Deporte — naranja coral */
+    .dim-arrow:nth-child(6) { background: #2fa4d4; } /* Paz, Convivencia y Justicia — azul cielo */
+    .dim-arrow:nth-child(7) { background: #1e7895; } /* Hábitat — azul petróleo */
+  </style>
+</head>
+<body>
+
+  <div class="header-right">
+    <a class="icon-btn" href="guia.html" title="Navigation guide">?</a>
+  </div>
+
+  <!-- Contenido -->
+  <div class="main-content">
+    <div class="left">
+      <div class="titulo-row">
+        <img src="imagenes/elementos/8.png" alt="" class="titulo-imagen">
+        <h1 class="titulo">Youth<br>Information<br>Centre</h1>
+      </div>
+
+      <div class="stats-section">
+        <h2>Bogotá in figures</h2>
+        <div class="stats-cards">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <!-- Icono persona joven -->
+              <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="32" cy="16" r="10"/>
+                <path d="M16 58c0-12 7-20 16-20s16 8 16 20z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="stat-number" id="stat-jovenes-total">&ndash;</div>
+              <div class="stat-label" id="stat-jovenes-label">Young people</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">
+              <!-- Icono grupo de personas -->
+              <svg viewBox="0 0 80 64" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="40" cy="12" r="8"/>
+                <path d="M28 56c0-10 5-16 12-16s12 6 12 16z"/>
+                <circle cx="20" cy="18" r="6"/>
+                <path d="M12 56c0-8 4-13 8-13s8 5 8 13z"/>
+                <circle cx="60" cy="18" r="6"/>
+                <path d="M52 56c0-8 4-13 8-13s8 5 8 13z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="stat-number" id="stat-jovenes-pct">&ndash;</div>
+              <div class="stat-label" id="stat-pct-label">of the population</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="right">
+      <p class="dim-intro">
+        Explore the <strong>information on each dimension</strong> of<br>
+        <strong>Bogotá’s District Youth Policy</strong>
+      </p>
+      <div class="dim-list">
+        <a href="dim1/index.html" class="dim-arrow">1. Being Young</a>
+        <a href="dim2/index.html" class="dim-arrow">2. Education</a>
+        <a href="dim3/index.html" class="dim-arrow">3. Productive Inclusion</a>
+        <a href="dim4/index.html" class="dim-arrow">4. Health and Self-Care</a>
+        <a href="dim5/index.html" class="dim-arrow">5. Culture, Recreation and Sport</a>
+        <a href="dim6/index.html" class="dim-arrow">6. Peace, Coexistence and Justice</a>
+        <a href="dim7/index.html" class="dim-arrow">7. Habitat</a>
+      </div>
+    </div>
+  </div>
+  <p style="max-width:1100px; margin:1.2rem auto 0.6rem; padding:0 1.5rem; text-align:center; font-size:0.75rem; line-height:1.5; color:#83766c;">English version prepared for a portfolio. The official dashboard, in Spanish, is at <a href="https://sdis-juventud.github.io/tablero-cij/" style="color:#83766c;">sdis-juventud.github.io/tablero-cij/</a>.</p>
+
+
+  <img src="imagenes/SDIS/Distrito joven.png" alt="Distrito Joven — District Secretariat of Social Integration" class="footer-marca">
+
+  <script>
+    // Resumen liviano de dim1/data/resumen_bogota.json (misma fuente, para no duplicar el dato).
+    // Fallback embebido por si fetch() falla (ej. al abrir el archivo con file:// en vez de servidor).
+    const RESUMEN_FALLBACK = [{"anio":2018,"jovenes_total":1939132,"poblacion_total":7391056},{"anio":2019,"jovenes_total":1971941,"poblacion_total":7533202},{"anio":2020,"jovenes_total":2012953,"poblacion_total":7717564},{"anio":2021,"jovenes_total":2010638,"poblacion_total":7804920},{"anio":2022,"jovenes_total":1985395,"poblacion_total":7849206},{"anio":2023,"jovenes_total":1951385,"poblacion_total":7883928},{"anio":2024,"jovenes_total":1914928,"poblacion_total":7918660},{"anio":2025,"jovenes_total":1874583,"poblacion_total":7942867},{"anio":2026,"jovenes_total":1827708,"poblacion_total":7945996},{"anio":2027,"jovenes_total":1783125,"poblacion_total":7943941},{"anio":2028,"jovenes_total":1742160,"poblacion_total":7937939},{"anio":2029,"jovenes_total":1705004,"poblacion_total":7928632},{"anio":2030,"jovenes_total":1671365,"poblacion_total":7916525},{"anio":2031,"jovenes_total":1640795,"poblacion_total":7901596},{"anio":2032,"jovenes_total":1610926,"poblacion_total":7883923},{"anio":2033,"jovenes_total":1579569,"poblacion_total":7863483},{"anio":2034,"jovenes_total":1548384,"poblacion_total":7840309},{"anio":2035,"jovenes_total":1515847,"poblacion_total":7814324}];
+
+    fetch('dim1/data/resumen_bogota.json')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .catch(() => RESUMEN_FALLBACK)
+      .then(resumen => {
+        const anioActual = new Date().getFullYear();
+        // Busca el año exacto; si no está (fuera del rango de proyecciones DANE),
+        // usa el año disponible más cercano por debajo, o si no hay ninguno, el más antiguo.
+        let dato = resumen.find(d => d.anio === anioActual);
+        if (!dato) {
+          const anteriores = resumen.filter(d => d.anio < anioActual).sort((a, b) => b.anio - a.anio);
+          dato = anteriores[0] || resumen[0];
+        }
+        const pct = (dato.jovenes_total / dato.poblacion_total * 100).toFixed(2);
+        document.getElementById('stat-jovenes-total').textContent = dato.jovenes_total.toLocaleString('en-US');
+        document.getElementById('stat-jovenes-label').textContent = 'Young people (' + dato.anio + ')';
+        document.getElementById('stat-jovenes-pct').textContent = pct + '%';
+        document.getElementById('stat-pct-label').textContent = 'of the population (' + dato.anio + ')';
+      });
+  </script>
+</body>
+</html>

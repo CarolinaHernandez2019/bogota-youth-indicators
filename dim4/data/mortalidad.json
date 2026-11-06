@@ -1,0 +1,221 @@
+{
+  "por_anio": [
+    {
+      "anio": "2018",
+      "total": 1668,
+      "hombres": 1261,
+      "mujeres": 407,
+      "tasa_100k": 84.2,
+      "top_causas": [],
+      "por_localidad": []
+    },
+    {
+      "anio": "2019",
+      "total": 1738,
+      "hombres": 1280,
+      "mujeres": 458,
+      "tasa_100k": 86.7,
+      "top_causas": [],
+      "por_localidad": []
+    },
+    {
+      "anio": "2020",
+      "total": 1630,
+      "hombres": 1212,
+      "mujeres": 418,
+      "tasa_100k": 81.0,
+      "top_causas": [],
+      "por_localidad": []
+    },
+    {
+      "anio": "2021",
+      "total": 1838,
+      "hombres": 1389,
+      "mujeres": 449,
+      "tasa_100k": 92.2,
+      "top_causas": [],
+      "por_localidad": []
+    },
+    {
+      "anio": "2022",
+      "total": 1697,
+      "hombres": 1277,
+      "mujeres": 420,
+      "tasa_100k": 86.5,
+      "top_causas": [],
+      "por_localidad": []
+    },
+    {
+      "anio": "2023",
+      "total": 1666,
+      "hombres": 1258,
+      "mujeres": 408,
+      "tasa_100k": 86.5,
+      "top_causas": [],
+      "por_localidad": []
+    },
+    {
+      "anio": "2024",
+      "total": 1678,
+      "hombres": 1267,
+      "mujeres": 411,
+      "tasa_100k": 89.1,
+      "top_causas": [],
+      "por_localidad": []
+    },
+    {
+      "anio": "2025p",
+      "total": 1516,
+      "hombres": 1095,
+      "mujeres": 421,
+      "tasa_100k": 82.3,
+      "top_causas": [
+        {
+          "causa": "Assault (homicide)",
+          "casos": 452
+        },
+        {
+          "causa": "Land transport accidents",
+          "casos": 237
+        },
+        {
+          "causa": "Intentional self-harm (suicide)",
+          "casos": 149
+        },
+        {
+          "causa": "Ill-defined signs and symptoms",
+          "casos": 73
+        },
+        {
+          "causa": "Nervous system (excl. meningitis)",
+          "casos": 68
+        },
+        {
+          "causa": "Malignant tumours, other sites",
+          "casos": 50
+        },
+        {
+          "causa": "Leukaemia",
+          "casos": 43
+        },
+        {
+          "causa": "All other diseases",
+          "casos": 43
+        },
+        {
+          "causa": "Acute respiratory infections",
+          "casos": 37
+        },
+        {
+          "causa": "Events of undetermined intent",
+          "casos": 37
+        }
+      ],
+      "por_localidad": [
+        {
+          "localidad": "Santa Fe",
+          "casos": 37,
+          "tasa_100k": 144.1
+        },
+        {
+          "localidad": "Los Mártires",
+          "casos": 25,
+          "tasa_100k": 126.5
+        },
+        {
+          "localidad": "Ciudad Bolívar",
+          "casos": 198,
+          "tasa_100k": 119.3
+        },
+        {
+          "localidad": "Teusaquillo",
+          "casos": 36,
+          "tasa_100k": 118.2
+        },
+        {
+          "localidad": "Sumapaz",
+          "casos": 1,
+          "tasa_100k": 108.0
+        },
+        {
+          "localidad": "San Cristóbal",
+          "casos": 103,
+          "tasa_100k": 105.8
+        },
+        {
+          "localidad": "La Candelaria",
+          "casos": 6,
+          "tasa_100k": 105.1
+        },
+        {
+          "localidad": "Barrios Unidos",
+          "casos": 33,
+          "tasa_100k": 103.4
+        },
+        {
+          "localidad": "Rafael Uribe Uribe",
+          "casos": 91,
+          "tasa_100k": 100.6
+        },
+        {
+          "localidad": "Antonio Nariño",
+          "casos": 17,
+          "tasa_100k": 90.8
+        },
+        {
+          "localidad": "Bosa",
+          "casos": 168,
+          "tasa_100k": 90.9
+        },
+        {
+          "localidad": "Chapinero",
+          "casos": 30,
+          "tasa_100k": 88.8
+        },
+        {
+          "localidad": "Puente Aranda",
+          "casos": 47,
+          "tasa_100k": 84.8
+        },
+        {
+          "localidad": "Usme",
+          "casos": 86,
+          "tasa_100k": 82.4
+        },
+        {
+          "localidad": "Tunjuelito",
+          "casos": 34,
+          "tasa_100k": 80.6
+        },
+        {
+          "localidad": "Kennedy",
+          "casos": 184,
+          "tasa_100k": 74.7
+        },
+        {
+          "localidad": "Fontibón",
+          "casos": 58,
+          "tasa_100k": 63.7
+        },
+        {
+          "localidad": "Engativá",
+          "casos": 115,
+          "tasa_100k": 62.6
+        },
+        {
+          "localidad": "Usaquén",
+          "casos": 71,
+          "tasa_100k": 60.6
+        },
+        {
+          "localidad": "Suba",
+          "casos": 176,
+          "tasa_100k": 59.4
+        }
+      ]
+    }
+  ],
+  "ultimo_anio": "2025p",
+  "corte": "11 Jun 2026",
+  "nota": "Deaths of young people aged 15-29 living in Bogotá. Rate per 100,000 young people aged 15-29. Causes grouped by the 6/67 list. Source: DANE–RUAF–ND / Bogotá Health Observatory – SaludData. p = preliminary."
+}

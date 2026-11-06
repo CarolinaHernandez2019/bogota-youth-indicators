@@ -1,0 +1,286 @@
+{
+  "fuente_cultura": "Biennial Culture Survey 2025 — Secretariat of Culture, Recreation and Sport",
+  "fuente_deportes": "Sports Practice and Quality of Life Survey 2024 (Biennial module)",
+  "corte_edad": "Ages 13 to 28",
+  "nota_categorias_descontinuadas": "Fairs, talks, literary gatherings and carnival are no longer asked in the 2025 survey",
+  "kpis": {
+    "practica_cultural_actual": 14.7,
+    "practica_deportiva_actual": 33.4
+  },
+  "satisfaccion": {
+    "cultura_distrito": {
+      "nada": 13,
+      "poco": 25.5,
+      "satisfecho": 53.1,
+      "muy_satisfecho": 8.4
+    },
+    "deporte_distrito": {
+      "nada": 12.7,
+      "poco": 27.3,
+      "satisfecho": 45.6,
+      "muy_satisfecho": 14.3
+    }
+  },
+  "practica_cultural": [
+    {
+      "nombre": "Dancing",
+      "pct": 10.1
+    },
+    {
+      "nombre": "Singing, creating or composing music",
+      "pct": 7.8
+    },
+    {
+      "nombre": "Painting, drawing, photography",
+      "pct": 7.4
+    },
+    {
+      "nombre": "Writing (novels, poetry, short stories, essays, comics...)",
+      "pct": 6.7
+    },
+    {
+      "nombre": "Spoken expression (storytelling, podcasts, stand-up...)",
+      "pct": 5.5
+    },
+    {
+      "nombre": "Playing instruments",
+      "pct": 5.4
+    },
+    {
+      "nombre": "Directing or acting in stage shows",
+      "pct": 5
+    },
+    {
+      "nombre": "Cooking or making drinks as a cultural tradition",
+      "pct": 5
+    },
+    {
+      "nombre": "Designing or creating advertising content",
+      "pct": 4.4
+    },
+    {
+      "nombre": "Filming, animating or editing audiovisual content",
+      "pct": 3.9
+    },
+    {
+      "nombre": "Creating video games, apps or software",
+      "pct": 3.9
+    },
+    {
+      "nombre": "Designing installations and stage sets",
+      "pct": 3.1
+    },
+    {
+      "nombre": "Sculpting, knitting, embroidering, carving, sewing",
+      "pct": 3
+    },
+    {
+      "nombre": "Designing or making musical instruments",
+      "pct": 2.3
+    },
+    {
+      "nombre": "Designing or making jewellery",
+      "pct": 2.3
+    },
+    {
+      "nombre": "Designing or making toys",
+      "pct": 2.1
+    },
+    {
+      "nombre": "Another artistic or creative activity of my own",
+      "pct": 1.4
+    }
+  ],
+  "asistencia_cultural": [
+    {
+      "nombre": "Tours of the historic centre",
+      "pct": 30.9
+    },
+    {
+      "nombre": "Churches or religious centres",
+      "pct": 20.8
+    },
+    {
+      "nombre": "Market squares",
+      "pct": 20
+    },
+    {
+      "nombre": "Museums",
+      "pct": 18.8
+    },
+    {
+      "nombre": "Trips to natural or rural areas",
+      "pct": 17.7
+    },
+    {
+      "nombre": "Visits to monuments",
+      "pct": 17.3
+    },
+    {
+      "nombre": "Festivals and cultural events",
+      "pct": 16.9
+    },
+    {
+      "nombre": "Recognised heritage sites",
+      "pct": 11.8
+    },
+    {
+      "nombre": "Public art",
+      "pct": 10.4
+    },
+    {
+      "nombre": "Historic founding squares",
+      "pct": 9.8
+    },
+    {
+      "nombre": "Mural and street art corridors",
+      "pct": 8.7
+    },
+    {
+      "nombre": "Exhibition halls or art galleries",
+      "pct": 6.3
+    },
+    {
+      "nombre": "Bogotá Creative Districts",
+      "pct": 5.8
+    },
+    {
+      "nombre": "Expressions of ethnic peoples and communities",
+      "pct": 4
+    },
+    {
+      "nombre": "Cultural activities for early childhood",
+      "pct": 3.4
+    }
+  ],
+  "razon_no_deporte": [
+    {
+      "nombre": "I do not have time",
+      "pct": 60.7
+    },
+    {
+      "nombre": "Lack of motivation",
+      "pct": 20.6
+    },
+    {
+      "nombre": "I have work, study or family obligations",
+      "pct": 4.8
+    },
+    {
+      "nombre": "Other ",
+      "pct": 4.3
+    },
+    {
+      "nombre": "I am not good enough at any sport",
+      "pct": 2.1
+    },
+    {
+      "nombre": "I am too tired during the week",
+      "pct": 1.7
+    },
+    {
+      "nombre": "I need to take classes",
+      "pct": 1.7
+    },
+    {
+      "nombre": "People I know do not like doing sport to compete with others.",
+      "pct": 1.5
+    },
+    {
+      "nombre": "There are no suitable places to train near my home",
+      "pct": 0.9
+    },
+    {
+      "nombre": "My usual social activities with family and friends do not include sport",
+      "pct": 0.7
+    },
+    {
+      "nombre": "It is too expensive",
+      "pct": 0.6
+    },
+    {
+      "nombre": "I am afraid of getting injured",
+      "pct": 0.3
+    },
+    {
+      "nombre": "I feel embarrassed",
+      "pct": 0.2
+    }
+  ],
+  "donde_actividad_fisica": [
+    {
+      "nombre": "Parks and sports facilities",
+      "pct": 24.8
+    },
+    {
+      "nombre": "Other public spaces (streets, pavements, squares)",
+      "pct": 23.1
+    },
+    {
+      "nombre": "I have work, study or family obligations",
+      "pct": 13.6
+    },
+    {
+      "nombre": "I need to take classes",
+      "pct": 12.2
+    },
+    {
+      "nombre": "Ciclovía (car-free routes)",
+      "pct": 7.6
+    },
+    {
+      "nombre": "Workplace",
+      "pct": 5.4
+    },
+    {
+      "nombre": "Private training centres",
+      "pct": 3.7
+    },
+    {
+      "nombre": "Bike lanes",
+      "pct": 3.1
+    },
+    {
+      "nombre": "Sports centre (school, university or trade association)",
+      "pct": 2.8
+    },
+    {
+      "nombre": "Public training centres",
+      "pct": 1.9
+    },
+    {
+      "nombre": "Club or family compensation fund",
+      "pct": 1.5
+    },
+    {
+      "nombre": "The city’s hills and mountains",
+      "pct": 0.1
+    },
+    {
+      "nombre": "Other ",
+      "pct": 0.1
+    }
+  ],
+  "etapas_cambio": [
+    {
+      "nombre": "I have been physically active in the last 24 months",
+      "pct": 26.9
+    },
+    {
+      "nombre": "I do not intend to be physically active",
+      "pct": 25.1
+    },
+    {
+      "nombre": "I intend to be physically active in the next 6 months",
+      "pct": 23.7
+    },
+    {
+      "nombre": "I have been physically active for the last 6 months",
+      "pct": 14.9
+    },
+    {
+      "nombre": "I intend to be physically active in the next 30 days",
+      "pct": 9.5
+    }
+  ]
+}

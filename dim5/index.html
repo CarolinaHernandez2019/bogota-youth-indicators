@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Youth Information Centre – Dimension 5: Culture, Recreation and Sport</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>Chart.defaults.locale = 'en-US';</script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Anton&family=Antonio:wght@700&family=Figtree:wght@400;500;600;700;800&display=swap');
+    :root {
+      /* Identidad de la dimensión 5 (Cultura, Recreación y Deporte): naranja coral, según
+         mapeo de 7 colores oficiales. El naranja coral base no da contraste suficiente para
+         texto — --acento-oscuro es la variante ya usada como alerta en dim2. */
+      --acento: #f58b53;
+      --acento-oscuro: #c46f42;
+      --crema: #f5efd2;
+      --gris-oscuro: #2f2b28;
+      --gris: #83766c;
+      --gris-claro: #f4f2ee;
+      --blanco: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Figtree', 'Segoe UI', sans-serif;
+      background: var(--gris-claro);
+      color: var(--gris-oscuro);
+      line-height: 1.5;
+    }
+    .header-hero {
+      position: relative;
+      background: url('../imagenes/SDIS/Fondo naranja.png') center/cover;
+      padding-top: 3rem;
+      overflow: hidden;
+    }
+    .header-hero .hero-texto { text-align: center; padding: 0 2rem 2.5rem; }
+    .header-hero .hero-title {
+      font-family: 'Anton', 'Segoe UI', sans-serif;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+      font-size: 3.4rem;
+      line-height: 1.08;
+      color: var(--crema);
+    }
+    .header-hero .hero-subtitle {
+      font-family: 'Antonio', 'Segoe UI', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 1.15rem;
+      color: var(--crema);
+      opacity: 0.85;
+      margin-top: 0.4rem;
+    }
+    .header-hero .btn-home {
+      position: absolute; top: 1.3rem; left: 2rem; z-index: 2;
+      color: var(--crema);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 14px;
+      border: 1.5px solid rgba(245,239,210,0.55);
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+    .header-hero .btn-home:hover { background: rgba(255,255,255,0.15); border-color: var(--crema); }
+    .footer-marca { display: block; width: 100%; height: auto; margin-top: 2rem; }
+    @media (max-width: 600px) {
+      .header-hero { padding-top: 2.2rem; }
+      .header-hero .hero-title { font-size: 2.2rem; }
+      .header-hero .hero-subtitle { font-size: 0.9rem; }
+      .header-hero .btn-home { top: 0.9rem; left: 1rem; font-size: 0.72rem; padding: 4px 10px; }
+    }
+    .container { max-width: 1320px; margin: 0 auto; padding: 1.5rem; }
+    .page-subtitle { font-size: 1.1rem; color: var(--gris); margin-bottom: 1rem; margin-top: 2rem; }
+    .page-subtitle:first-child { margin-top: 0; }
+    .page-subtitle span { font-weight: 600; color: var(--gris-oscuro); }
+
+    /* Franja de estadísticas en blanco: mismo formato de dim2/dim4 (pastilla + número
+       grande + etiqueta), pero pensada para convivir con tarjetas blancas — número y
+       pastilla en color en vez de blanco sobre fondo sólido. */
+    .stat-strip {
+      display: flex; background: var(--blanco);
+      border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .stat-tile { position: relative; flex: 1; padding: 1.2rem 1.5rem; display: flex; align-items: center; gap: 1.5rem; }
+    .stat-tile:not(:first-child)::before {
+      content: ''; position: absolute; left: 0; top: 50%;
+      width: 1px; height: 56%; background: var(--gris-claro);
+      transform: translateY(-50%);
+    }
+    .stat-numero {
+      font-family: 'Anton', 'Figtree', sans-serif; font-weight: 400;
+      font-size: 3rem; color: var(--acento-oscuro); line-height: 1; flex-shrink: 0;
+    }
+    .stat-texto { font-size: 1rem; font-weight: 700; color: var(--gris-oscuro); margin-bottom: 5px; }
+    .stat-meta { font-size: 0.8rem; color: var(--gris); }
+    .stat-imagen { height: 240px; width: auto; flex-shrink: 0; align-self: flex-end; }
+
+    .card {
+      background: var(--blanco); border-radius: 10px;
+      padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      margin-bottom: 1.5rem;
+    }
+    .card-title {
+      font-size: 0.85rem; font-weight: 700; color: var(--gris);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 1rem;
+    }
+    .card-nota {
+      font-size: 0.78rem; color: var(--gris); margin-bottom: 1rem; line-height: 1.4;
+    }
+    .chart-container { position: relative; }
+    .footer {
+      margin-top: 1.5rem; padding: 1rem 1.5rem; font-size: 0.8rem; color: var(--gris);
+    }
+    .footer-top {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;
+      margin-bottom: 0.8rem; padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--gris-claro);
+    }
+    .footer-notas {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 0.8rem 1rem;
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: #666;
+    }
+    .footer-notas a { color: #666; }
+  </style>
+</head>
+<body>
+
+  <div class="header-hero">
+    <a href="../index.html" class="btn-home">&#8592; Home</a>
+    <div class="hero-texto">
+      <h1 class="hero-title">Culture, recreation and sport</h1>
+      <p class="hero-subtitle">Dimension 5</p>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- ============================================================ -->
+    <!-- 5.1 Cultura                                                  -->
+    <!-- ============================================================ -->
+    <p class="page-subtitle">
+      <span>5.1 Cultural and artistic practices — young people in Bogotá</span><br>
+      Source: Biennial Culture Survey 2025 – Secretariat of Culture, Recreation and Sport<br>
+      <span style="font-size:0.8em; font-weight:400; color:#888;" id="nota-corte-cultura">Cut-off 2025, young people aged 13-28</span>
+    </p>
+
+    <div class="stat-strip" style="margin-bottom:1.5rem;">
+      <div class="stat-tile">
+        <div class="stat-numero" id="kpi-practica-cultural">–</div>
+        <div>
+          <div class="stat-texto">of young people currently practise a cultural, artistic or creative activity</div>
+          <div class="stat-meta">Do you currently practise any cultural, artistic or creative activity? · Answer Yes</div>
+        </div>
+        <img src="../imagenes/elementos/3.png" alt="" class="stat-imagen">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Cultural practice by type of activity</div>
+      <div class="card-nota">In the last 12 months, which of these activities did you practise with some frequency?</div>
+      <div class="chart-container" id="cont-practica-cultural">
+        <canvas id="chart-practica-cultural"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Attendance at cultural venues and activities</div>
+      <div class="card-nota">In the last 12 months, did you attend at least once...?</div>
+      <div class="chart-container" id="cont-asistencia-cultural">
+        <canvas id="chart-asistencia-cultural"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Satisfaction with the city’s cultural offer</div>
+      <div class="card-nota">
+        How satisfied are you with the cultural and artistic activities that city agencies organise in your locality? (scale 1 Not at all – 4 Very satisfied)
+      </div>
+      <div class="chart-container" style="height:110px;">
+        <canvas id="chart-satisfaccion-cultura"></canvas>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 5.2 Deporte y recreación                                     -->
+    <!-- ============================================================ -->
+    <p class="page-subtitle">
+      <span>5.2 Recreation and sport — young people in Bogotá</span><br>
+      Source: Sports Practice and Quality of Life Survey 2024 (module of the Biennial Culture Survey)<br>
+      <span style="font-size:0.8em; font-weight:400; color:#888;">Cut-off December 2024</span>
+    </p>
+
+    <div class="stat-strip" style="margin-bottom:1.5rem;">
+      <div class="stat-tile">
+        <div class="stat-numero" id="kpi-practica-deporte">–</div>
+        <div>
+          <div class="stat-texto">of young people currently practise a sport</div>
+          <div class="stat-meta">Do you currently practise a sport? · Answer Yes</div>
+        </div>
+        <img src="../imagenes/elementos/4.png" alt="" class="stat-imagen">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Main place for physical activity</div>
+      <div class="card-nota">Where do you mainly do physical activity?</div>
+      <div class="chart-container" id="cont-donde-actividad-fisica">
+        <canvas id="chart-donde-actividad-fisica"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Attitudes to physical activity</div>
+      <div class="card-nota">Which of these statements is closest to your current situation?</div>
+      <div class="chart-container" id="cont-etapas-cambio">
+        <canvas id="chart-etapas-cambio"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Main reason for not practising a sport</div>
+      <div class="card-nota">Base, only young people who said they do not currently practise a sport.</div>
+      <div class="chart-container" id="cont-razon-no-deporte">
+        <canvas id="chart-razon-no-deporte"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Satisfaction with the city’s sports and recreation offer</div>
+      <div class="card-nota">
+        How satisfied are you with the sports and recreational activities that city agencies organise in your locality? (scale 1 Not at all – 4 Very satisfied)
+      </div>
+      <div class="chart-container" style="height:110px;">
+        <canvas id="chart-satisfaccion-deporte"></canvas>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-top">
+        <span>Source: Biennial Culture Survey 2025 — Bogotá Secretariat of Culture, Recreation and Sport</span>
+        <span style="text-align:right;">District Secretariat of Social Integration<br>
+        Youth Subdirectorate – Youth Information Centre</span>
+      </div>
+      <div class="footer-notas">
+        <p><strong>Note:</strong> percentages are weighted with the survey expansion factor. Sources: <a href="https://observatoriocultura.github.io/observatorio/#/ebc/encuesta-cultura-ciudadana-2025?tab=inicio" target="_blank" rel="noopener">Biennial Culture Survey — Civic Culture and Rights Indicators 2025</a> and <a href="https://app.powerbi.com/view?r=eyJrIjoiNjBkMjFjMjktZWIwZi00ZjA5LWEwNGUtODVmYzUyODFlNDYyIiwidCI6IjRmNzkzOWM3LWFhNjAtNDliZC05YjdiLTZmODFjMzdkMWIzNyJ9&amp;pageName=69b48348ad3ee2b5bec5" target="_blank" rel="noopener">Sports Practice and Quality of Life Survey 2024</a>, from Bogotá’s Secretariat of Culture, Recreation and Sport.</p>
+      </div>
+    </div>
+
+  </div>
+  <p style="max-width:1100px; margin:1.2rem auto 0.6rem; padding:0 1.5rem; text-align:center; font-size:0.75rem; line-height:1.5; color:#83766c;">English version prepared for a portfolio. The official dashboard, in Spanish, is at <a href="https://sdis-juventud.github.io/tablero-cij/dim5/" style="color:#83766c;">sdis-juventud.github.io/tablero-cij/dim5/</a>.</p>
+
+
+  <img src="../imagenes/SDIS/Distrito joven.png" alt="Distrito Joven — District Secretariat of Social Integration" class="footer-marca">
+
+<script>
+function fmt(v, d) {
+  if (v == null || isNaN(v)) return '–';
+  return v.toFixed(d);
+}
+
+// Datos precargados — se actualizan con extraer_bienal_microdatos.py + actualizar_bienal.py
+const BIENAL = {
+  "fuente_cultura": "Biennial Culture Survey 2025 — Secretariat of Culture, Recreation and Sport",
+  "fuente_deportes": "Sports Practice and Quality of Life Survey 2024 (Biennial module)",
+  "corte_edad": "Ages 13 to 28",
+  "nota_categorias_descontinuadas": "Fairs, talks, literary gatherings and carnival are no longer asked in the 2025 survey",
+  "kpis": { "practica_cultural_actual": 14.7, "practica_deportiva_actual": 33.4 },
+  "satisfaccion": {
+    "cultura_distrito": { "nada": 13, "poco": 25.5, "satisfecho": 53.1, "muy_satisfecho": 8.4 },
+    "deporte_distrito":  { "nada": 12.7, "poco": 27.3, "satisfecho": 45.6, "muy_satisfecho": 14.3 }
+  },
+  "practica_cultural": [
+    { "nombre": "Dancing", "pct": 10.1 },
+    { "nombre": "Singing, creating or composing music", "pct": 7.8 },
+    { "nombre": "Painting, drawing, photography", "pct": 7.4 },
+    { "nombre": "Writing (novels, poetry, short stories, essays, comics...)", "pct": 6.7 },
+    { "nombre": "Spoken expression (storytelling, podcasts, stand-up...)", "pct": 5.5 },
+    { "nombre": "Playing instruments", "pct": 5.4 },
+    { "nombre": "Directing or acting in stage shows", "pct": 5 },
+    { "nombre": "Cooking or making drinks as a cultural tradition", "pct": 5 },
+    { "nombre": "Designing or creating advertising content", "pct": 4.4 },
+    { "nombre": "Filming, animating or editing audiovisual content", "pct": 3.9 },
+    { "nombre": "Creating video games, apps or software", "pct": 3.9 },
+    { "nombre": "Designing installations and stage sets", "pct": 3.1 },
+    { "nombre": "Sculpting, knitting, embroidering, carving, sewing", "pct": 3 },
+    { "nombre": "Designing or making musical instruments", "pct": 2.3 },
+    { "nombre": "Designing or making jewellery", "pct": 2.3 },
+    { "nombre": "Designing or making toys", "pct": 2.1 },
+    { "nombre": "Another artistic or creative activity of my own", "pct": 1.4 }
+  ],
+  "asistencia_cultural": [
+    { "nombre": "Tours of the historic centre", "pct": 30.9 },
+    { "nombre": "Churches or religious centres", "pct": 20.8 },
+    { "nombre": "Market squares", "pct": 20 },
+    { "nombre": "Museums", "pct": 18.8 },
+    { "nombre": "Trips to natural or rural areas", "pct": 17.7 },
+    { "nombre": "Visits to monuments", "pct": 17.3 },
+    { "nombre": "Festivals and cultural events", "pct": 16.9 },
+    { "nombre": "Recognised heritage sites", "pct": 11.8 },
+    { "nombre": "Public art", "pct": 10.4 },
+    { "nombre": "Historic founding squares", "pct": 9.8 },
+    { "nombre": "Mural and street art corridors", "pct": 8.7 },
+    { "nombre": "Exhibition halls or art galleries", "pct": 6.3 },
+    { "nombre": "Bogotá Creative Districts", "pct": 5.8 },
+    { "nombre": "Expressions of ethnic peoples and communities", "pct": 4 },
+    { "nombre": "Cultural activities for early childhood", "pct": 3.4 }
+  ],
+  "razon_no_deporte": [
+    { "nombre": "I do not have time", "pct": 60.7 },
+    { "nombre": "Lack of motivation", "pct": 20.6 },
+    { "nombre": "I have work, study or family obligations", "pct": 4.8 },
+    { "nombre": "Other", "pct": 4.3 },
+    { "nombre": "I am not good enough at any sport", "pct": 2.1 },
+    { "nombre": "I am too tired during the week", "pct": 1.7 },
+    { "nombre": "I need to take classes", "pct": 1.7 },
+    { "nombre": "People I know do not like competing with others", "pct": 1.5 },
+    { "nombre": "There are no suitable places to train near my home", "pct": 0.9 },
+    { "nombre": "My social activities do not include sport", "pct": 0.7 },
+    { "nombre": "It is too expensive", "pct": 0.6 },
+    { "nombre": "I am afraid of getting injured", "pct": 0.3 },
+    { "nombre": "I feel embarrassed", "pct": 0.2 }
+  ],
+  "donde_actividad_fisica": [
+    { "nombre": "Parks and sports facilities", "pct": 24.8 },
+    { "nombre": "Other public spaces (streets, pavements, squares)", "pct": 23.1 },
+    { "nombre": "I have work, study or family obligations", "pct": 13.6 },
+    { "nombre": "I need to take classes", "pct": 12.2 },
+    { "nombre": "Ciclovía (car-free routes)", "pct": 7.6 },
+    { "nombre": "Workplace", "pct": 5.4 },
+    { "nombre": "Private training centres", "pct": 3.7 },
+    { "nombre": "Bike lanes", "pct": 3.1 },
+    { "nombre": "Sports centre (school, university or trade association)", "pct": 2.8 },
+    { "nombre": "Public training centres", "pct": 1.9 },
+    { "nombre": "Club or family compensation fund", "pct": 1.5 },
+    { "nombre": "The city’s hills and mountains", "pct": 0.1 },
+    { "nombre": "Other", "pct": 0.1 }
+  ],
+  "etapas_cambio": [
+    { "nombre": "I have been physically active in the last 24 months", "pct": 26.9 },
+    { "nombre": "I do not intend to be physically active", "pct": 25.1 },
+    { "nombre": "I intend to be physically active in the next 6 months", "pct": 23.7 },
+    { "nombre": "I have been physically active for the last 6 months", "pct": 14.9 },
+    { "nombre": "I intend to be physically active in the next 30 days", "pct": 9.5 }
+  ]
+};
+
+function renderBienal(d) {
+  document.getElementById('kpi-practica-cultural').textContent = fmt(d.kpis.practica_cultural_actual, 1) + '%';
+  document.getElementById('kpi-practica-deporte').textContent = fmt(d.kpis.practica_deportiva_actual, 1) + '%';
+
+  renderBarras('chart-practica-cultural', 'cont-practica-cultural', d.practica_cultural);
+  renderBarras('chart-asistencia-cultural', 'cont-asistencia-cultural', d.asistencia_cultural);
+  renderBarras('chart-razon-no-deporte', 'cont-razon-no-deporte', d.razon_no_deporte);
+  renderBarras('chart-donde-actividad-fisica', 'cont-donde-actividad-fisica', d.donde_actividad_fisica);
+  renderBarras('chart-etapas-cambio', 'cont-etapas-cambio', d.etapas_cambio);
+
+  renderSatisfaccion('chart-satisfaccion-cultura', d.satisfaccion.cultura_distrito);
+  renderSatisfaccion('chart-satisfaccion-deporte', d.satisfaccion.deporte_distrito);
+}
+
+// Gráfica genérica de barras horizontales (% por categoría, ordenadas de mayor a menor)
+function renderBarras(canvasId, containerId, datos) {
+  const alturaPorFila = 20;
+  document.getElementById(containerId).style.height = (datos.length * alturaPorFila + 30) + 'px';
+
+  new Chart(document.getElementById(canvasId), {
+    type: 'bar',
+    data: {
+      labels: datos.map(d => d.nombre),
+      datasets: [{
+        data: datos.map(d => d.pct),
+        backgroundColor: '#f58b53',
+        borderRadius: 2,
+        maxBarThickness: 16,
+      }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => fmt(ctx.parsed.x, 1) + '%' } }
+      },
+      scales: {
+        x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', font: { size: 10 } }, grid: { color: '#f4f2ee' } },
+        y: { ticks: { font: { size: 10.5 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+// Gráfica de satisfacción: barra única apilada. Orden de izquierda a derecha: lo bueno
+// primero, lo malo al final — mismo formato de dim6/dim7: dos familias de color (azul
+// petróleo bueno, rosa coral malo) con variación de intensidad, no cuatro tonos distintos.
+function renderSatisfaccion(canvasId, sat) {
+  const niveles = [
+    { key: 'muy_satisfecho', label: '4 – Very satisfied',  color: '#114252' },
+    { key: 'satisfecho',     label: '3 – Satisfied',      color: '#1e7895' },
+    { key: 'poco',           label: '2 – Slightly satisfied', color: '#e86269' },
+    { key: 'nada',           label: '1 – Not at all satisfied', color: '#c35258' },
+  ];
+
+  new Chart(document.getElementById(canvasId), {
+    type: 'bar',
+    data: {
+      labels: [''],
+      datasets: niveles.map(n => ({
+        label: n.label,
+        data: [sat[n.key]],
+        backgroundColor: n.color,
+        borderRadius: 2,
+        maxBarThickness: 46,
+      }))
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { usePointStyle: true, pointStyle: 'rect', font: { size: 10 }, boxWidth: 11 } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmt(ctx.parsed.x, 1) + '%' } }
+      },
+      scales: {
+        x: { stacked: true, max: 100, ticks: { callback: v => v + '%', font: { size: 10 } }, grid: { color: '#f4f2ee' } },
+        y: { stacked: true, ticks: { display: false }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+// En servidor (GitHub Pages) usa el JSON; en local usa los datos incrustados
+fetch('data/bienal_culturas.json')
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(d => renderBienal(d))
+  .catch(() => renderBienal(BIENAL));
+</script>
+</body>
+</html>

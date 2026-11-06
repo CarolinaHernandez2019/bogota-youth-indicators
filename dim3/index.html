@@ -1,0 +1,5682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Youth Information Centre - Dimension 3: Productive Inclusion</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>Chart.defaults.locale = 'en-US';</script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Anton&family=Antonio:wght@700&family=Figtree:wght@400;500;600;700;800&display=swap');
+    :root {
+      /* Identidad de la dimensión 3 (Inclusión productiva): morado, según mapeo de 7 colores
+         oficiales x 7 dimensiones. Carolina pidió un tono más serio para esta dimensión que
+         para salud/educación — sin franjas de color grandes, apoyado en gris, negro, morado
+         y azul oscuro. --alerta (rosa coral) es el único acento de alerta: se reserva
+         exclusivamente para la tasa de desocupación (TD), no se usa para nada más. */
+      --acento: #663a93;
+      --azul-oscuro: #1e7895;
+      --alerta: #f4676e;
+      --crema: #f5efd2;
+      --gris-oscuro: #2f2b28;
+      --gris: #83766c;
+      --gris-claro: #f4f2ee;
+      --blanco: #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Figtree', 'Segoe UI', sans-serif;
+      background: var(--gris-claro);
+      color: var(--gris-oscuro);
+      line-height: 1.5;
+    }
+
+    .header-hero {
+      position: relative;
+      background: url('../imagenes/SDIS/Fondo morado.png') center/cover;
+      padding-top: 3rem;
+      overflow: hidden;
+    }
+    .header-hero .hero-texto { text-align: center; padding: 0 2rem 2.5rem; }
+    .header-hero .hero-title {
+      font-family: 'Anton', 'Segoe UI', sans-serif;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+      font-size: 3.4rem;
+      line-height: 1.08;
+      color: var(--crema);
+    }
+    .header-hero .hero-subtitle {
+      font-family: 'Antonio', 'Segoe UI', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 1.15rem;
+      color: var(--crema);
+      opacity: 0.85;
+      margin-top: 0.4rem;
+    }
+    .header-hero .btn-home {
+      position: absolute; top: 1.3rem; left: 2rem; z-index: 2;
+      color: var(--crema);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 14px;
+      border: 1.5px solid rgba(245,239,210,0.55);
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+    .header-hero .btn-home:hover { background: rgba(255,255,255,0.15); border-color: var(--crema); }
+    .footer-marca { display: block; width: 100%; height: auto; margin-top: 2rem; }
+    @media (max-width: 600px) {
+      .header-hero { padding-top: 2.2rem; }
+      .header-hero .hero-title { font-size: 2.2rem; }
+      .header-hero .hero-subtitle { font-size: 0.9rem; }
+      .header-hero .btn-home { top: 0.9rem; left: 1rem; font-size: 0.72rem; padding: 4px 10px; }
+    }
+
+    .container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    .page-subtitle {
+      font-size: 1.1rem;
+      color: var(--gris);
+      margin-bottom: 1rem;
+    }
+    .page-subtitle span { font-weight: 600; color: var(--gris-oscuro); }
+
+    /* Filtros */
+    .filtros {
+      background: var(--blanco);
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .filtros label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--gris);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .filtro-grupo { display: flex; align-items: center; gap: 0.5rem; }
+    .anio-btns { display: flex; gap: 4px; flex-wrap: wrap; }
+    .anio-btn {
+      padding: 6px 14px;
+      border: 2px solid var(--gris-claro);
+      background: var(--blanco);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--gris-oscuro);
+      transition: all 0.15s;
+    }
+    .anio-btn:hover { border-color: var(--acento); color: var(--acento); }
+    .anio-btn.activo {
+      background: var(--gris-oscuro);
+      color: var(--blanco);
+      border-color: var(--gris-oscuro);
+    }
+    .trim-select {
+      padding: 6px 12px;
+      border: 2px solid var(--gris-claro);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      color: var(--gris-oscuro);
+      background: var(--blanco);
+      cursor: pointer;
+      min-width: 200px;
+    }
+    .trim-select:focus { outline: none; border-color: var(--acento); }
+
+    /* Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 960px) { .grid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--blanco);
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gris);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 1rem;
+    }
+
+    /* Árbol SVG */
+    .arbol-svg {
+      width: 100%;
+      max-width: 340px;
+      margin: 0 auto;
+    }
+    .arbol-svg text.nodo-label {
+      font-size: 8px;
+      fill: var(--gris);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-family: 'Antonio', 'Segoe UI', sans-serif;
+    }
+    .arbol-svg text.nodo-valor {
+      font-size: 18px;
+      font-weight: 400;
+      font-family: 'Anton', 'Segoe UI', sans-serif;
+    }
+
+    /* Tasas */
+    .tasas-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.8rem;
+      margin-top: 0.5rem;
+    }
+    .tasa-card {
+      border: 2px solid var(--gris-claro);
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+    }
+    .tasa-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      font-family: 'Antonio', 'Figtree', sans-serif;
+      color: var(--gris);
+      text-transform: uppercase;
+    }
+    .tasa-valor { font-size: 1.4rem; font-family: 'Anton', 'Figtree', sans-serif; font-weight: 400; }
+    .tasa-valor.tgp { color: var(--acento); }
+    .tasa-valor.to { color: var(--azul-oscuro); }
+    .tasa-valor.td { color: var(--alerta); }
+
+    .trim-actual {
+      background: var(--acento);
+      color: var(--blanco);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Charts */
+    .chart-container { position: relative; height: 340px; }
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 960px) { .grid-2col { grid-template-columns: 1fr; } }
+
+    /* Tabla comparativa */
+    .tabla-comp {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    .tabla-comp th {
+      background: var(--gris-oscuro);
+      color: var(--blanco);
+      padding: 8px 12px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    .tabla-comp td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--gris-claro);
+    }
+    .tabla-comp tr:hover { background: #f8f9fa; }
+    .tabla-comp tr.fila-bogota {
+      background: #f0ebf4;
+      font-weight: 600;
+    }
+    .tabla-comp tr.fila-bogota:hover { background: #e8e1ef; }
+    .tabla-comp .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    .section-title {
+      font-family: 'Antonio', 'Figtree', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 1rem;
+      color: var(--gris);
+      margin: 2.5rem 0 1rem;
+    }
+
+    .footer {
+      margin-top: 1.5rem;
+      padding: 1rem 1.5rem;
+      font-size: 0.8rem;
+      color: var(--gris);
+    }
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.8rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--gris-claro);
+    }
+    .footer-notas {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 0.8rem 1rem;
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: #666;
+    }
+    .footer-notas a { color: #666; }
+    .footer-notas p { margin-bottom: 0.3rem; }
+    .footer-notas p:last-child { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+
+  <div class="header-hero">
+    <a href="../index.html" class="btn-home">&#8592; Home</a>
+    <div class="hero-texto">
+      <h1 class="hero-title">Productive inclusion</h1>
+      <p class="hero-subtitle">Dimension 3</p>
+    </div>
+  </div>
+
+  <div class="container">
+    <p class="page-subtitle">
+      <span>3.1 Labour market situation of young people in Bogotá</span><br>
+      Source: DANE, GEIH youth labour market
+    </p>
+
+    <!-- Filtros -->
+    <div class="filtros">
+      <div class="filtro-grupo">
+        <label>Year</label>
+        <div class="anio-btns" id="anio-btns"></div>
+      </div>
+      <div class="filtro-grupo">
+        <label>Quarter</label>
+        <select class="trim-select" id="trim-select"></select>
+      </div>
+    </div>
+
+    <!-- Fila 1: Árbol + Gráfico serie histórica -->
+    <div class="grid">
+      <div>
+        <div class="card">
+          <div class="card-title">
+            Labour market figures <span style="font-size:0.75em; font-weight:400;">(thousands)</span><span id="lbl-anio" style="display:none;"></span>
+            <div class="trim-actual" id="lbl-trim">Oct - Dec 25</div>
+          </div>
+          <svg class="arbol-svg" viewBox="0 0 340 235" xmlns="http://www.w3.org/2000/svg">
+            <!-- Líneas de conexión: gris neutro, no compiten por atención -->
+            <g stroke="#83766c" stroke-width="2" fill="none">
+              <!-- PET hacia abajo -->
+              <line x1="170" y1="52" x2="170" y2="72"/>
+              <!-- Horizontal nivel 2 -->
+              <line x1="95" y1="72" x2="260" y2="72"/>
+              <!-- Bajada a Fuerza laboral -->
+              <line x1="95" y1="72" x2="95" y2="82"/>
+              <!-- Bajada a Fuera FT -->
+              <line x1="260" y1="72" x2="260" y2="82"/>
+              <!-- Fuerza laboral hacia abajo -->
+              <line x1="95" y1="142" x2="95" y2="162"/>
+              <!-- Horizontal nivel 3 -->
+              <line x1="48" y1="162" x2="142" y2="162"/>
+              <!-- Bajada a Ocupados -->
+              <line x1="48" y1="162" x2="48" y2="172"/>
+              <!-- Bajada a Desocupados -->
+              <line x1="142" y1="162" x2="142" y2="172"/>
+            </g>
+            <!-- Nodo PET: total, gris oscuro (neutral) -->
+            <rect x="55" y="2" width="230" height="50" rx="8" fill="white" stroke="#83766c" stroke-width="2"/>
+            <text x="170" y="18" text-anchor="middle" class="nodo-label">Working-age young people</text>
+            <text x="170" y="42" text-anchor="middle" class="nodo-valor" fill="#2f2b28" id="v-pet">1,662</text>
+            <!-- Nodo Fuerza laboral: morado (identidad de la dimensión) -->
+            <rect x="10" y="82" width="170" height="60" rx="8" fill="white" stroke="#663a93" stroke-width="2"/>
+            <text x="95" y="102" text-anchor="middle" class="nodo-label">Labour force</text>
+            <text x="95" y="130" text-anchor="middle" class="nodo-valor" fill="#663a93" id="v-ft">1,025</text>
+            <!-- Nodo Fuera FT: gris (rama secundaria) -->
+            <rect x="190" y="82" width="140" height="60" rx="8" fill="white" stroke="#83766c" stroke-width="2"/>
+            <text x="260" y="102" text-anchor="middle" class="nodo-label">Outside the</text>
+            <text x="260" y="113" text-anchor="middle" class="nodo-label">labour force</text>
+            <text x="260" y="134" text-anchor="middle" class="nodo-valor" fill="#83766c" id="v-fuera">637</text>
+            <!-- Nodo Ocupados: azul petróleo (resultado positivo) -->
+            <rect x="2" y="172" width="92" height="55" rx="8" fill="white" stroke="#1e7895" stroke-width="2"/>
+            <text x="48" y="195" text-anchor="middle" class="nodo-label">Employed</text>
+            <text x="48" y="221" text-anchor="middle" class="nodo-valor" fill="#1e7895" id="v-ocup">912</text>
+            <!-- Nodo Desocupados: rosa coral (único acento de alerta) -->
+            <rect x="100" y="172" width="92" height="55" rx="8" fill="white" stroke="#f4676e" stroke-width="2"/>
+            <text x="146" y="195" text-anchor="middle" class="nodo-label">Unemployed</text>
+            <text x="146" y="221" text-anchor="middle" class="nodo-valor" fill="#f4676e" id="v-desoc">113</text>
+          </svg>
+          <div class="tasas-grid">
+            <div class="tasa-card">
+              <div class="tasa-label">Labour force participation rate (LFPR)</div>
+              <div class="tasa-valor tgp" id="v-tgp">61.7</div>
+            </div>
+            <div class="tasa-card">
+              <div class="tasa-label">Employment rate (ER)</div>
+              <div class="tasa-valor to" id="v-to">54.9</div>
+            </div>
+            <div class="tasa-card">
+              <div class="tasa-label">Unemployment rate (UR)</div>
+              <div class="tasa-valor td" id="v-td">11.1</div>
+            </div>
+          </div>
+          <!-- Definiciones del DANE en una oración (comentario de David, 2026-07) -->
+          <div style="margin-top:12px; font-size:0.75rem; line-height:1.6; color:#83766c;">
+            <strong>LFPR</strong> is the labour force as a percentage of the working-age population. It reflects the pressure of the working-age population on the labour market.
+            <strong>ER</strong> is employed people as a percentage of the working-age population.
+            <strong>UR</strong> is unemployed people as a percentage of the labour force.
+            <em>DANE definitions, Integrated Household Survey (GEIH).</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          LFPR, ER and UR in Bogotá – Time series <span id="lbl-trim-chart"></span>
+        </div>
+        <div class="chart-container">
+          <canvas id="chart-tasas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección comparativa -->
+    <h2 class="section-title">Bogotá compared with the national total</h2>
+
+    <!-- Fila 2: Gráficos comparativos de líneas -->
+    <div class="grid-2col">
+      <div class="card">
+        <div class="card-title">Unemployment rate (UR) – Time series <span id="lbl-trim-td"></span></div>
+        <div class="chart-container">
+          <canvas id="chart-td-ciudades"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Employment rate (ER) – Time series <span id="lbl-trim-to"></span></div>
+        <div class="chart-container">
+          <canvas id="chart-to-ciudades"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla comparativa -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Indicators compared – <span id="lbl-trim-tabla"></span></div>
+      <div style="overflow-x:auto;">
+        <table class="tabla-comp" id="tabla-ciudades">
+          <thead>
+            <tr>
+              <th></th>
+              <th class="num">Working-age youth (thousands)</th>
+              <th class="num">LFPR (%)</th>
+              <th class="num">ER (%)</th>
+              <th class="num">UR (%)</th>
+              <th class="num">% outside labour force</th>
+              <th class="num">Employed (thousands)</th>
+              <th class="num">Unemployed (thousands)</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-top">
+        <div>
+          Source: Youth labour market annex, Integrated Household Survey (GEIH) – DANE<br>
+          Figures in thousands of people. Data for ages 15 to 28.
+        </div>
+        <div style="text-align:right;">
+          District Secretariat of Social Integration<br>
+          Youth Subdirectorate – Youth Information Centre
+        </div>
+      </div>
+      <div class="footer-notas">
+        <p><strong>Note:</strong> DANE defines the working-age population as everyone aged 15 and over. The 15 to 28 age group is the breakdown DANE uses to measure the youth labour market and its key rates. Source: <a href="https://www.dane.gov.co/index.php/estadisticas-por-tema/mercado-laboral/mercado-laboral-de-la-juventud" target="_blank" rel="noopener">Youth labour market annex – DANE</a>.</p>
+        <p>In the Amazon and Orinoquía departments, the national total excludes municipal centres that are not department capitals, as well as small settlements and rural areas. It also excludes the population of Providencia and the small settlements and rural areas of San Andrés.</p>
+      </div>
+    </div>
+  </div>
+  <p style="max-width:1100px; margin:1.2rem auto 0.6rem; padding:0 1.5rem; text-align:center; font-size:0.75rem; line-height:1.5; color:#83766c;">English version prepared for a portfolio. The official dashboard, in Spanish, is at <a href="https://sdis-juventud.github.io/tablero-cij/dim3/" style="color:#83766c;">sdis-juventud.github.io/tablero-cij/dim3/</a>.</p>
+
+
+  <img src="../imagenes/SDIS/Distrito joven.png" alt="Distrito Joven — District Secretariat of Social Integration" class="footer-marca">
+
+<script>
+// Formato colombiano
+function fmtMiles(n) {
+  if (n == null) return '–';
+  return Math.round(n).toLocaleString('en-US');
+}
+function fmtDec(n, d=1) {
+  if (n == null) return '–';
+  return n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+
+let BOGOTA = [];
+let CIUDADES = {};
+let anioActual = 2025;
+let trimActual = '';
+let chartTasas = null;
+let chartTD = null;
+let chartTO = null;
+
+const COMPARAR = ['Bogotá D.C.', 'Total nacional'];
+
+const COLORES = {
+  'Bogotá D.C.': '#663a93',
+  'Total nacional': '#2f2b28',
+};
+
+const NOMBRES_CORTOS = {
+  'Bogotá D.C.': 'Bogotá',
+  'Total nacional': 'National',
+};
+
+const MERCADO_LABORAL_FALLBACK = [
+  {
+    "anio": 2014,
+    "trimestre": "Jan - Mar 14",
+    "pct_pet": 33.1,
+    "tgp": 69.5,
+    "to": 57.8,
+    "td": 16.8,
+    "pct_fuera_ft": 30.5,
+    "pet": 5649.5,
+    "pet_15_28": 1871.1,
+    "fuerza_trabajo": 1300.2,
+    "ocupados": 1081.9,
+    "desocupados": 218.3,
+    "fuera_ft": 570.9
+  },
+  {
+    "anio": 2014,
+    "trimestre": "Feb - Apr 14",
+    "pct_pet": 33.3,
+    "tgp": 69.5,
+    "to": 59.0,
+    "td": 15.2,
+    "pct_fuera_ft": 30.5,
+    "pet": 5655.1,
+    "pet_15_28": 1880.8,
+    "fuerza_trabajo": 1307.1,
+    "ocupados": 1108.8,
+    "desocupados": 198.4,
+    "fuera_ft": 573.6
+  },
+  {
+    "anio": 2014,
+    "trimestre": "Mar - May 14",
+    "pct_pet": 33.5,
+    "tgp": 69.7,
+    "to": 59.3,
+    "td": 14.9,
+    "pct_fuera_ft": 30.3,
+    "pet": 5660.5,
+    "pet_15_28": 1899.0,
+    "fuerza_trabajo": 1323.3,
+    "ocupados": 1125.9,
+    "desocupados": 197.4,
+    "fuera_ft": 575.7
+  },
+  {
+    "anio": 2014,
+    "trimestre": "Apr - Jun 14",
+    "pct_pet": 33.4,
+    "tgp": 70.1,
+    "to": 60.1,
+    "td": 14.2,
+    "pct_fuera_ft": 29.9,
+    "pet": 5666.1,
+    "pet_15_28": 1890.1,
+    "fuerza_trabajo": 1324.2,
+    "ocupados": 1135.5,
+    "desocupados": 188.6,
+    "fuera_ft": 566.0
+  },
+  {
+    "anio": 2014,
+    "trimestre": "May - Jul 14",
+    "pct_pet": 33.7,
+    "tgp": 70.3,
+    "to": 59.4,
+    "td": 15.5,
+    "pct_fuera_ft": 29.7,
+    "pet": 5671.5,
+    "pet_15_28": 1909.6,
+    "fuerza_trabajo": 1342.2,
+    "ocupados": 1134.0,
+    "desocupados": 208.3,
+    "fuera_ft": 567.4
+  },
+  {
+    "anio": 2014,
+    "trimestre": "Jun - Aug 14",
+    "pct_pet": 33.7,
+    "tgp": 70.4,
+    "to": 59.1,
+    "td": 16.0,
+    "pct_fuera_ft": 29.6,
+    "pet": 5677.0,
+    "pet_15_28": 1910.6,
+    "fuerza_trabajo": 1344.2,
+    "ocupados": 1129.1,
+    "desocupados": 215.1,
+    "fuera_ft": 566.4
+  },
+  {
+    "anio": 2014,
+    "trimestre": "Jul - Sep 14",
+    "pct_pet": 33.5,
+    "tgp": 70.4,
+    "to": 59.6,
+    "td": 15.3,
+    "pct_fuera_ft": 29.6,
+    "pet": 5682.3,
+    "pet_15_28": 1901.7,
+    "fuerza_trabajo": 1338.3,
+    "ocupados": 1133.9,
+    "desocupados": 204.5,
+    "fuera_ft": 563.3
+  },
+  {
+    "anio": 2014,
+    "trimestre": "Aug - Oct 14",
+    "pct_pet": 33.0,
+    "tgp": 71.3,
+    "to": 61.4,
+    "td": 13.9,
+    "pct_fuera_ft": 28.7,
+    "pet": 5687.6,
+    "pet_15_28": 1879.6,
+    "fuerza_trabajo": 1339.8,
+    "ocupados": 1153.3,
+    "desocupados": 186.5,
+    "fuera_ft": 539.8
+  },
+  {
+    "anio": 2014,
+    "trimestre": "Sep - Nov 14",
+    "pct_pet": 33.1,
+    "tgp": 71.3,
+    "to": 62.3,
+    "td": 12.7,
+    "pct_fuera_ft": 28.7,
+    "pet": 5692.9,
+    "pet_15_28": 1884.2,
+    "fuerza_trabajo": 1343.3,
+    "ocupados": 1173.0,
+    "desocupados": 170.3,
+    "fuera_ft": 540.8
+  },
+  {
+    "anio": 2014,
+    "trimestre": "Oct - Dec 14",
+    "pct_pet": 33.3,
+    "tgp": 71.8,
+    "to": 62.5,
+    "td": 12.9,
+    "pct_fuera_ft": 28.2,
+    "pet": 5698.0,
+    "pet_15_28": 1900.3,
+    "fuerza_trabajo": 1363.6,
+    "ocupados": 1187.9,
+    "desocupados": 175.7,
+    "fuera_ft": 536.6
+  },
+  {
+    "anio": 2014,
+    "trimestre": "Nov 14 - Jan 15",
+    "pct_pet": 33.4,
+    "tgp": 71.5,
+    "to": 61.6,
+    "td": 13.8,
+    "pct_fuera_ft": 28.5,
+    "pet": 5703.1,
+    "pet_15_28": 1905.6,
+    "fuerza_trabajo": 1361.9,
+    "ocupados": 1174.3,
+    "desocupados": 187.6,
+    "fuera_ft": 543.8
+  },
+  {
+    "anio": 2014,
+    "trimestre": "Dec 14 - Feb 15",
+    "pct_pet": 33.2,
+    "tgp": 70.8,
+    "to": 60.9,
+    "td": 14.0,
+    "pct_fuera_ft": 29.2,
+    "pet": 5708.3,
+    "pet_15_28": 1892.6,
+    "fuerza_trabajo": 1340.6,
+    "ocupados": 1152.6,
+    "desocupados": 188.0,
+    "fuera_ft": 552.0
+  },
+  {
+    "anio": 2015,
+    "trimestre": "Jan - Mar 15",
+    "pct_pet": 33.4,
+    "tgp": 70.2,
+    "to": 60.4,
+    "td": 13.9,
+    "pct_fuera_ft": 29.8,
+    "pet": 5713.2,
+    "pet_15_28": 1908.7,
+    "fuerza_trabajo": 1339.6,
+    "ocupados": 1153.5,
+    "desocupados": 186.1,
+    "fuera_ft": 569.0
+  },
+  {
+    "anio": 2015,
+    "trimestre": "Feb - Apr 15",
+    "pct_pet": 33.5,
+    "tgp": 70.7,
+    "to": 61.0,
+    "td": 13.7,
+    "pct_fuera_ft": 29.3,
+    "pet": 5718.2,
+    "pet_15_28": 1915.0,
+    "fuerza_trabajo": 1353.5,
+    "ocupados": 1168.2,
+    "desocupados": 185.3,
+    "fuera_ft": 561.5
+  },
+  {
+    "anio": 2015,
+    "trimestre": "Mar - May 15",
+    "pct_pet": 33.4,
+    "tgp": 70.3,
+    "to": 60.7,
+    "td": 13.7,
+    "pct_fuera_ft": 29.7,
+    "pet": 5723.1,
+    "pet_15_28": 1912.5,
+    "fuerza_trabajo": 1344.9,
+    "ocupados": 1160.9,
+    "desocupados": 184.0,
+    "fuera_ft": 567.6
+  },
+  {
+    "anio": 2015,
+    "trimestre": "Apr - Jun 15",
+    "pct_pet": 32.7,
+    "tgp": 68.9,
+    "to": 59.1,
+    "td": 14.3,
+    "pct_fuera_ft": 31.1,
+    "pet": 5728.2,
+    "pet_15_28": 1874.4,
+    "fuerza_trabajo": 1292.3,
+    "ocupados": 1107.1,
+    "desocupados": 185.2,
+    "fuera_ft": 582.0
+  },
+  {
+    "anio": 2015,
+    "trimestre": "May - Jul 15",
+    "pct_pet": 32.8,
+    "tgp": 67.7,
+    "to": 58.1,
+    "td": 14.2,
+    "pct_fuera_ft": 32.3,
+    "pet": 5733.2,
+    "pet_15_28": 1879.8,
+    "fuerza_trabajo": 1272.5,
+    "ocupados": 1092.4,
+    "desocupados": 180.1,
+    "fuera_ft": 607.3
+  },
+  {
+    "anio": 2015,
+    "trimestre": "Jun - Aug 15",
+    "pct_pet": 32.7,
+    "tgp": 68.5,
+    "to": 58.5,
+    "td": 14.5,
+    "pct_fuera_ft": 31.5,
+    "pet": 5738.3,
+    "pet_15_28": 1876.2,
+    "fuerza_trabajo": 1284.4,
+    "ocupados": 1098.0,
+    "desocupados": 186.3,
+    "fuera_ft": 591.8
+  },
+  {
+    "anio": 2015,
+    "trimestre": "Jul - Sep 15",
+    "pct_pet": 33.1,
+    "tgp": 68.9,
+    "to": 59.4,
+    "td": 13.8,
+    "pct_fuera_ft": 31.1,
+    "pet": 5743.4,
+    "pet_15_28": 1902.8,
+    "fuerza_trabajo": 1311.2,
+    "ocupados": 1129.8,
+    "desocupados": 181.3,
+    "fuera_ft": 591.7
+  },
+  {
+    "anio": 2015,
+    "trimestre": "Aug - Oct 15",
+    "pct_pet": 33.1,
+    "tgp": 69.2,
+    "to": 59.5,
+    "td": 14.1,
+    "pct_fuera_ft": 30.8,
+    "pet": 5748.6,
+    "pet_15_28": 1904.4,
+    "fuerza_trabajo": 1318.2,
+    "ocupados": 1132.8,
+    "desocupados": 185.4,
+    "fuera_ft": 586.3
+  },
+  {
+    "anio": 2015,
+    "trimestre": "Sep - Nov 15",
+    "pct_pet": 33.4,
+    "tgp": 69.2,
+    "to": 59.9,
+    "td": 13.5,
+    "pct_fuera_ft": 30.8,
+    "pet": 5753.7,
+    "pet_15_28": 1920.9,
+    "fuerza_trabajo": 1330.0,
+    "ocupados": 1151.1,
+    "desocupados": 178.9,
+    "fuera_ft": 590.9
+  },
+  {
+    "anio": 2015,
+    "trimestre": "Oct - Dec 15",
+    "pct_pet": 32.9,
+    "tgp": 70.0,
+    "to": 60.3,
+    "td": 13.9,
+    "pct_fuera_ft": 30.0,
+    "pet": 5758.8,
+    "pet_15_28": 1895.3,
+    "fuerza_trabajo": 1326.5,
+    "ocupados": 1142.5,
+    "desocupados": 184.0,
+    "fuera_ft": 568.8
+  },
+  {
+    "anio": 2015,
+    "trimestre": "Nov 15 - Jan 16",
+    "pct_pet": 32.8,
+    "tgp": 69.7,
+    "to": 57.7,
+    "td": 17.2,
+    "pct_fuera_ft": 30.3,
+    "pet": 5764.0,
+    "pet_15_28": 1890.6,
+    "fuerza_trabajo": 1317.3,
+    "ocupados": 1090.3,
+    "desocupados": 227.0,
+    "fuera_ft": 573.3
+  },
+  {
+    "anio": 2015,
+    "trimestre": "Dec 15 - Feb 16",
+    "pct_pet": 32.4,
+    "tgp": 69.9,
+    "to": 57.4,
+    "td": 17.9,
+    "pct_fuera_ft": 30.1,
+    "pet": 5769.2,
+    "pet_15_28": 1870.9,
+    "fuerza_trabajo": 1308.4,
+    "ocupados": 1074.2,
+    "desocupados": 234.2,
+    "fuera_ft": 562.5
+  },
+  {
+    "anio": 2016,
+    "trimestre": "Jan - Mar 16",
+    "pct_pet": 32.4,
+    "tgp": 69.1,
+    "to": 57.0,
+    "td": 17.5,
+    "pct_fuera_ft": 30.9,
+    "pet": 5774.3,
+    "pet_15_28": 1870.0,
+    "fuerza_trabajo": 1291.3,
+    "ocupados": 1065.2,
+    "desocupados": 226.1,
+    "fuera_ft": 578.7
+  },
+  {
+    "anio": 2016,
+    "trimestre": "Feb - Apr 16",
+    "pct_pet": 32.2,
+    "tgp": 68.8,
+    "to": 59.2,
+    "td": 13.9,
+    "pct_fuera_ft": 31.2,
+    "pet": 5779.4,
+    "pet_15_28": 1861.9,
+    "fuerza_trabajo": 1281.4,
+    "ocupados": 1102.8,
+    "desocupados": 178.7,
+    "fuera_ft": 580.5
+  },
+  {
+    "anio": 2016,
+    "trimestre": "Mar - May 16",
+    "pct_pet": 31.9,
+    "tgp": 66.4,
+    "to": 57.5,
+    "td": 13.5,
+    "pct_fuera_ft": 33.6,
+    "pet": 5784.5,
+    "pet_15_28": 1845.7,
+    "fuerza_trabajo": 1225.9,
+    "ocupados": 1060.9,
+    "desocupados": 165.0,
+    "fuera_ft": 619.8
+  },
+  {
+    "anio": 2016,
+    "trimestre": "Apr - Jun 16",
+    "pct_pet": 32.0,
+    "tgp": 67.6,
+    "to": 58.6,
+    "td": 13.4,
+    "pct_fuera_ft": 32.4,
+    "pet": 5789.7,
+    "pet_15_28": 1854.2,
+    "fuerza_trabajo": 1254.1,
+    "ocupados": 1085.8,
+    "desocupados": 168.3,
+    "fuera_ft": 600.1
+  },
+  {
+    "anio": 2016,
+    "trimestre": "May - Jul 16",
+    "pct_pet": 31.7,
+    "tgp": 67.8,
+    "to": 57.6,
+    "td": 15.0,
+    "pct_fuera_ft": 32.2,
+    "pet": 5794.8,
+    "pet_15_28": 1838.9,
+    "fuerza_trabajo": 1246.1,
+    "ocupados": 1058.6,
+    "desocupados": 187.5,
+    "fuera_ft": 592.8
+  },
+  {
+    "anio": 2016,
+    "trimestre": "Jun - Aug 16",
+    "pct_pet": 32.1,
+    "tgp": 68.2,
+    "to": 57.9,
+    "td": 15.1,
+    "pct_fuera_ft": 31.8,
+    "pet": 5800.0,
+    "pet_15_28": 1862.3,
+    "fuerza_trabajo": 1270.0,
+    "ocupados": 1078.0,
+    "desocupados": 192.0,
+    "fuera_ft": 592.3
+  },
+  {
+    "anio": 2016,
+    "trimestre": "Jul - Sep 16",
+    "pct_pet": 31.9,
+    "tgp": 65.8,
+    "to": 55.6,
+    "td": 15.5,
+    "pct_fuera_ft": 34.2,
+    "pet": 5805.2,
+    "pet_15_28": 1851.8,
+    "fuerza_trabajo": 1219.3,
+    "ocupados": 1030.5,
+    "desocupados": 188.8,
+    "fuera_ft": 632.5
+  },
+  {
+    "anio": 2016,
+    "trimestre": "Aug - Oct 16",
+    "pct_pet": 31.7,
+    "tgp": 65.8,
+    "to": 56.3,
+    "td": 14.4,
+    "pct_fuera_ft": 34.2,
+    "pet": 5810.4,
+    "pet_15_28": 1844.3,
+    "fuerza_trabajo": 1213.4,
+    "ocupados": 1038.8,
+    "desocupados": 174.6,
+    "fuera_ft": 630.9
+  },
+  {
+    "anio": 2016,
+    "trimestre": "Sep - Nov 16",
+    "pct_pet": 31.7,
+    "tgp": 66.1,
+    "to": 56.5,
+    "td": 14.5,
+    "pct_fuera_ft": 33.9,
+    "pet": 5815.6,
+    "pet_15_28": 1846.2,
+    "fuerza_trabajo": 1219.8,
+    "ocupados": 1042.4,
+    "desocupados": 177.4,
+    "fuera_ft": 626.4
+  },
+  {
+    "anio": 2016,
+    "trimestre": "Oct - Dec 16",
+    "pct_pet": 31.8,
+    "tgp": 67.4,
+    "to": 57.2,
+    "td": 15.2,
+    "pct_fuera_ft": 32.6,
+    "pet": 5820.8,
+    "pet_15_28": 1848.5,
+    "fuerza_trabajo": 1246.3,
+    "ocupados": 1057.4,
+    "desocupados": 188.9,
+    "fuera_ft": 602.2
+  },
+  {
+    "anio": 2016,
+    "trimestre": "Nov 16 - Jan 17",
+    "pct_pet": 32.0,
+    "tgp": 67.7,
+    "to": 56.1,
+    "td": 17.0,
+    "pct_fuera_ft": 32.3,
+    "pet": 5826.0,
+    "pet_15_28": 1864.8,
+    "fuerza_trabajo": 1261.9,
+    "ocupados": 1046.9,
+    "desocupados": 215.0,
+    "fuera_ft": 602.9
+  },
+  {
+    "anio": 2016,
+    "trimestre": "Dec 16 - Feb 17",
+    "pct_pet": 32.2,
+    "tgp": 67.6,
+    "to": 55.4,
+    "td": 18.1,
+    "pct_fuera_ft": 32.4,
+    "pet": 5831.3,
+    "pet_15_28": 1880.4,
+    "fuerza_trabajo": 1271.2,
+    "ocupados": 1041.3,
+    "desocupados": 229.9,
+    "fuera_ft": 609.2
+  },
+  {
+    "anio": 2017,
+    "trimestre": "Jan - Mar 17",
+    "pct_pet": 32.1,
+    "tgp": 67.0,
+    "to": 54.2,
+    "td": 19.1,
+    "pct_fuera_ft": 33.0,
+    "pet": 5836.6,
+    "pet_15_28": 1872.4,
+    "fuerza_trabajo": 1255.3,
+    "ocupados": 1015.7,
+    "desocupados": 239.6,
+    "fuera_ft": 617.1
+  },
+  {
+    "anio": 2017,
+    "trimestre": "Feb - Apr 17",
+    "pct_pet": 32.4,
+    "tgp": 66.5,
+    "to": 54.5,
+    "td": 18.0,
+    "pct_fuera_ft": 33.5,
+    "pet": 5841.8,
+    "pet_15_28": 1893.6,
+    "fuerza_trabajo": 1259.1,
+    "ocupados": 1032.7,
+    "desocupados": 226.4,
+    "fuera_ft": 634.5
+  },
+  {
+    "anio": 2017,
+    "trimestre": "Mar - May 17",
+    "pct_pet": 31.9,
+    "tgp": 66.9,
+    "to": 54.9,
+    "td": 17.9,
+    "pct_fuera_ft": 33.1,
+    "pet": 5847.1,
+    "pet_15_28": 1864.7,
+    "fuerza_trabajo": 1247.5,
+    "ocupados": 1024.1,
+    "desocupados": 223.4,
+    "fuera_ft": 617.2
+  },
+  {
+    "anio": 2017,
+    "trimestre": "Apr - Jun 17",
+    "pct_pet": 32.0,
+    "tgp": 67.3,
+    "to": 55.2,
+    "td": 18.0,
+    "pct_fuera_ft": 32.7,
+    "pet": 5852.7,
+    "pet_15_28": 1875.4,
+    "fuerza_trabajo": 1262.0,
+    "ocupados": 1034.5,
+    "desocupados": 227.5,
+    "fuera_ft": 613.3
+  },
+  {
+    "anio": 2017,
+    "trimestre": "May - Jul 17",
+    "pct_pet": 31.5,
+    "tgp": 66.3,
+    "to": 53.8,
+    "td": 18.9,
+    "pct_fuera_ft": 33.7,
+    "pet": 5858.2,
+    "pet_15_28": 1846.9,
+    "fuerza_trabajo": 1224.6,
+    "ocupados": 993.7,
+    "desocupados": 230.9,
+    "fuera_ft": 622.2
+  },
+  {
+    "anio": 2017,
+    "trimestre": "Jun - Aug 17",
+    "pct_pet": 31.6,
+    "tgp": 65.7,
+    "to": 53.5,
+    "td": 18.6,
+    "pct_fuera_ft": 34.3,
+    "pet": 5863.9,
+    "pet_15_28": 1853.8,
+    "fuerza_trabajo": 1218.6,
+    "ocupados": 991.8,
+    "desocupados": 226.8,
+    "fuera_ft": 635.3
+  },
+  {
+    "anio": 2017,
+    "trimestre": "Jul - Sep 17",
+    "pct_pet": 31.6,
+    "tgp": 65.9,
+    "to": 53.8,
+    "td": 18.3,
+    "pct_fuera_ft": 34.1,
+    "pet": 5869.8,
+    "pet_15_28": 1856.1,
+    "fuerza_trabajo": 1222.9,
+    "ocupados": 999.5,
+    "desocupados": 223.4,
+    "fuera_ft": 633.2
+  },
+  {
+    "anio": 2017,
+    "trimestre": "Aug - Oct 17",
+    "pct_pet": 31.6,
+    "tgp": 65.6,
+    "to": 55.0,
+    "td": 16.2,
+    "pct_fuera_ft": 34.4,
+    "pet": 5875.8,
+    "pet_15_28": 1857.5,
+    "fuerza_trabajo": 1218.6,
+    "ocupados": 1021.0,
+    "desocupados": 197.6,
+    "fuera_ft": 638.9
+  },
+  {
+    "anio": 2017,
+    "trimestre": "Sep - Nov 17",
+    "pct_pet": 31.7,
+    "tgp": 65.8,
+    "to": 55.3,
+    "td": 15.9,
+    "pct_fuera_ft": 34.2,
+    "pet": 5882.1,
+    "pet_15_28": 1866.6,
+    "fuerza_trabajo": 1227.4,
+    "ocupados": 1032.6,
+    "desocupados": 194.8,
+    "fuera_ft": 639.2
+  },
+  {
+    "anio": 2017,
+    "trimestre": "Oct - Dec 17",
+    "pct_pet": 31.5,
+    "tgp": 65.6,
+    "to": 55.7,
+    "td": 15.1,
+    "pct_fuera_ft": 34.4,
+    "pet": 5888.7,
+    "pet_15_28": 1857.2,
+    "fuerza_trabajo": 1218.4,
+    "ocupados": 1033.8,
+    "desocupados": 184.5,
+    "fuera_ft": 638.8
+  },
+  {
+    "anio": 2017,
+    "trimestre": "Nov 17 - Jan 18",
+    "pct_pet": 31.4,
+    "tgp": 65.7,
+    "to": 53.9,
+    "td": 17.9,
+    "pct_fuera_ft": 34.3,
+    "pet": 5895.7,
+    "pet_15_28": 1848.6,
+    "fuerza_trabajo": 1214.5,
+    "ocupados": 997.2,
+    "desocupados": 217.3,
+    "fuera_ft": 634.1
+  },
+  {
+    "anio": 2017,
+    "trimestre": "Dec 17 - Feb 18",
+    "pct_pet": 31.2,
+    "tgp": 65.1,
+    "to": 52.9,
+    "td": 18.7,
+    "pct_fuera_ft": 34.9,
+    "pet": 5903.1,
+    "pet_15_28": 1844.6,
+    "fuerza_trabajo": 1200.2,
+    "ocupados": 975.5,
+    "desocupados": 224.7,
+    "fuera_ft": 644.4
+  },
+  {
+    "anio": 2018,
+    "trimestre": "Jan - Mar 18",
+    "pct_pet": 31.5,
+    "tgp": 65.3,
+    "to": 52.3,
+    "td": 19.9,
+    "pct_fuera_ft": 34.7,
+    "pet": 5910.8,
+    "pet_15_28": 1863.6,
+    "fuerza_trabajo": 1216.6,
+    "ocupados": 975.1,
+    "desocupados": 241.6,
+    "fuera_ft": 646.9
+  },
+  {
+    "anio": 2018,
+    "trimestre": "Feb - Apr 18",
+    "pct_pet": 31.8,
+    "tgp": 65.5,
+    "to": 53.9,
+    "td": 17.8,
+    "pct_fuera_ft": 34.5,
+    "pet": 5919.1,
+    "pet_15_28": 1883.7,
+    "fuerza_trabajo": 1234.6,
+    "ocupados": 1014.7,
+    "desocupados": 219.9,
+    "fuera_ft": 649.1
+  },
+  {
+    "anio": 2018,
+    "trimestre": "Mar - May 18",
+    "pct_pet": 31.8,
+    "tgp": 66.4,
+    "to": 54.5,
+    "td": 17.8,
+    "pct_fuera_ft": 33.6,
+    "pet": 5927.9,
+    "pet_15_28": 1885.5,
+    "fuerza_trabajo": 1251.2,
+    "ocupados": 1028.2,
+    "desocupados": 223.1,
+    "fuera_ft": 634.2
+  },
+  {
+    "anio": 2018,
+    "trimestre": "Apr - Jun 18",
+    "pct_pet": 31.7,
+    "tgp": 65.7,
+    "to": 54.3,
+    "td": 17.3,
+    "pct_fuera_ft": 34.3,
+    "pet": 5937.7,
+    "pet_15_28": 1881.4,
+    "fuerza_trabajo": 1235.6,
+    "ocupados": 1021.5,
+    "desocupados": 214.1,
+    "fuera_ft": 645.9
+  },
+  {
+    "anio": 2018,
+    "trimestre": "May - Jul 18",
+    "pct_pet": 31.4,
+    "tgp": 66.6,
+    "to": 54.7,
+    "td": 17.9,
+    "pct_fuera_ft": 33.4,
+    "pet": 5948.1,
+    "pet_15_28": 1865.3,
+    "fuerza_trabajo": 1242.6,
+    "ocupados": 1020.3,
+    "desocupados": 222.3,
+    "fuera_ft": 622.7
+  },
+  {
+    "anio": 2018,
+    "trimestre": "Jun - Aug 18",
+    "pct_pet": 31.3,
+    "tgp": 65.4,
+    "to": 54.3,
+    "td": 17.1,
+    "pct_fuera_ft": 34.6,
+    "pet": 5959.4,
+    "pet_15_28": 1865.6,
+    "fuerza_trabajo": 1220.5,
+    "ocupados": 1012.3,
+    "desocupados": 208.2,
+    "fuera_ft": 645.1
+  },
+  {
+    "anio": 2018,
+    "trimestre": "Jul - Sep 18",
+    "pct_pet": 30.7,
+    "tgp": 64.5,
+    "to": 53.9,
+    "td": 16.5,
+    "pct_fuera_ft": 35.5,
+    "pet": 5971.5,
+    "pet_15_28": 1830.3,
+    "fuerza_trabajo": 1180.8,
+    "ocupados": 986.0,
+    "desocupados": 194.8,
+    "fuera_ft": 649.5
+  },
+  {
+    "anio": 2018,
+    "trimestre": "Aug - Oct 18",
+    "pct_pet": 30.7,
+    "tgp": 63.1,
+    "to": 52.4,
+    "td": 16.9,
+    "pct_fuera_ft": 36.9,
+    "pet": 5984.2,
+    "pet_15_28": 1836.7,
+    "fuerza_trabajo": 1158.5,
+    "ocupados": 962.9,
+    "desocupados": 195.6,
+    "fuera_ft": 678.2
+  },
+  {
+    "anio": 2018,
+    "trimestre": "Sep - Nov 18",
+    "pct_pet": 30.6,
+    "tgp": 63.6,
+    "to": 52.5,
+    "td": 17.5,
+    "pct_fuera_ft": 36.4,
+    "pet": 5997.6,
+    "pet_15_28": 1832.7,
+    "fuerza_trabajo": 1166.4,
+    "ocupados": 961.9,
+    "desocupados": 204.5,
+    "fuera_ft": 666.3
+  },
+  {
+    "anio": 2018,
+    "trimestre": "Oct - Dec 18",
+    "pct_pet": 30.6,
+    "tgp": 65.1,
+    "to": 54.2,
+    "td": 16.8,
+    "pct_fuera_ft": 34.9,
+    "pet": 6011.2,
+    "pet_15_28": 1840.2,
+    "fuerza_trabajo": 1198.4,
+    "ocupados": 997.6,
+    "desocupados": 200.8,
+    "fuera_ft": 641.7
+  },
+  {
+    "anio": 2018,
+    "trimestre": "Nov 18 - Jan 19",
+    "pct_pet": 30.7,
+    "tgp": 66.7,
+    "to": 54.2,
+    "td": 18.7,
+    "pct_fuera_ft": 33.3,
+    "pet": 6025.3,
+    "pet_15_28": 1851.2,
+    "fuerza_trabajo": 1234.9,
+    "ocupados": 1003.6,
+    "desocupados": 231.3,
+    "fuera_ft": 616.4
+  },
+  {
+    "anio": 2018,
+    "trimestre": "Dec 18 - Feb 19",
+    "pct_pet": 31.1,
+    "tgp": 67.9,
+    "to": 54.2,
+    "td": 20.1,
+    "pct_fuera_ft": 32.1,
+    "pet": 6039.7,
+    "pet_15_28": 1876.4,
+    "fuerza_trabajo": 1273.2,
+    "ocupados": 1016.9,
+    "desocupados": 256.3,
+    "fuera_ft": 603.2
+  },
+  {
+    "anio": 2019,
+    "trimestre": "Jan - Mar 19",
+    "pct_pet": 31.4,
+    "tgp": 66.6,
+    "to": 51.9,
+    "td": 22.0,
+    "pct_fuera_ft": 33.4,
+    "pet": 6053.9,
+    "pet_15_28": 1897.9,
+    "fuerza_trabajo": 1263.1,
+    "ocupados": 985.3,
+    "desocupados": 277.9,
+    "fuera_ft": 634.8
+  },
+  {
+    "anio": 2019,
+    "trimestre": "Feb - Apr 19",
+    "pct_pet": 31.0,
+    "tgp": 64.3,
+    "to": 51.3,
+    "td": 20.2,
+    "pct_fuera_ft": 35.7,
+    "pet": 6068.1,
+    "pet_15_28": 1879.0,
+    "fuerza_trabajo": 1207.8,
+    "ocupados": 963.6,
+    "desocupados": 244.3,
+    "fuera_ft": 671.2
+  },
+  {
+    "anio": 2019,
+    "trimestre": "Mar - May 19",
+    "pct_pet": 30.7,
+    "tgp": 63.8,
+    "to": 51.6,
+    "td": 19.1,
+    "pct_fuera_ft": 36.2,
+    "pet": 6082.0,
+    "pet_15_28": 1867.0,
+    "fuerza_trabajo": 1191.4,
+    "ocupados": 964.3,
+    "desocupados": 227.1,
+    "fuera_ft": 675.6
+  },
+  {
+    "anio": 2019,
+    "trimestre": "Apr - Jun 19",
+    "pct_pet": 30.3,
+    "tgp": 63.9,
+    "to": 51.9,
+    "td": 18.8,
+    "pct_fuera_ft": 36.1,
+    "pet": 6096.3,
+    "pet_15_28": 1845.3,
+    "fuerza_trabajo": 1180.0,
+    "ocupados": 957.6,
+    "desocupados": 222.4,
+    "fuera_ft": 665.3
+  },
+  {
+    "anio": 2019,
+    "trimestre": "May - Jul 19",
+    "pct_pet": 30.3,
+    "tgp": 66.2,
+    "to": 53.9,
+    "td": 18.5,
+    "pct_fuera_ft": 33.8,
+    "pet": 6110.1,
+    "pet_15_28": 1850.9,
+    "fuerza_trabajo": 1224.7,
+    "ocupados": 998.5,
+    "desocupados": 226.2,
+    "fuera_ft": 626.1
+  },
+  {
+    "anio": 2019,
+    "trimestre": "Jun - Aug 19",
+    "pct_pet": 29.6,
+    "tgp": 63.8,
+    "to": 52.3,
+    "td": 18.0,
+    "pct_fuera_ft": 36.2,
+    "pet": 6123.7,
+    "pet_15_28": 1809.9,
+    "fuerza_trabajo": 1155.0,
+    "ocupados": 946.6,
+    "desocupados": 208.3,
+    "fuera_ft": 654.9
+  },
+  {
+    "anio": 2019,
+    "trimestre": "Jul - Sep 19",
+    "pct_pet": 30.4,
+    "tgp": 63.3,
+    "to": 53.2,
+    "td": 16.0,
+    "pct_fuera_ft": 36.7,
+    "pet": 6136.8,
+    "pet_15_28": 1867.5,
+    "fuerza_trabajo": 1183.0,
+    "ocupados": 993.3,
+    "desocupados": 189.7,
+    "fuera_ft": 684.5
+  },
+  {
+    "anio": 2019,
+    "trimestre": "Aug - Oct 19",
+    "pct_pet": 30.5,
+    "tgp": 62.7,
+    "to": 52.6,
+    "td": 16.0,
+    "pct_fuera_ft": 37.3,
+    "pet": 6149.5,
+    "pet_15_28": 1877.4,
+    "fuerza_trabajo": 1176.6,
+    "ocupados": 988.1,
+    "desocupados": 188.5,
+    "fuera_ft": 700.8
+  },
+  {
+    "anio": 2019,
+    "trimestre": "Sep - Nov 19",
+    "pct_pet": 30.8,
+    "tgp": 64.3,
+    "to": 53.9,
+    "td": 16.2,
+    "pct_fuera_ft": 35.7,
+    "pet": 6161.9,
+    "pet_15_28": 1898.0,
+    "fuerza_trabajo": 1220.9,
+    "ocupados": 1023.7,
+    "desocupados": 197.2,
+    "fuera_ft": 677.1
+  },
+  {
+    "anio": 2019,
+    "trimestre": "Oct - Dec 19",
+    "pct_pet": 29.6,
+    "tgp": 65.4,
+    "to": 53.4,
+    "td": 18.3,
+    "pct_fuera_ft": 34.6,
+    "pet": 6173.8,
+    "pet_15_28": 1830.2,
+    "fuerza_trabajo": 1197.5,
+    "ocupados": 978.0,
+    "desocupados": 219.5,
+    "fuera_ft": 632.7
+  },
+  {
+    "anio": 2019,
+    "trimestre": "Nov 19 - Jan 20",
+    "pct_pet": 29.5,
+    "tgp": 64.6,
+    "to": 51.7,
+    "td": 20.1,
+    "pct_fuera_ft": 35.4,
+    "pet": 6185.6,
+    "pet_15_28": 1823.8,
+    "fuerza_trabajo": 1179.0,
+    "ocupados": 942.3,
+    "desocupados": 236.6,
+    "fuera_ft": 644.9
+  },
+  {
+    "anio": 2019,
+    "trimestre": "Dec 19 - Feb 20",
+    "pct_pet": 29.5,
+    "tgp": 63.6,
+    "to": 50.6,
+    "td": 20.6,
+    "pct_fuera_ft": 36.4,
+    "pet": 6197.1,
+    "pet_15_28": 1828.3,
+    "fuerza_trabajo": 1163.7,
+    "ocupados": 924.3,
+    "desocupados": 239.4,
+    "fuera_ft": 664.6
+  },
+  {
+    "anio": 2020,
+    "trimestre": "Jan - Mar 20",
+    "pct_pet": 29.8,
+    "tgp": 61.6,
+    "to": 48.6,
+    "td": 21.1,
+    "pct_fuera_ft": 38.4,
+    "pet": 6208.2,
+    "pet_15_28": 1849.6,
+    "fuerza_trabajo": 1139.1,
+    "ocupados": 898.7,
+    "desocupados": 240.4,
+    "fuera_ft": 710.5
+  },
+  {
+    "anio": 2020,
+    "trimestre": "Feb - Apr 20",
+    "pct_pet": 29.7,
+    "tgp": 56.0,
+    "to": 42.8,
+    "td": 23.6,
+    "pct_fuera_ft": 44.0,
+    "pet": 6219.2,
+    "pet_15_28": 1848.6,
+    "fuerza_trabajo": 1035.6,
+    "ocupados": 791.6,
+    "desocupados": 244.0,
+    "fuera_ft": 813.0
+  },
+  {
+    "anio": 2020,
+    "trimestre": "Mar - May 20",
+    "pct_pet": 29.3,
+    "tgp": 54.8,
+    "to": 39.3,
+    "td": 28.3,
+    "pct_fuera_ft": 45.2,
+    "pet": 6230.0,
+    "pet_15_28": 1827.8,
+    "fuerza_trabajo": 1001.3,
+    "ocupados": 718.1,
+    "desocupados": 283.3,
+    "fuera_ft": 826.4
+  },
+  {
+    "anio": 2020,
+    "trimestre": "Apr - Jun 20",
+    "pct_pet": 29.7,
+    "tgp": 55.9,
+    "to": 37.2,
+    "td": 33.4,
+    "pct_fuera_ft": 44.1,
+    "pet": 6240.9,
+    "pet_15_28": 1854.3,
+    "fuerza_trabajo": 1036.1,
+    "ocupados": 689.6,
+    "desocupados": 346.6,
+    "fuera_ft": 818.2
+  },
+  {
+    "anio": 2020,
+    "trimestre": "May - Jul 20",
+    "pct_pet": 29.6,
+    "tgp": 60.6,
+    "to": 39.6,
+    "td": 34.6,
+    "pct_fuera_ft": 39.4,
+    "pet": 6251.2,
+    "pet_15_28": 1849.1,
+    "fuerza_trabajo": 1119.7,
+    "ocupados": 731.8,
+    "desocupados": 387.9,
+    "fuera_ft": 729.4
+  },
+  {
+    "anio": 2020,
+    "trimestre": "Jun - Aug 20",
+    "pct_pet": 30.0,
+    "tgp": 62.8,
+    "to": 41.4,
+    "td": 34.0,
+    "pct_fuera_ft": 37.2,
+    "pet": 6260.9,
+    "pet_15_28": 1880.8,
+    "fuerza_trabajo": 1180.2,
+    "ocupados": 778.9,
+    "desocupados": 401.3,
+    "fuera_ft": 700.6
+  },
+  {
+    "anio": 2020,
+    "trimestre": "Jul - Sep 20",
+    "pct_pet": 29.9,
+    "tgp": 63.3,
+    "to": 43.5,
+    "td": 31.3,
+    "pct_fuera_ft": 36.7,
+    "pet": 6269.8,
+    "pet_15_28": 1873.6,
+    "fuerza_trabajo": 1186.2,
+    "ocupados": 814.7,
+    "desocupados": 371.6,
+    "fuera_ft": 687.4
+  },
+  {
+    "anio": 2020,
+    "trimestre": "Aug- Oct 20",
+    "pct_pet": 30.1,
+    "tgp": 64.5,
+    "to": 46.2,
+    "td": 28.4,
+    "pct_fuera_ft": 35.5,
+    "pet": 6278.3,
+    "pet_15_28": 1892.3,
+    "fuerza_trabajo": 1220.7,
+    "ocupados": 874.1,
+    "desocupados": 346.6,
+    "fuera_ft": 671.6
+  },
+  {
+    "anio": 2020,
+    "trimestre": "Sep - Nov 20",
+    "pct_pet": 29.9,
+    "tgp": 65.1,
+    "to": 48.1,
+    "td": 26.1,
+    "pct_fuera_ft": 34.9,
+    "pet": 6286.8,
+    "pet_15_28": 1877.9,
+    "fuerza_trabajo": 1221.7,
+    "ocupados": 903.3,
+    "desocupados": 318.4,
+    "fuera_ft": 656.2
+  },
+  {
+    "anio": 2020,
+    "trimestre": "Oct - Dec 20",
+    "pct_pet": 29.5,
+    "tgp": 64.7,
+    "to": 48.3,
+    "td": 25.4,
+    "pct_fuera_ft": 35.3,
+    "pet": 6295.1,
+    "pet_15_28": 1857.0,
+    "fuerza_trabajo": 1201.2,
+    "ocupados": 896.3,
+    "desocupados": 305.0,
+    "fuera_ft": 655.8
+  },
+  {
+    "anio": 2020,
+    "trimestre": "Nov 20 - Jan 21",
+    "pct_pet": 29.4,
+    "tgp": 66.1,
+    "to": 48.6,
+    "td": 26.4,
+    "pct_fuera_ft": 33.9,
+    "pet": 6303.4,
+    "pet_15_28": 1851.0,
+    "fuerza_trabajo": 1222.6,
+    "ocupados": 899.8,
+    "desocupados": 322.8,
+    "fuera_ft": 628.4
+  },
+  {
+    "anio": 2020,
+    "trimestre": "Dec 20 - Feb 21",
+    "pct_pet": 29.6,
+    "tgp": 66.0,
+    "to": 47.4,
+    "td": 28.3,
+    "pct_fuera_ft": 34.0,
+    "pet": 6311.6,
+    "pet_15_28": 1865.5,
+    "fuerza_trabajo": 1232.0,
+    "ocupados": 883.8,
+    "desocupados": 348.2,
+    "fuera_ft": 633.5
+  },
+  {
+    "anio": 2021,
+    "trimestre": "Jan - Mar 21",
+    "pct_pet": 29.3,
+    "tgp": 66.5,
+    "to": 47.1,
+    "td": 29.1,
+    "pct_fuera_ft": 33.5,
+    "pet": 6319.6,
+    "pet_15_28": 1853.8,
+    "fuerza_trabajo": 1233.3,
+    "ocupados": 873.9,
+    "desocupados": 359.4,
+    "fuera_ft": 620.5
+  },
+  {
+    "anio": 2021,
+    "trimestre": "Feb - Apr 21",
+    "pct_pet": 29.2,
+    "tgp": 65.2,
+    "to": 47.2,
+    "td": 27.6,
+    "pct_fuera_ft": 34.8,
+    "pet": 6327.4,
+    "pet_15_28": 1848.3,
+    "fuerza_trabajo": 1204.8,
+    "ocupados": 872.6,
+    "desocupados": 332.2,
+    "fuera_ft": 643.6
+  },
+  {
+    "anio": 2021,
+    "trimestre": "Mar - May 21",
+    "pct_pet": 28.4,
+    "tgp": 62.2,
+    "to": 45.3,
+    "td": 27.2,
+    "pct_fuera_ft": 37.8,
+    "pet": 6334.9,
+    "pet_15_28": 1801.8,
+    "fuerza_trabajo": 1121.4,
+    "ocupados": 816.2,
+    "desocupados": 305.2,
+    "fuera_ft": 680.4
+  },
+  {
+    "anio": 2021,
+    "trimestre": "Apr - Jun 21",
+    "pct_pet": 28.8,
+    "tgp": 61.4,
+    "to": 44.9,
+    "td": 26.9,
+    "pct_fuera_ft": 38.6,
+    "pet": 6342.5,
+    "pet_15_28": 1829.5,
+    "fuerza_trabajo": 1123.9,
+    "ocupados": 821.9,
+    "desocupados": 302.0,
+    "fuera_ft": 705.6
+  },
+  {
+    "anio": 2021,
+    "trimestre": "May - Jul 21",
+    "pct_pet": 28.4,
+    "tgp": 60.5,
+    "to": 43.7,
+    "td": 27.7,
+    "pct_fuera_ft": 39.5,
+    "pet": 6349.9,
+    "pet_15_28": 1802.4,
+    "fuerza_trabajo": 1090.2,
+    "ocupados": 788.2,
+    "desocupados": 302.0,
+    "fuera_ft": 712.2
+  },
+  {
+    "anio": 2021,
+    "trimestre": "Jun - Aug 21",
+    "pct_pet": 28.0,
+    "tgp": 61.0,
+    "to": 45.1,
+    "td": 26.1,
+    "pct_fuera_ft": 39.0,
+    "pet": 6357.1,
+    "pet_15_28": 1778.7,
+    "fuerza_trabajo": 1084.7,
+    "ocupados": 801.9,
+    "desocupados": 282.8,
+    "fuera_ft": 694.0
+  },
+  {
+    "anio": 2021,
+    "trimestre": "Jul - Sep 21",
+    "pct_pet": 27.7,
+    "tgp": 60.7,
+    "to": 46.4,
+    "td": 23.5,
+    "pct_fuera_ft": 39.3,
+    "pet": 6364.2,
+    "pet_15_28": 1763.1,
+    "fuerza_trabajo": 1069.5,
+    "ocupados": 818.4,
+    "desocupados": 251.1,
+    "fuera_ft": 693.6
+  },
+  {
+    "anio": 2021,
+    "trimestre": "Aug - Oct 21",
+    "pct_pet": 27.7,
+    "tgp": 59.3,
+    "to": 46.1,
+    "td": 22.3,
+    "pct_fuera_ft": 40.7,
+    "pet": 6371.0,
+    "pet_15_28": 1764.1,
+    "fuerza_trabajo": 1046.2,
+    "ocupados": 813.2,
+    "desocupados": 233.0,
+    "fuera_ft": 717.9
+  },
+  {
+    "anio": 2021,
+    "trimestre": "Sep - Nov 21",
+    "pct_pet": 28.0,
+    "tgp": 59.7,
+    "to": 46.9,
+    "td": 21.4,
+    "pct_fuera_ft": 40.3,
+    "pet": 6377.7,
+    "pet_15_28": 1787.8,
+    "fuerza_trabajo": 1067.5,
+    "ocupados": 839.1,
+    "desocupados": 228.4,
+    "fuera_ft": 720.3
+  },
+  {
+    "anio": 2021,
+    "trimestre": "Oct - Dec 21",
+    "pct_pet": 27.4,
+    "tgp": 57.1,
+    "to": 45.1,
+    "td": 21.0,
+    "pct_fuera_ft": 42.9,
+    "pet": 6384.2,
+    "pet_15_28": 1750.7,
+    "fuerza_trabajo": 999.8,
+    "ocupados": 789.8,
+    "desocupados": 210.0,
+    "fuera_ft": 750.9
+  },
+  {
+    "anio": 2021,
+    "trimestre": "Nov 21 - Jan 22",
+    "pct_pet": 27.1,
+    "tgp": 58.3,
+    "to": 45.0,
+    "td": 22.7,
+    "pct_fuera_ft": 41.7,
+    "pet": 6390.6,
+    "pet_15_28": 1732.7,
+    "fuerza_trabajo": 1009.8,
+    "ocupados": 780.4,
+    "desocupados": 229.4,
+    "fuera_ft": 722.9
+  },
+  {
+    "anio": 2021,
+    "trimestre": "Dec 21 - Feb 22",
+    "pct_pet": 27.5,
+    "tgp": 58.9,
+    "to": 45.5,
+    "td": 22.7,
+    "pct_fuera_ft": 41.1,
+    "pet": 6396.9,
+    "pet_15_28": 1762.0,
+    "fuerza_trabajo": 1038.5,
+    "ocupados": 802.3,
+    "desocupados": 236.2,
+    "fuera_ft": 723.5
+  },
+  {
+    "anio": 2022,
+    "trimestre": "Jan - Mar 22",
+    "pct_pet": 27.8,
+    "tgp": 60.3,
+    "to": 46.4,
+    "td": 23.2,
+    "pct_fuera_ft": 39.7,
+    "pet": 6402.9,
+    "pet_15_28": 1778.8,
+    "fuerza_trabajo": 1073.3,
+    "ocupados": 824.5,
+    "desocupados": 248.8,
+    "fuera_ft": 705.5
+  },
+  {
+    "anio": 2022,
+    "trimestre": "Feb - Apr 22",
+    "pct_pet": 28.1,
+    "tgp": 58.6,
+    "to": 47.0,
+    "td": 19.9,
+    "pct_fuera_ft": 41.4,
+    "pet": 6408.9,
+    "pet_15_28": 1800.1,
+    "fuerza_trabajo": 1055.6,
+    "ocupados": 846.1,
+    "desocupados": 209.5,
+    "fuera_ft": 744.5
+  },
+  {
+    "anio": 2022,
+    "trimestre": "Mar - May 22",
+    "pct_pet": 27.8,
+    "tgp": 57.2,
+    "to": 46.5,
+    "td": 18.8,
+    "pct_fuera_ft": 42.8,
+    "pet": 6414.8,
+    "pet_15_28": 1783.3,
+    "fuerza_trabajo": 1020.8,
+    "ocupados": 829.2,
+    "desocupados": 191.5,
+    "fuera_ft": 762.5
+  },
+  {
+    "anio": 2022,
+    "trimestre": "Apr - Jun 22",
+    "pct_pet": 27.7,
+    "tgp": 56.4,
+    "to": 46.3,
+    "td": 17.9,
+    "pct_fuera_ft": 43.6,
+    "pet": 6420.9,
+    "pet_15_28": 1781.4,
+    "fuerza_trabajo": 1005.0,
+    "ocupados": 825.3,
+    "desocupados": 179.8,
+    "fuera_ft": 776.4
+  },
+  {
+    "anio": 2022,
+    "trimestre": "May - Jul 22",
+    "pct_pet": 27.1,
+    "tgp": 55.1,
+    "to": 45.0,
+    "td": 18.3,
+    "pct_fuera_ft": 44.9,
+    "pet": 6426.9,
+    "pet_15_28": 1738.8,
+    "fuerza_trabajo": 957.5,
+    "ocupados": 782.1,
+    "desocupados": 175.3,
+    "fuera_ft": 781.4
+  },
+  {
+    "anio": 2022,
+    "trimestre": "Jun - Aug 22",
+    "pct_pet": 27.0,
+    "tgp": 54.2,
+    "to": 43.8,
+    "td": 19.1,
+    "pct_fuera_ft": 45.8,
+    "pet": 6433.0,
+    "pet_15_28": 1737.8,
+    "fuerza_trabajo": 942.2,
+    "ocupados": 761.8,
+    "desocupados": 180.4,
+    "fuera_ft": 795.6
+  },
+  {
+    "anio": 2022,
+    "trimestre": "Jul - Sep 22",
+    "pct_pet": 26.8,
+    "tgp": 55.0,
+    "to": 44.6,
+    "td": 18.9,
+    "pct_fuera_ft": 45.0,
+    "pet": 6439.1,
+    "pet_15_28": 1724.5,
+    "fuerza_trabajo": 949.0,
+    "ocupados": 769.3,
+    "desocupados": 179.7,
+    "fuera_ft": 775.4
+  },
+  {
+    "anio": 2022,
+    "trimestre": "Aug - Oct 22",
+    "pct_pet": 27.3,
+    "tgp": 56.8,
+    "to": 46.6,
+    "td": 17.8,
+    "pct_fuera_ft": 43.2,
+    "pet": 6445.2,
+    "pet_15_28": 1761.4,
+    "fuerza_trabajo": 999.9,
+    "ocupados": 821.5,
+    "desocupados": 178.4,
+    "fuera_ft": 761.5
+  },
+  {
+    "anio": 2022,
+    "trimestre": "Sep - Nov 22",
+    "pct_pet": 26.7,
+    "tgp": 57.0,
+    "to": 47.5,
+    "td": 16.7,
+    "pct_fuera_ft": 43.0,
+    "pet": 6451.4,
+    "pet_15_28": 1720.3,
+    "fuerza_trabajo": 980.8,
+    "ocupados": 816.5,
+    "desocupados": 164.2,
+    "fuera_ft": 739.5
+  },
+  {
+    "anio": 2022,
+    "trimestre": "Oct - Dec 22",
+    "pct_pet": 26.7,
+    "tgp": 57.8,
+    "to": 48.2,
+    "td": 16.5,
+    "pct_fuera_ft": 42.2,
+    "pet": 6457.5,
+    "pet_15_28": 1725.2,
+    "fuerza_trabajo": 996.5,
+    "ocupados": 832.1,
+    "desocupados": 164.5,
+    "fuera_ft": 728.7
+  },
+  {
+    "anio": 2023,
+    "trimestre": "Nov 22 - Jan 23",
+    "pct_pet": 26.8,
+    "tgp": 58.9,
+    "to": 47.8,
+    "td": 18.9,
+    "pct_fuera_ft": 41.1,
+    "pet": 6463.7,
+    "pet_15_28": 1733.4,
+    "fuerza_trabajo": 1020.6,
+    "ocupados": 828.1,
+    "desocupados": 192.5,
+    "fuera_ft": 712.8
+  },
+  {
+    "anio": 2023,
+    "trimestre": "Dec 22 - Feb 23",
+    "pct_pet": 27.5,
+    "tgp": 60.5,
+    "to": 49.4,
+    "td": 18.3,
+    "pct_fuera_ft": 39.5,
+    "pet": 6469.9,
+    "pet_15_28": 1779.3,
+    "fuerza_trabajo": 1076.3,
+    "ocupados": 879.7,
+    "desocupados": 196.6,
+    "fuera_ft": 703.0
+  },
+  {
+    "anio": 2023,
+    "trimestre": "Jan - Mar 23",
+    "pct_pet": 27.5,
+    "tgp": 60.2,
+    "to": 49.1,
+    "td": 18.5,
+    "pct_fuera_ft": 39.8,
+    "pet": 6476.0,
+    "pet_15_28": 1778.7,
+    "fuerza_trabajo": 1070.3,
+    "ocupados": 872.8,
+    "desocupados": 197.5,
+    "fuera_ft": 708.4
+  },
+  {
+    "anio": 2023,
+    "trimestre": "Feb - Apr 23",
+    "pct_pet": 27.0,
+    "tgp": 60.0,
+    "to": 50.3,
+    "td": 16.2,
+    "pct_fuera_ft": 40.0,
+    "pet": 6482.2,
+    "pet_15_28": 1748.5,
+    "fuerza_trabajo": 1048.9,
+    "ocupados": 879.5,
+    "desocupados": 169.5,
+    "fuera_ft": 699.6
+  },
+  {
+    "anio": 2023,
+    "trimestre": "Mar - May 23",
+    "pct_pet": 26.8,
+    "tgp": 59.9,
+    "to": 50.4,
+    "td": 15.9,
+    "pct_fuera_ft": 40.1,
+    "pet": 6488.3,
+    "pet_15_28": 1736.5,
+    "fuerza_trabajo": 1040.0,
+    "ocupados": 874.6,
+    "desocupados": 165.5,
+    "fuera_ft": 696.4
+  },
+  {
+    "anio": 2023,
+    "trimestre": "Apr - Jun 23",
+    "pct_pet": 27.1,
+    "tgp": 60.3,
+    "to": 51.2,
+    "td": 15.1,
+    "pct_fuera_ft": 39.7,
+    "pet": 6494.7,
+    "pet_15_28": 1758.9,
+    "fuerza_trabajo": 1060.4,
+    "ocupados": 900.2,
+    "desocupados": 160.2,
+    "fuera_ft": 698.5
+  },
+  {
+    "anio": 2023,
+    "trimestre": "May - Jul 23",
+    "pct_pet": 26.8,
+    "tgp": 61.8,
+    "to": 52.7,
+    "td": 14.7,
+    "pct_fuera_ft": 38.2,
+    "pet": 6501.0,
+    "pet_15_28": 1743.8,
+    "fuerza_trabajo": 1077.2,
+    "ocupados": 919.1,
+    "desocupados": 158.1,
+    "fuera_ft": 666.7
+  },
+  {
+    "anio": 2023,
+    "trimestre": "Jun - Aug 23",
+    "pct_pet": 26.5,
+    "tgp": 63.4,
+    "to": 53.9,
+    "td": 14.9,
+    "pct_fuera_ft": 36.6,
+    "pet": 6507.4,
+    "pet_15_28": 1724.6,
+    "fuerza_trabajo": 1092.8,
+    "ocupados": 930.2,
+    "desocupados": 162.6,
+    "fuera_ft": 631.8
+  },
+  {
+    "anio": 2023,
+    "trimestre": "Jul - Sep 23",
+    "pct_pet": 26.1,
+    "tgp": 63.7,
+    "to": 54.7,
+    "td": 14.2,
+    "pct_fuera_ft": 36.3,
+    "pet": 6513.9,
+    "pet_15_28": 1699.2,
+    "fuerza_trabajo": 1083.2,
+    "ocupados": 929.3,
+    "desocupados": 153.9,
+    "fuera_ft": 616.0
+  },
+  {
+    "anio": 2023,
+    "trimestre": "Aug - Oct 23",
+    "pct_pet": 26.9,
+    "tgp": 63.1,
+    "to": 54.5,
+    "td": 13.6,
+    "pct_fuera_ft": 36.9,
+    "pet": 6520.4,
+    "pet_15_28": 1753.4,
+    "fuerza_trabajo": 1106.2,
+    "ocupados": 956.0,
+    "desocupados": 150.2,
+    "fuera_ft": 647.3
+  },
+  {
+    "anio": 2023,
+    "trimestre": "Sep - Nov 23",
+    "pct_pet": 27.0,
+    "tgp": 62.8,
+    "to": 54.1,
+    "td": 13.9,
+    "pct_fuera_ft": 37.2,
+    "pet": 6526.9,
+    "pet_15_28": 1763.3,
+    "fuerza_trabajo": 1107.6,
+    "ocupados": 953.6,
+    "desocupados": 154.0,
+    "fuera_ft": 655.7
+  },
+  {
+    "anio": 2023,
+    "trimestre": "Oct - Dec 23",
+    "pct_pet": 26.9,
+    "tgp": 62.8,
+    "to": 52.5,
+    "td": 16.4,
+    "pct_fuera_ft": 37.2,
+    "pet": 6533.3,
+    "pet_15_28": 1754.7,
+    "fuerza_trabajo": 1101.3,
+    "ocupados": 920.8,
+    "desocupados": 180.4,
+    "fuera_ft": 653.4
+  },
+  {
+    "anio": 2024,
+    "trimestre": "Nov 23 - Jan 24",
+    "pct_pet": 25.9,
+    "tgp": 62.5,
+    "to": 50.4,
+    "td": 19.4,
+    "pct_fuera_ft": 37.5,
+    "pet": 6539.8,
+    "pet_15_28": 1694.4,
+    "fuerza_trabajo": 1058.9,
+    "ocupados": 853.5,
+    "desocupados": 205.4,
+    "fuera_ft": 635.4
+  },
+  {
+    "anio": 2024,
+    "trimestre": "Dec 23 - Feb 24",
+    "pct_pet": 25.6,
+    "tgp": 61.4,
+    "to": 48.0,
+    "td": 21.9,
+    "pct_fuera_ft": 38.6,
+    "pet": 6546.3,
+    "pet_15_28": 1673.8,
+    "fuerza_trabajo": 1027.9,
+    "ocupados": 802.7,
+    "desocupados": 225.2,
+    "fuera_ft": 645.9
+  },
+  {
+    "anio": 2024,
+    "trimestre": "Jan - Mar 24",
+    "pct_pet": 25.4,
+    "tgp": 62.0,
+    "to": 49.7,
+    "td": 19.8,
+    "pct_fuera_ft": 38.0,
+    "pet": 6552.8,
+    "pet_15_28": 1667.0,
+    "fuerza_trabajo": 1033.7,
+    "ocupados": 828.7,
+    "desocupados": 205.0,
+    "fuera_ft": 633.2
+  },
+  {
+    "anio": 2024,
+    "trimestre": "Feb - Apr 24",
+    "pct_pet": 25.6,
+    "tgp": 62.6,
+    "to": 50.8,
+    "td": 18.8,
+    "pct_fuera_ft": 37.4,
+    "pet": 6559.2,
+    "pet_15_28": 1676.4,
+    "fuerza_trabajo": 1049.6,
+    "ocupados": 852.4,
+    "desocupados": 197.2,
+    "fuera_ft": 626.8
+  },
+  {
+    "anio": 2024,
+    "trimestre": "Mar - May 24",
+    "pct_pet": 26.1,
+    "tgp": 63.6,
+    "to": 52.7,
+    "td": 17.1,
+    "pct_fuera_ft": 36.4,
+    "pet": 6565.5,
+    "pet_15_28": 1713.1,
+    "fuerza_trabajo": 1088.9,
+    "ocupados": 902.8,
+    "desocupados": 186.1,
+    "fuera_ft": 624.2
+  },
+  {
+    "anio": 2024,
+    "trimestre": "Apr - Jun 24",
+    "pct_pet": 26.3,
+    "tgp": 64.6,
+    "to": 53.3,
+    "td": 17.5,
+    "pct_fuera_ft": 35.4,
+    "pet": 6571.9,
+    "pet_15_28": 1729.3,
+    "fuerza_trabajo": 1116.4,
+    "ocupados": 921.6,
+    "desocupados": 194.9,
+    "fuera_ft": 612.9
+  },
+  {
+    "anio": 2024,
+    "trimestre": "May - Jul 24",
+    "pct_pet": 26.7,
+    "tgp": 65.1,
+    "to": 54.4,
+    "td": 16.5,
+    "pct_fuera_ft": 34.9,
+    "pet": 6578.2,
+    "pet_15_28": 1755.1,
+    "fuerza_trabajo": 1142.5,
+    "ocupados": 954.5,
+    "desocupados": 188.0,
+    "fuera_ft": 612.6
+  },
+  {
+    "anio": 2024,
+    "trimestre": "Jun - Aug 24",
+    "pct_pet": 26.4,
+    "tgp": 65.0,
+    "to": 54.5,
+    "td": 16.1,
+    "pct_fuera_ft": 35.0,
+    "pet": 6584.5,
+    "pet_15_28": 1739.5,
+    "fuerza_trabajo": 1131.2,
+    "ocupados": 948.6,
+    "desocupados": 182.6,
+    "fuera_ft": 608.4
+  },
+  {
+    "anio": 2024,
+    "trimestre": "Jul - Sep 24",
+    "pct_pet": 26.2,
+    "tgp": 62.9,
+    "to": 53.0,
+    "td": 15.8,
+    "pct_fuera_ft": 37.1,
+    "pet": 6590.8,
+    "pet_15_28": 1729.3,
+    "fuerza_trabajo": 1087.7,
+    "ocupados": 916.3,
+    "desocupados": 171.4,
+    "fuera_ft": 641.6
+  },
+  {
+    "anio": 2024,
+    "trimestre": "Aug - Oct 24",
+    "pct_pet": 26.0,
+    "tgp": 61.8,
+    "to": 51.4,
+    "td": 16.8,
+    "pct_fuera_ft": 38.2,
+    "pet": 6597.0,
+    "pet_15_28": 1717.5,
+    "fuerza_trabajo": 1061.5,
+    "ocupados": 883.2,
+    "desocupados": 178.4,
+    "fuera_ft": 656.0
+  },
+  {
+    "anio": 2024,
+    "trimestre": "Sep - Nov 24",
+    "pct_pet": 25.4,
+    "tgp": 60.0,
+    "to": 50.3,
+    "td": 16.2,
+    "pct_fuera_ft": 40.0,
+    "pet": 6603.2,
+    "pet_15_28": 1675.7,
+    "fuerza_trabajo": 1005.5,
+    "ocupados": 843.0,
+    "desocupados": 162.5,
+    "fuera_ft": 670.1
+  },
+  {
+    "anio": 2024,
+    "trimestre": "Oct - Dec 24",
+    "pct_pet": 25.2,
+    "tgp": 60.4,
+    "to": 50.2,
+    "td": 16.8,
+    "pct_fuera_ft": 39.6,
+    "pet": 6609.3,
+    "pet_15_28": 1668.6,
+    "fuerza_trabajo": 1007.7,
+    "ocupados": 838.5,
+    "desocupados": 169.3,
+    "fuera_ft": 660.9
+  },
+  {
+    "anio": 2024,
+    "trimestre": "Nov 24 - Jan 25",
+    "pct_pet": 24.9,
+    "tgp": 61.8,
+    "to": 51.8,
+    "td": 16.2,
+    "pct_fuera_ft": 38.2,
+    "pet": 6615.4,
+    "pet_15_28": 1647.5,
+    "fuerza_trabajo": 1017.9,
+    "ocupados": 853.2,
+    "desocupados": 164.7,
+    "fuera_ft": 629.6
+  },
+  {
+    "anio": 2024,
+    "trimestre": "Dec 24 - Feb 25",
+    "pct_pet": 25.2,
+    "tgp": 63.1,
+    "to": 52.8,
+    "td": 16.2,
+    "pct_fuera_ft": 36.9,
+    "pet": 6621.5,
+    "pet_15_28": 1669.4,
+    "fuerza_trabajo": 1052.8,
+    "ocupados": 882.2,
+    "desocupados": 170.5,
+    "fuera_ft": 616.6
+  },
+  {
+    "anio": 2025,
+    "trimestre": "Jan - Mar 25",
+    "pct_pet": 24.9,
+    "tgp": 63.6,
+    "to": 53.0,
+    "td": 16.6,
+    "pct_fuera_ft": 36.4,
+    "pet": 6627.5,
+    "pet_15_28": 1647.4,
+    "fuerza_trabajo": 1047.4,
+    "ocupados": 873.4,
+    "desocupados": 174.0,
+    "fuera_ft": 600.0
+  },
+  {
+    "anio": 2025,
+    "trimestre": "Feb - Apr 25",
+    "pct_pet": 25.1,
+    "tgp": 60.7,
+    "to": 51.6,
+    "td": 15.0,
+    "pct_fuera_ft": 39.3,
+    "pet": 6633.4,
+    "pet_15_28": 1663.4,
+    "fuerza_trabajo": 1010.2,
+    "ocupados": 858.2,
+    "desocupados": 151.9,
+    "fuera_ft": 653.2
+  },
+  {
+    "anio": 2025,
+    "trimestre": "Mar - May 25",
+    "pct_pet": 25.4,
+    "tgp": 60.0,
+    "to": 50.8,
+    "td": 15.4,
+    "pct_fuera_ft": 40.0,
+    "pet": 6639.3,
+    "pet_15_28": 1685.4,
+    "fuerza_trabajo": 1011.9,
+    "ocupados": 855.6,
+    "desocupados": 156.2,
+    "fuera_ft": 673.5
+  },
+  {
+    "anio": 2025,
+    "trimestre": "Apr - Jun 25",
+    "pct_pet": 25.9,
+    "tgp": 60.6,
+    "to": 51.8,
+    "td": 14.5,
+    "pct_fuera_ft": 39.4,
+    "pet": 6645.4,
+    "pet_15_28": 1720.1,
+    "fuerza_trabajo": 1042.5,
+    "ocupados": 891.5,
+    "desocupados": 150.9,
+    "fuera_ft": 677.6
+  },
+  {
+    "anio": 2025,
+    "trimestre": "May - Jul 25",
+    "pct_pet": 25.8,
+    "tgp": 61.8,
+    "to": 53.2,
+    "td": 13.9,
+    "pct_fuera_ft": 38.2,
+    "pet": 6651.4,
+    "pet_15_28": 1715.0,
+    "fuerza_trabajo": 1060.3,
+    "ocupados": 912.4,
+    "desocupados": 147.9,
+    "fuera_ft": 654.6
+  },
+  {
+    "anio": 2025,
+    "trimestre": "Jun - Aug 25",
+    "pct_pet": 25.4,
+    "tgp": 63.2,
+    "to": 54.6,
+    "td": 13.6,
+    "pct_fuera_ft": 36.8,
+    "pet": 6657.5,
+    "pet_15_28": 1687.7,
+    "fuerza_trabajo": 1066.5,
+    "ocupados": 921.2,
+    "desocupados": 145.3,
+    "fuera_ft": 621.2
+  },
+  {
+    "anio": 2025,
+    "trimestre": "Jul - Sep 25",
+    "pct_pet": 25.3,
+    "tgp": 61.5,
+    "to": 53.6,
+    "td": 12.8,
+    "pct_fuera_ft": 38.5,
+    "pet": 6663.6,
+    "pet_15_28": 1684.0,
+    "fuerza_trabajo": 1034.8,
+    "ocupados": 902.1,
+    "desocupados": 132.7,
+    "fuera_ft": 649.2
+  },
+  {
+    "anio": 2025,
+    "trimestre": "Aug - Oct 25",
+    "pct_pet": 25.4,
+    "tgp": 62.2,
+    "to": 54.4,
+    "td": 12.5,
+    "pct_fuera_ft": 37.8,
+    "pet": 6669.7,
+    "pet_15_28": 1690.9,
+    "fuerza_trabajo": 1051.9,
+    "ocupados": 920.1,
+    "desocupados": 131.8,
+    "fuera_ft": 639.0
+  },
+  {
+    "anio": 2025,
+    "trimestre": "Sep - Nov 25",
+    "pct_pet": 25.4,
+    "tgp": 61.8,
+    "to": 54.7,
+    "td": 11.4,
+    "pct_fuera_ft": 38.2,
+    "pet": 6675.8,
+    "pet_15_28": 1694.2,
+    "fuerza_trabajo": 1046.2,
+    "ocupados": 926.5,
+    "desocupados": 119.7,
+    "fuera_ft": 648.0
+  },
+  {
+    "anio": 2025,
+    "trimestre": "Oct - Dec 25",
+    "pct_pet": 24.9,
+    "tgp": 61.7,
+    "to": 54.9,
+    "td": 11.1,
+    "pct_fuera_ft": 38.3,
+    "pet": 6681.8,
+    "pet_15_28": 1661.6,
+    "fuerza_trabajo": 1024.9,
+    "ocupados": 911.6,
+    "desocupados": 113.3,
+    "fuera_ft": 636.6
+  }
+];
+
+const MERCADO_LABORAL_CIUDADES_FALLBACK = {
+  "Bogotá D.C.": [
+    {
+      "anio": 2018,
+      "trimestre": "Jan - Mar 18",
+      "pct_pet": 31.5,
+      "tgp": 65.3,
+      "to": 52.3,
+      "td": 19.9,
+      "pct_fuera_ft": 34.7,
+      "pet": 5910.8,
+      "pet_15_28": 1863.6,
+      "fuerza_trabajo": 1216.6,
+      "ocupados": 975.1,
+      "desocupados": 241.6,
+      "fuera_ft": 646.9
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Feb - Apr 18",
+      "pct_pet": 31.8,
+      "tgp": 65.5,
+      "to": 53.9,
+      "td": 17.8,
+      "pct_fuera_ft": 34.5,
+      "pet": 5919.1,
+      "pet_15_28": 1883.7,
+      "fuerza_trabajo": 1234.6,
+      "ocupados": 1014.7,
+      "desocupados": 219.9,
+      "fuera_ft": 649.1
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Mar - May 18",
+      "pct_pet": 31.8,
+      "tgp": 66.4,
+      "to": 54.5,
+      "td": 17.8,
+      "pct_fuera_ft": 33.6,
+      "pet": 5927.9,
+      "pet_15_28": 1885.5,
+      "fuerza_trabajo": 1251.2,
+      "ocupados": 1028.2,
+      "desocupados": 223.1,
+      "fuera_ft": 634.2
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Apr - Jun 18",
+      "pct_pet": 31.7,
+      "tgp": 65.7,
+      "to": 54.3,
+      "td": 17.3,
+      "pct_fuera_ft": 34.3,
+      "pet": 5937.7,
+      "pet_15_28": 1881.4,
+      "fuerza_trabajo": 1235.6,
+      "ocupados": 1021.5,
+      "desocupados": 214.1,
+      "fuera_ft": 645.9
+    },
+    {
+      "anio": 2018,
+      "trimestre": "May - Jul 18",
+      "pct_pet": 31.4,
+      "tgp": 66.6,
+      "to": 54.7,
+      "td": 17.9,
+      "pct_fuera_ft": 33.4,
+      "pet": 5948.1,
+      "pet_15_28": 1865.3,
+      "fuerza_trabajo": 1242.6,
+      "ocupados": 1020.3,
+      "desocupados": 222.3,
+      "fuera_ft": 622.7
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Jun - Aug 18",
+      "pct_pet": 31.3,
+      "tgp": 65.4,
+      "to": 54.3,
+      "td": 17.1,
+      "pct_fuera_ft": 34.6,
+      "pet": 5959.4,
+      "pet_15_28": 1865.6,
+      "fuerza_trabajo": 1220.5,
+      "ocupados": 1012.3,
+      "desocupados": 208.2,
+      "fuera_ft": 645.1
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Jul - Sep 18",
+      "pct_pet": 30.7,
+      "tgp": 64.5,
+      "to": 53.9,
+      "td": 16.5,
+      "pct_fuera_ft": 35.5,
+      "pet": 5971.5,
+      "pet_15_28": 1830.3,
+      "fuerza_trabajo": 1180.8,
+      "ocupados": 986.0,
+      "desocupados": 194.8,
+      "fuera_ft": 649.5
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Aug - Oct 18",
+      "pct_pet": 30.7,
+      "tgp": 63.1,
+      "to": 52.4,
+      "td": 16.9,
+      "pct_fuera_ft": 36.9,
+      "pet": 5984.2,
+      "pet_15_28": 1836.7,
+      "fuerza_trabajo": 1158.5,
+      "ocupados": 962.9,
+      "desocupados": 195.6,
+      "fuera_ft": 678.2
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Sep - Nov 18",
+      "pct_pet": 30.6,
+      "tgp": 63.6,
+      "to": 52.5,
+      "td": 17.5,
+      "pct_fuera_ft": 36.4,
+      "pet": 5997.6,
+      "pet_15_28": 1832.7,
+      "fuerza_trabajo": 1166.4,
+      "ocupados": 961.9,
+      "desocupados": 204.5,
+      "fuera_ft": 666.3
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Oct - Dec 18",
+      "pct_pet": 30.6,
+      "tgp": 65.1,
+      "to": 54.2,
+      "td": 16.8,
+      "pct_fuera_ft": 34.9,
+      "pet": 6011.2,
+      "pet_15_28": 1840.2,
+      "fuerza_trabajo": 1198.4,
+      "ocupados": 997.6,
+      "desocupados": 200.8,
+      "fuera_ft": 641.7
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Nov 18 - Jan 19",
+      "pct_pet": 30.7,
+      "tgp": 66.7,
+      "to": 54.2,
+      "td": 18.7,
+      "pct_fuera_ft": 33.3,
+      "pet": 6025.3,
+      "pet_15_28": 1851.2,
+      "fuerza_trabajo": 1234.9,
+      "ocupados": 1003.6,
+      "desocupados": 231.3,
+      "fuera_ft": 616.4
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Dec 18 - Feb 19",
+      "pct_pet": 31.1,
+      "tgp": 67.9,
+      "to": 54.2,
+      "td": 20.1,
+      "pct_fuera_ft": 32.1,
+      "pet": 6039.7,
+      "pet_15_28": 1876.4,
+      "fuerza_trabajo": 1273.2,
+      "ocupados": 1016.9,
+      "desocupados": 256.3,
+      "fuera_ft": 603.2
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Jan - Mar 19",
+      "pct_pet": 31.4,
+      "tgp": 66.6,
+      "to": 51.9,
+      "td": 22.0,
+      "pct_fuera_ft": 33.4,
+      "pet": 6053.9,
+      "pet_15_28": 1897.9,
+      "fuerza_trabajo": 1263.1,
+      "ocupados": 985.3,
+      "desocupados": 277.9,
+      "fuera_ft": 634.8
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Feb - Apr 19",
+      "pct_pet": 31.0,
+      "tgp": 64.3,
+      "to": 51.3,
+      "td": 20.2,
+      "pct_fuera_ft": 35.7,
+      "pet": 6068.1,
+      "pet_15_28": 1879.0,
+      "fuerza_trabajo": 1207.8,
+      "ocupados": 963.6,
+      "desocupados": 244.3,
+      "fuera_ft": 671.2
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Mar - May 19",
+      "pct_pet": 30.7,
+      "tgp": 63.8,
+      "to": 51.6,
+      "td": 19.1,
+      "pct_fuera_ft": 36.2,
+      "pet": 6082.0,
+      "pet_15_28": 1867.0,
+      "fuerza_trabajo": 1191.4,
+      "ocupados": 964.3,
+      "desocupados": 227.1,
+      "fuera_ft": 675.6
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Apr - Jun 19",
+      "pct_pet": 30.3,
+      "tgp": 63.9,
+      "to": 51.9,
+      "td": 18.8,
+      "pct_fuera_ft": 36.1,
+      "pet": 6096.3,
+      "pet_15_28": 1845.3,
+      "fuerza_trabajo": 1180.0,
+      "ocupados": 957.6,
+      "desocupados": 222.4,
+      "fuera_ft": 665.3
+    },
+    {
+      "anio": 2019,
+      "trimestre": "May - Jul 19",
+      "pct_pet": 30.3,
+      "tgp": 66.2,
+      "to": 53.9,
+      "td": 18.5,
+      "pct_fuera_ft": 33.8,
+      "pet": 6110.1,
+      "pet_15_28": 1850.9,
+      "fuerza_trabajo": 1224.7,
+      "ocupados": 998.5,
+      "desocupados": 226.2,
+      "fuera_ft": 626.1
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Jun - Aug 19",
+      "pct_pet": 29.6,
+      "tgp": 63.8,
+      "to": 52.3,
+      "td": 18.0,
+      "pct_fuera_ft": 36.2,
+      "pet": 6123.7,
+      "pet_15_28": 1809.9,
+      "fuerza_trabajo": 1155.0,
+      "ocupados": 946.6,
+      "desocupados": 208.3,
+      "fuera_ft": 654.9
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Jul - Sep 19",
+      "pct_pet": 30.4,
+      "tgp": 63.3,
+      "to": 53.2,
+      "td": 16.0,
+      "pct_fuera_ft": 36.7,
+      "pet": 6136.8,
+      "pet_15_28": 1867.5,
+      "fuerza_trabajo": 1183.0,
+      "ocupados": 993.3,
+      "desocupados": 189.7,
+      "fuera_ft": 684.5
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Aug - Oct 19",
+      "pct_pet": 30.5,
+      "tgp": 62.7,
+      "to": 52.6,
+      "td": 16.0,
+      "pct_fuera_ft": 37.3,
+      "pet": 6149.5,
+      "pet_15_28": 1877.4,
+      "fuerza_trabajo": 1176.6,
+      "ocupados": 988.1,
+      "desocupados": 188.5,
+      "fuera_ft": 700.8
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Sep - Nov 19",
+      "pct_pet": 30.8,
+      "tgp": 64.3,
+      "to": 53.9,
+      "td": 16.2,
+      "pct_fuera_ft": 35.7,
+      "pet": 6161.9,
+      "pet_15_28": 1898.0,
+      "fuerza_trabajo": 1220.9,
+      "ocupados": 1023.7,
+      "desocupados": 197.2,
+      "fuera_ft": 677.1
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Oct - Dec 19",
+      "pct_pet": 29.6,
+      "tgp": 65.4,
+      "to": 53.4,
+      "td": 18.3,
+      "pct_fuera_ft": 34.6,
+      "pet": 6173.8,
+      "pet_15_28": 1830.2,
+      "fuerza_trabajo": 1197.5,
+      "ocupados": 978.0,
+      "desocupados": 219.5,
+      "fuera_ft": 632.7
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Nov 19 - Jan 20",
+      "pct_pet": 29.5,
+      "tgp": 64.6,
+      "to": 51.7,
+      "td": 20.1,
+      "pct_fuera_ft": 35.4,
+      "pet": 6185.6,
+      "pet_15_28": 1823.8,
+      "fuerza_trabajo": 1179.0,
+      "ocupados": 942.3,
+      "desocupados": 236.6,
+      "fuera_ft": 644.9
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Dec 19 - Feb 20",
+      "pct_pet": 29.5,
+      "tgp": 63.6,
+      "to": 50.6,
+      "td": 20.6,
+      "pct_fuera_ft": 36.4,
+      "pet": 6197.1,
+      "pet_15_28": 1828.3,
+      "fuerza_trabajo": 1163.7,
+      "ocupados": 924.3,
+      "desocupados": 239.4,
+      "fuera_ft": 664.6
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Jan - Mar 20",
+      "pct_pet": 29.8,
+      "tgp": 61.6,
+      "to": 48.6,
+      "td": 21.1,
+      "pct_fuera_ft": 38.4,
+      "pet": 6208.2,
+      "pet_15_28": 1849.6,
+      "fuerza_trabajo": 1139.1,
+      "ocupados": 898.7,
+      "desocupados": 240.4,
+      "fuera_ft": 710.5
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Feb - Apr 20",
+      "pct_pet": 29.7,
+      "tgp": 56.0,
+      "to": 42.8,
+      "td": 23.6,
+      "pct_fuera_ft": 44.0,
+      "pet": 6219.2,
+      "pet_15_28": 1848.6,
+      "fuerza_trabajo": 1035.6,
+      "ocupados": 791.6,
+      "desocupados": 244.0,
+      "fuera_ft": 813.0
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Mar - May 20",
+      "pct_pet": 29.3,
+      "tgp": 54.8,
+      "to": 39.3,
+      "td": 28.3,
+      "pct_fuera_ft": 45.2,
+      "pet": 6230.0,
+      "pet_15_28": 1827.8,
+      "fuerza_trabajo": 1001.3,
+      "ocupados": 718.1,
+      "desocupados": 283.3,
+      "fuera_ft": 826.4
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Apr - Jun 20",
+      "pct_pet": 29.7,
+      "tgp": 55.9,
+      "to": 37.2,
+      "td": 33.4,
+      "pct_fuera_ft": 44.1,
+      "pet": 6240.9,
+      "pet_15_28": 1854.3,
+      "fuerza_trabajo": 1036.1,
+      "ocupados": 689.6,
+      "desocupados": 346.6,
+      "fuera_ft": 818.2
+    },
+    {
+      "anio": 2020,
+      "trimestre": "May - Jul 20",
+      "pct_pet": 29.6,
+      "tgp": 60.6,
+      "to": 39.6,
+      "td": 34.6,
+      "pct_fuera_ft": 39.4,
+      "pet": 6251.2,
+      "pet_15_28": 1849.1,
+      "fuerza_trabajo": 1119.7,
+      "ocupados": 731.8,
+      "desocupados": 387.9,
+      "fuera_ft": 729.4
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Jun - Aug 20",
+      "pct_pet": 30.0,
+      "tgp": 62.8,
+      "to": 41.4,
+      "td": 34.0,
+      "pct_fuera_ft": 37.2,
+      "pet": 6260.9,
+      "pet_15_28": 1880.8,
+      "fuerza_trabajo": 1180.2,
+      "ocupados": 778.9,
+      "desocupados": 401.3,
+      "fuera_ft": 700.6
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Jul - Sep 20",
+      "pct_pet": 29.9,
+      "tgp": 63.3,
+      "to": 43.5,
+      "td": 31.3,
+      "pct_fuera_ft": 36.7,
+      "pet": 6269.8,
+      "pet_15_28": 1873.6,
+      "fuerza_trabajo": 1186.2,
+      "ocupados": 814.7,
+      "desocupados": 371.6,
+      "fuera_ft": 687.4
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Aug- Oct 20",
+      "pct_pet": 30.1,
+      "tgp": 64.5,
+      "to": 46.2,
+      "td": 28.4,
+      "pct_fuera_ft": 35.5,
+      "pet": 6278.3,
+      "pet_15_28": 1892.3,
+      "fuerza_trabajo": 1220.7,
+      "ocupados": 874.1,
+      "desocupados": 346.6,
+      "fuera_ft": 671.6
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Sep - Nov 20",
+      "pct_pet": 29.9,
+      "tgp": 65.1,
+      "to": 48.1,
+      "td": 26.1,
+      "pct_fuera_ft": 34.9,
+      "pet": 6286.8,
+      "pet_15_28": 1877.9,
+      "fuerza_trabajo": 1221.7,
+      "ocupados": 903.3,
+      "desocupados": 318.4,
+      "fuera_ft": 656.2
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Oct - Dec 20",
+      "pct_pet": 29.5,
+      "tgp": 64.7,
+      "to": 48.3,
+      "td": 25.4,
+      "pct_fuera_ft": 35.3,
+      "pet": 6295.1,
+      "pet_15_28": 1857.0,
+      "fuerza_trabajo": 1201.2,
+      "ocupados": 896.3,
+      "desocupados": 305.0,
+      "fuera_ft": 655.8
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Nov 20 - Jan 21",
+      "pct_pet": 29.4,
+      "tgp": 66.1,
+      "to": 48.6,
+      "td": 26.4,
+      "pct_fuera_ft": 33.9,
+      "pet": 6303.4,
+      "pet_15_28": 1851.0,
+      "fuerza_trabajo": 1222.6,
+      "ocupados": 899.8,
+      "desocupados": 322.8,
+      "fuera_ft": 628.4
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Dec 20 - Feb 21",
+      "pct_pet": 29.6,
+      "tgp": 66.0,
+      "to": 47.4,
+      "td": 28.3,
+      "pct_fuera_ft": 34.0,
+      "pet": 6311.6,
+      "pet_15_28": 1865.5,
+      "fuerza_trabajo": 1232.0,
+      "ocupados": 883.8,
+      "desocupados": 348.2,
+      "fuera_ft": 633.5
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Jan - Mar 21",
+      "pct_pet": 29.3,
+      "tgp": 66.5,
+      "to": 47.1,
+      "td": 29.1,
+      "pct_fuera_ft": 33.5,
+      "pet": 6319.6,
+      "pet_15_28": 1853.8,
+      "fuerza_trabajo": 1233.3,
+      "ocupados": 873.9,
+      "desocupados": 359.4,
+      "fuera_ft": 620.5
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Feb - Apr 21",
+      "pct_pet": 29.2,
+      "tgp": 65.2,
+      "to": 47.2,
+      "td": 27.6,
+      "pct_fuera_ft": 34.8,
+      "pet": 6327.4,
+      "pet_15_28": 1848.3,
+      "fuerza_trabajo": 1204.8,
+      "ocupados": 872.6,
+      "desocupados": 332.2,
+      "fuera_ft": 643.6
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Mar - May 21",
+      "pct_pet": 28.4,
+      "tgp": 62.2,
+      "to": 45.3,
+      "td": 27.2,
+      "pct_fuera_ft": 37.8,
+      "pet": 6334.9,
+      "pet_15_28": 1801.8,
+      "fuerza_trabajo": 1121.4,
+      "ocupados": 816.2,
+      "desocupados": 305.2,
+      "fuera_ft": 680.4
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Apr - Jun 21",
+      "pct_pet": 28.8,
+      "tgp": 61.4,
+      "to": 44.9,
+      "td": 26.9,
+      "pct_fuera_ft": 38.6,
+      "pet": 6342.5,
+      "pet_15_28": 1829.5,
+      "fuerza_trabajo": 1123.9,
+      "ocupados": 821.9,
+      "desocupados": 302.0,
+      "fuera_ft": 705.6
+    },
+    {
+      "anio": 2021,
+      "trimestre": "May - Jul 21",
+      "pct_pet": 28.4,
+      "tgp": 60.5,
+      "to": 43.7,
+      "td": 27.7,
+      "pct_fuera_ft": 39.5,
+      "pet": 6349.9,
+      "pet_15_28": 1802.4,
+      "fuerza_trabajo": 1090.2,
+      "ocupados": 788.2,
+      "desocupados": 302.0,
+      "fuera_ft": 712.2
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Jun - Aug 21",
+      "pct_pet": 28.0,
+      "tgp": 61.0,
+      "to": 45.1,
+      "td": 26.1,
+      "pct_fuera_ft": 39.0,
+      "pet": 6357.1,
+      "pet_15_28": 1778.7,
+      "fuerza_trabajo": 1084.7,
+      "ocupados": 801.9,
+      "desocupados": 282.8,
+      "fuera_ft": 694.0
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Jul - Sep 21",
+      "pct_pet": 27.7,
+      "tgp": 60.7,
+      "to": 46.4,
+      "td": 23.5,
+      "pct_fuera_ft": 39.3,
+      "pet": 6364.2,
+      "pet_15_28": 1763.1,
+      "fuerza_trabajo": 1069.5,
+      "ocupados": 818.4,
+      "desocupados": 251.1,
+      "fuera_ft": 693.6
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Aug - Oct 21",
+      "pct_pet": 27.7,
+      "tgp": 59.3,
+      "to": 46.1,
+      "td": 22.3,
+      "pct_fuera_ft": 40.7,
+      "pet": 6371.0,
+      "pet_15_28": 1764.1,
+      "fuerza_trabajo": 1046.2,
+      "ocupados": 813.2,
+      "desocupados": 233.0,
+      "fuera_ft": 717.9
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Sep - Nov 21",
+      "pct_pet": 28.0,
+      "tgp": 59.7,
+      "to": 46.9,
+      "td": 21.4,
+      "pct_fuera_ft": 40.3,
+      "pet": 6377.7,
+      "pet_15_28": 1787.8,
+      "fuerza_trabajo": 1067.5,
+      "ocupados": 839.1,
+      "desocupados": 228.4,
+      "fuera_ft": 720.3
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Oct - Dec 21",
+      "pct_pet": 27.4,
+      "tgp": 57.1,
+      "to": 45.1,
+      "td": 21.0,
+      "pct_fuera_ft": 42.9,
+      "pet": 6384.2,
+      "pet_15_28": 1750.7,
+      "fuerza_trabajo": 999.8,
+      "ocupados": 789.8,
+      "desocupados": 210.0,
+      "fuera_ft": 750.9
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Nov 21 - Jan 22",
+      "pct_pet": 27.1,
+      "tgp": 58.3,
+      "to": 45.0,
+      "td": 22.7,
+      "pct_fuera_ft": 41.7,
+      "pet": 6390.6,
+      "pet_15_28": 1732.7,
+      "fuerza_trabajo": 1009.8,
+      "ocupados": 780.4,
+      "desocupados": 229.4,
+      "fuera_ft": 722.9
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Dec 21 - Feb 22",
+      "pct_pet": 27.5,
+      "tgp": 58.9,
+      "to": 45.5,
+      "td": 22.7,
+      "pct_fuera_ft": 41.1,
+      "pet": 6396.9,
+      "pet_15_28": 1762.0,
+      "fuerza_trabajo": 1038.5,
+      "ocupados": 802.3,
+      "desocupados": 236.2,
+      "fuera_ft": 723.5
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Jan - Mar 22",
+      "pct_pet": 27.8,
+      "tgp": 60.3,
+      "to": 46.4,
+      "td": 23.2,
+      "pct_fuera_ft": 39.7,
+      "pet": 6402.9,
+      "pet_15_28": 1778.8,
+      "fuerza_trabajo": 1073.3,
+      "ocupados": 824.5,
+      "desocupados": 248.8,
+      "fuera_ft": 705.5
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Feb - Apr 22",
+      "pct_pet": 28.1,
+      "tgp": 58.6,
+      "to": 47.0,
+      "td": 19.9,
+      "pct_fuera_ft": 41.4,
+      "pet": 6408.9,
+      "pet_15_28": 1800.1,
+      "fuerza_trabajo": 1055.6,
+      "ocupados": 846.1,
+      "desocupados": 209.5,
+      "fuera_ft": 744.5
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Mar - May 22",
+      "pct_pet": 27.8,
+      "tgp": 57.2,
+      "to": 46.5,
+      "td": 18.8,
+      "pct_fuera_ft": 42.8,
+      "pet": 6414.8,
+      "pet_15_28": 1783.3,
+      "fuerza_trabajo": 1020.8,
+      "ocupados": 829.2,
+      "desocupados": 191.5,
+      "fuera_ft": 762.5
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Apr - Jun 22",
+      "pct_pet": 27.7,
+      "tgp": 56.4,
+      "to": 46.3,
+      "td": 17.9,
+      "pct_fuera_ft": 43.6,
+      "pet": 6420.9,
+      "pet_15_28": 1781.4,
+      "fuerza_trabajo": 1005.0,
+      "ocupados": 825.3,
+      "desocupados": 179.8,
+      "fuera_ft": 776.4
+    },
+    {
+      "anio": 2022,
+      "trimestre": "May - Jul 22",
+      "pct_pet": 27.1,
+      "tgp": 55.1,
+      "to": 45.0,
+      "td": 18.3,
+      "pct_fuera_ft": 44.9,
+      "pet": 6426.9,
+      "pet_15_28": 1738.8,
+      "fuerza_trabajo": 957.5,
+      "ocupados": 782.1,
+      "desocupados": 175.3,
+      "fuera_ft": 781.4
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Jun - Aug 22",
+      "pct_pet": 27.0,
+      "tgp": 54.2,
+      "to": 43.8,
+      "td": 19.1,
+      "pct_fuera_ft": 45.8,
+      "pet": 6433.0,
+      "pet_15_28": 1737.8,
+      "fuerza_trabajo": 942.2,
+      "ocupados": 761.8,
+      "desocupados": 180.4,
+      "fuera_ft": 795.6
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Jul - Sep 22",
+      "pct_pet": 26.8,
+      "tgp": 55.0,
+      "to": 44.6,
+      "td": 18.9,
+      "pct_fuera_ft": 45.0,
+      "pet": 6439.1,
+      "pet_15_28": 1724.5,
+      "fuerza_trabajo": 949.0,
+      "ocupados": 769.3,
+      "desocupados": 179.7,
+      "fuera_ft": 775.4
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Aug - Oct 22",
+      "pct_pet": 27.3,
+      "tgp": 56.8,
+      "to": 46.6,
+      "td": 17.8,
+      "pct_fuera_ft": 43.2,
+      "pet": 6445.2,
+      "pet_15_28": 1761.4,
+      "fuerza_trabajo": 999.9,
+      "ocupados": 821.5,
+      "desocupados": 178.4,
+      "fuera_ft": 761.5
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Sep - Nov 22",
+      "pct_pet": 26.7,
+      "tgp": 57.0,
+      "to": 47.5,
+      "td": 16.7,
+      "pct_fuera_ft": 43.0,
+      "pet": 6451.4,
+      "pet_15_28": 1720.3,
+      "fuerza_trabajo": 980.8,
+      "ocupados": 816.5,
+      "desocupados": 164.2,
+      "fuera_ft": 739.5
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Oct - Dec 22",
+      "pct_pet": 26.7,
+      "tgp": 57.8,
+      "to": 48.2,
+      "td": 16.5,
+      "pct_fuera_ft": 42.2,
+      "pet": 6457.5,
+      "pet_15_28": 1725.2,
+      "fuerza_trabajo": 996.5,
+      "ocupados": 832.1,
+      "desocupados": 164.5,
+      "fuera_ft": 728.7
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Nov 22 - Jan 23",
+      "pct_pet": 26.8,
+      "tgp": 58.9,
+      "to": 47.8,
+      "td": 18.9,
+      "pct_fuera_ft": 41.1,
+      "pet": 6463.7,
+      "pet_15_28": 1733.4,
+      "fuerza_trabajo": 1020.6,
+      "ocupados": 828.1,
+      "desocupados": 192.5,
+      "fuera_ft": 712.8
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Dec 22 - Feb 23",
+      "pct_pet": 27.5,
+      "tgp": 60.5,
+      "to": 49.4,
+      "td": 18.3,
+      "pct_fuera_ft": 39.5,
+      "pet": 6469.9,
+      "pet_15_28": 1779.3,
+      "fuerza_trabajo": 1076.3,
+      "ocupados": 879.7,
+      "desocupados": 196.6,
+      "fuera_ft": 703.0
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Jan - Mar 23",
+      "pct_pet": 27.5,
+      "tgp": 60.2,
+      "to": 49.1,
+      "td": 18.5,
+      "pct_fuera_ft": 39.8,
+      "pet": 6476.0,
+      "pet_15_28": 1778.7,
+      "fuerza_trabajo": 1070.3,
+      "ocupados": 872.8,
+      "desocupados": 197.5,
+      "fuera_ft": 708.4
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Feb - Apr 23",
+      "pct_pet": 27.0,
+      "tgp": 60.0,
+      "to": 50.3,
+      "td": 16.2,
+      "pct_fuera_ft": 40.0,
+      "pet": 6482.2,
+      "pet_15_28": 1748.5,
+      "fuerza_trabajo": 1048.9,
+      "ocupados": 879.5,
+      "desocupados": 169.5,
+      "fuera_ft": 699.6
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Mar - May 23",
+      "pct_pet": 26.8,
+      "tgp": 59.9,
+      "to": 50.4,
+      "td": 15.9,
+      "pct_fuera_ft": 40.1,
+      "pet": 6488.3,
+      "pet_15_28": 1736.5,
+      "fuerza_trabajo": 1040.0,
+      "ocupados": 874.6,
+      "desocupados": 165.5,
+      "fuera_ft": 696.4
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Apr - Jun 23",
+      "pct_pet": 27.1,
+      "tgp": 60.3,
+      "to": 51.2,
+      "td": 15.1,
+      "pct_fuera_ft": 39.7,
+      "pet": 6494.7,
+      "pet_15_28": 1758.9,
+      "fuerza_trabajo": 1060.4,
+      "ocupados": 900.2,
+      "desocupados": 160.2,
+      "fuera_ft": 698.5
+    },
+    {
+      "anio": 2023,
+      "trimestre": "May - Jul 23",
+      "pct_pet": 26.8,
+      "tgp": 61.8,
+      "to": 52.7,
+      "td": 14.7,
+      "pct_fuera_ft": 38.2,
+      "pet": 6501.0,
+      "pet_15_28": 1743.8,
+      "fuerza_trabajo": 1077.2,
+      "ocupados": 919.1,
+      "desocupados": 158.1,
+      "fuera_ft": 666.7
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Jun - Aug 23",
+      "pct_pet": 26.5,
+      "tgp": 63.4,
+      "to": 53.9,
+      "td": 14.9,
+      "pct_fuera_ft": 36.6,
+      "pet": 6507.4,
+      "pet_15_28": 1724.6,
+      "fuerza_trabajo": 1092.8,
+      "ocupados": 930.2,
+      "desocupados": 162.6,
+      "fuera_ft": 631.8
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Jul - Sep 23",
+      "pct_pet": 26.1,
+      "tgp": 63.7,
+      "to": 54.7,
+      "td": 14.2,
+      "pct_fuera_ft": 36.3,
+      "pet": 6513.9,
+      "pet_15_28": 1699.2,
+      "fuerza_trabajo": 1083.2,
+      "ocupados": 929.3,
+      "desocupados": 153.9,
+      "fuera_ft": 616.0
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Aug - Oct 23",
+      "pct_pet": 26.9,
+      "tgp": 63.1,
+      "to": 54.5,
+      "td": 13.6,
+      "pct_fuera_ft": 36.9,
+      "pet": 6520.4,
+      "pet_15_28": 1753.4,
+      "fuerza_trabajo": 1106.2,
+      "ocupados": 956.0,
+      "desocupados": 150.2,
+      "fuera_ft": 647.3
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Sep - Nov 23",
+      "pct_pet": 27.0,
+      "tgp": 62.8,
+      "to": 54.1,
+      "td": 13.9,
+      "pct_fuera_ft": 37.2,
+      "pet": 6526.9,
+      "pet_15_28": 1763.3,
+      "fuerza_trabajo": 1107.6,
+      "ocupados": 953.6,
+      "desocupados": 154.0,
+      "fuera_ft": 655.7
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Oct - Dec 23",
+      "pct_pet": 26.9,
+      "tgp": 62.8,
+      "to": 52.5,
+      "td": 16.4,
+      "pct_fuera_ft": 37.2,
+      "pet": 6533.3,
+      "pet_15_28": 1754.7,
+      "fuerza_trabajo": 1101.3,
+      "ocupados": 920.8,
+      "desocupados": 180.4,
+      "fuera_ft": 653.4
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Nov 23 - Jan 24",
+      "pct_pet": 25.9,
+      "tgp": 62.5,
+      "to": 50.4,
+      "td": 19.4,
+      "pct_fuera_ft": 37.5,
+      "pet": 6539.8,
+      "pet_15_28": 1694.4,
+      "fuerza_trabajo": 1058.9,
+      "ocupados": 853.5,
+      "desocupados": 205.4,
+      "fuera_ft": 635.4
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Dec 23 - Feb 24",
+      "pct_pet": 25.6,
+      "tgp": 61.4,
+      "to": 48.0,
+      "td": 21.9,
+      "pct_fuera_ft": 38.6,
+      "pet": 6546.3,
+      "pet_15_28": 1673.8,
+      "fuerza_trabajo": 1027.9,
+      "ocupados": 802.7,
+      "desocupados": 225.2,
+      "fuera_ft": 645.9
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Jan - Mar 24",
+      "pct_pet": 25.4,
+      "tgp": 62.0,
+      "to": 49.7,
+      "td": 19.8,
+      "pct_fuera_ft": 38.0,
+      "pet": 6552.8,
+      "pet_15_28": 1667.0,
+      "fuerza_trabajo": 1033.7,
+      "ocupados": 828.7,
+      "desocupados": 205.0,
+      "fuera_ft": 633.2
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Feb - Apr 24",
+      "pct_pet": 25.6,
+      "tgp": 62.6,
+      "to": 50.8,
+      "td": 18.8,
+      "pct_fuera_ft": 37.4,
+      "pet": 6559.2,
+      "pet_15_28": 1676.4,
+      "fuerza_trabajo": 1049.6,
+      "ocupados": 852.4,
+      "desocupados": 197.2,
+      "fuera_ft": 626.8
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Mar - May 24",
+      "pct_pet": 26.1,
+      "tgp": 63.6,
+      "to": 52.7,
+      "td": 17.1,
+      "pct_fuera_ft": 36.4,
+      "pet": 6565.5,
+      "pet_15_28": 1713.1,
+      "fuerza_trabajo": 1088.9,
+      "ocupados": 902.8,
+      "desocupados": 186.1,
+      "fuera_ft": 624.2
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Apr - Jun 24",
+      "pct_pet": 26.3,
+      "tgp": 64.6,
+      "to": 53.3,
+      "td": 17.5,
+      "pct_fuera_ft": 35.4,
+      "pet": 6571.9,
+      "pet_15_28": 1729.3,
+      "fuerza_trabajo": 1116.4,
+      "ocupados": 921.6,
+      "desocupados": 194.9,
+      "fuera_ft": 612.9
+    },
+    {
+      "anio": 2024,
+      "trimestre": "May - Jul 24",
+      "pct_pet": 26.7,
+      "tgp": 65.1,
+      "to": 54.4,
+      "td": 16.5,
+      "pct_fuera_ft": 34.9,
+      "pet": 6578.2,
+      "pet_15_28": 1755.1,
+      "fuerza_trabajo": 1142.5,
+      "ocupados": 954.5,
+      "desocupados": 188.0,
+      "fuera_ft": 612.6
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Jun - Aug 24",
+      "pct_pet": 26.4,
+      "tgp": 65.0,
+      "to": 54.5,
+      "td": 16.1,
+      "pct_fuera_ft": 35.0,
+      "pet": 6584.5,
+      "pet_15_28": 1739.5,
+      "fuerza_trabajo": 1131.2,
+      "ocupados": 948.6,
+      "desocupados": 182.6,
+      "fuera_ft": 608.4
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Jul - Sep 24",
+      "pct_pet": 26.2,
+      "tgp": 62.9,
+      "to": 53.0,
+      "td": 15.8,
+      "pct_fuera_ft": 37.1,
+      "pet": 6590.8,
+      "pet_15_28": 1729.3,
+      "fuerza_trabajo": 1087.7,
+      "ocupados": 916.3,
+      "desocupados": 171.4,
+      "fuera_ft": 641.6
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Aug - Oct 24",
+      "pct_pet": 26.0,
+      "tgp": 61.8,
+      "to": 51.4,
+      "td": 16.8,
+      "pct_fuera_ft": 38.2,
+      "pet": 6597.0,
+      "pet_15_28": 1717.5,
+      "fuerza_trabajo": 1061.5,
+      "ocupados": 883.2,
+      "desocupados": 178.4,
+      "fuera_ft": 656.0
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Sep - Nov 24",
+      "pct_pet": 25.4,
+      "tgp": 60.0,
+      "to": 50.3,
+      "td": 16.2,
+      "pct_fuera_ft": 40.0,
+      "pet": 6603.2,
+      "pet_15_28": 1675.7,
+      "fuerza_trabajo": 1005.5,
+      "ocupados": 843.0,
+      "desocupados": 162.5,
+      "fuera_ft": 670.1
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Oct - Dec 24",
+      "pct_pet": 25.2,
+      "tgp": 60.4,
+      "to": 50.2,
+      "td": 16.8,
+      "pct_fuera_ft": 39.6,
+      "pet": 6609.3,
+      "pet_15_28": 1668.6,
+      "fuerza_trabajo": 1007.7,
+      "ocupados": 838.5,
+      "desocupados": 169.3,
+      "fuera_ft": 660.9
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Nov 24 - Jan 25",
+      "pct_pet": 24.9,
+      "tgp": 61.8,
+      "to": 51.8,
+      "td": 16.2,
+      "pct_fuera_ft": 38.2,
+      "pet": 6615.4,
+      "pet_15_28": 1647.5,
+      "fuerza_trabajo": 1017.9,
+      "ocupados": 853.2,
+      "desocupados": 164.7,
+      "fuera_ft": 629.6
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Dec 24 - Feb 25",
+      "pct_pet": 25.2,
+      "tgp": 63.1,
+      "to": 52.8,
+      "td": 16.2,
+      "pct_fuera_ft": 36.9,
+      "pet": 6621.5,
+      "pet_15_28": 1669.4,
+      "fuerza_trabajo": 1052.8,
+      "ocupados": 882.2,
+      "desocupados": 170.5,
+      "fuera_ft": 616.6
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Jan - Mar 25",
+      "pct_pet": 24.9,
+      "tgp": 63.6,
+      "to": 53.0,
+      "td": 16.6,
+      "pct_fuera_ft": 36.4,
+      "pet": 6627.5,
+      "pet_15_28": 1647.4,
+      "fuerza_trabajo": 1047.4,
+      "ocupados": 873.4,
+      "desocupados": 174.0,
+      "fuera_ft": 600.0
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Feb - Apr 25",
+      "pct_pet": 25.1,
+      "tgp": 60.7,
+      "to": 51.6,
+      "td": 15.0,
+      "pct_fuera_ft": 39.3,
+      "pet": 6633.4,
+      "pet_15_28": 1663.4,
+      "fuerza_trabajo": 1010.2,
+      "ocupados": 858.2,
+      "desocupados": 151.9,
+      "fuera_ft": 653.2
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Mar - May 25",
+      "pct_pet": 25.4,
+      "tgp": 60.0,
+      "to": 50.8,
+      "td": 15.4,
+      "pct_fuera_ft": 40.0,
+      "pet": 6639.3,
+      "pet_15_28": 1685.4,
+      "fuerza_trabajo": 1011.9,
+      "ocupados": 855.6,
+      "desocupados": 156.2,
+      "fuera_ft": 673.5
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Apr - Jun 25",
+      "pct_pet": 25.9,
+      "tgp": 60.6,
+      "to": 51.8,
+      "td": 14.5,
+      "pct_fuera_ft": 39.4,
+      "pet": 6645.4,
+      "pet_15_28": 1720.1,
+      "fuerza_trabajo": 1042.5,
+      "ocupados": 891.5,
+      "desocupados": 150.9,
+      "fuera_ft": 677.6
+    },
+    {
+      "anio": 2025,
+      "trimestre": "May - Jul 25",
+      "pct_pet": 25.8,
+      "tgp": 61.8,
+      "to": 53.2,
+      "td": 13.9,
+      "pct_fuera_ft": 38.2,
+      "pet": 6651.4,
+      "pet_15_28": 1715.0,
+      "fuerza_trabajo": 1060.3,
+      "ocupados": 912.4,
+      "desocupados": 147.9,
+      "fuera_ft": 654.6
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Jun - Aug 25",
+      "pct_pet": 25.4,
+      "tgp": 63.2,
+      "to": 54.6,
+      "td": 13.6,
+      "pct_fuera_ft": 36.8,
+      "pet": 6657.5,
+      "pet_15_28": 1687.7,
+      "fuerza_trabajo": 1066.5,
+      "ocupados": 921.2,
+      "desocupados": 145.3,
+      "fuera_ft": 621.2
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Jul - Sep 25",
+      "pct_pet": 25.3,
+      "tgp": 61.5,
+      "to": 53.6,
+      "td": 12.8,
+      "pct_fuera_ft": 38.5,
+      "pet": 6663.6,
+      "pet_15_28": 1684.0,
+      "fuerza_trabajo": 1034.8,
+      "ocupados": 902.1,
+      "desocupados": 132.7,
+      "fuera_ft": 649.2
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Aug - Oct 25",
+      "pct_pet": 25.4,
+      "tgp": 62.2,
+      "to": 54.4,
+      "td": 12.5,
+      "pct_fuera_ft": 37.8,
+      "pet": 6669.7,
+      "pet_15_28": 1690.9,
+      "fuerza_trabajo": 1051.9,
+      "ocupados": 920.1,
+      "desocupados": 131.8,
+      "fuera_ft": 639.0
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Sep - Nov 25",
+      "pct_pet": 25.4,
+      "tgp": 61.8,
+      "to": 54.7,
+      "td": 11.4,
+      "pct_fuera_ft": 38.2,
+      "pet": 6675.8,
+      "pet_15_28": 1694.2,
+      "fuerza_trabajo": 1046.2,
+      "ocupados": 926.5,
+      "desocupados": 119.7,
+      "fuera_ft": 648.0
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Oct - Dec 25",
+      "pct_pet": 24.9,
+      "tgp": 61.7,
+      "to": 54.9,
+      "td": 11.1,
+      "pct_fuera_ft": 38.3,
+      "pet": 6681.8,
+      "pet_15_28": 1661.6,
+      "fuerza_trabajo": 1024.9,
+      "ocupados": 911.6,
+      "desocupados": 113.3,
+      "fuera_ft": 636.6
+    }
+  ],
+  "Total nacional": [
+    {
+      "anio": 2018,
+      "trimestre": "Jan - Mar 18",
+      "pct_pet": 31.3,
+      "tgp": 57.3,
+      "to": 46.1,
+      "td": 19.5,
+      "pct_fuera_ft": 42.7,
+      "pet": 35646.7,
+      "pet_15_28": 11157.4,
+      "fuerza_trabajo": 6391.7,
+      "ocupados": 5146.6,
+      "desocupados": 1245.1,
+      "fuera_ft": 4765.7
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Feb - Apr 18",
+      "pct_pet": 31.5,
+      "tgp": 57.6,
+      "to": 47.4,
+      "td": 17.8,
+      "pct_fuera_ft": 42.4,
+      "pet": 35712.8,
+      "pet_15_28": 11238.2,
+      "fuerza_trabajo": 6478.8,
+      "ocupados": 5326.8,
+      "desocupados": 1152.0,
+      "fuera_ft": 4759.4
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Mar - May 18",
+      "pct_pet": 31.3,
+      "tgp": 57.7,
+      "to": 47.6,
+      "td": 17.4,
+      "pct_fuera_ft": 42.3,
+      "pet": 35780.4,
+      "pet_15_28": 11196.5,
+      "fuerza_trabajo": 6457.4,
+      "ocupados": 5334.7,
+      "desocupados": 1122.7,
+      "fuera_ft": 4739.1
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Apr - Jun 18",
+      "pct_pet": 31.2,
+      "tgp": 58.3,
+      "to": 48.5,
+      "td": 16.8,
+      "pct_fuera_ft": 41.7,
+      "pet": 35852.6,
+      "pet_15_28": 11181.7,
+      "fuerza_trabajo": 6514.0,
+      "ocupados": 5420.6,
+      "desocupados": 1093.4,
+      "fuera_ft": 4667.7
+    },
+    {
+      "anio": 2018,
+      "trimestre": "May - Jul 18",
+      "pct_pet": 31.0,
+      "tgp": 58.0,
+      "to": 48.0,
+      "td": 17.2,
+      "pct_fuera_ft": 42.0,
+      "pet": 35924.5,
+      "pet_15_28": 11136.0,
+      "fuerza_trabajo": 6453.5,
+      "ocupados": 5341.5,
+      "desocupados": 1112.0,
+      "fuera_ft": 4682.5
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Jun - Aug 18",
+      "pct_pet": 31.0,
+      "tgp": 57.7,
+      "to": 47.9,
+      "td": 16.9,
+      "pct_fuera_ft": 42.3,
+      "pet": 35999.4,
+      "pet_15_28": 11155.6,
+      "fuerza_trabajo": 6436.1,
+      "ocupados": 5348.1,
+      "desocupados": 1088.0,
+      "fuera_ft": 4719.5
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Jul - Sep 18",
+      "pct_pet": 31.0,
+      "tgp": 57.2,
+      "to": 47.5,
+      "td": 17.0,
+      "pct_fuera_ft": 42.8,
+      "pet": 36076.4,
+      "pet_15_28": 11188.6,
+      "fuerza_trabajo": 6401.1,
+      "ocupados": 5313.5,
+      "desocupados": 1087.6,
+      "fuera_ft": 4787.5
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Aug - Oct 18",
+      "pct_pet": 31.0,
+      "tgp": 57.8,
+      "to": 48.1,
+      "td": 16.7,
+      "pct_fuera_ft": 42.2,
+      "pet": 36156.9,
+      "pet_15_28": 11220.7,
+      "fuerza_trabajo": 6485.0,
+      "ocupados": 5400.0,
+      "desocupados": 1085.1,
+      "fuera_ft": 4735.7
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Sep - Nov 18",
+      "pct_pet": 31.0,
+      "tgp": 57.8,
+      "to": 48.1,
+      "td": 16.8,
+      "pct_fuera_ft": 42.2,
+      "pet": 36238.7,
+      "pet_15_28": 11237.8,
+      "fuerza_trabajo": 6495.8,
+      "ocupados": 5402.3,
+      "desocupados": 1093.5,
+      "fuera_ft": 4742.0
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Oct - Dec 18",
+      "pct_pet": 31.0,
+      "tgp": 58.8,
+      "to": 48.7,
+      "td": 17.1,
+      "pct_fuera_ft": 41.2,
+      "pet": 36320.5,
+      "pet_15_28": 11248.5,
+      "fuerza_trabajo": 6614.2,
+      "ocupados": 5480.3,
+      "desocupados": 1133.8,
+      "fuera_ft": 4634.3
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Nov 18 - Jan 19",
+      "pct_pet": 30.9,
+      "tgp": 58.2,
+      "to": 47.3,
+      "td": 18.7,
+      "pct_fuera_ft": 41.8,
+      "pet": 36404.1,
+      "pet_15_28": 11262.8,
+      "fuerza_trabajo": 6555.1,
+      "ocupados": 5326.5,
+      "desocupados": 1228.6,
+      "fuera_ft": 4707.7
+    },
+    {
+      "anio": 2018,
+      "trimestre": "Dec 18 - Feb 19",
+      "pct_pet": 30.9,
+      "tgp": 58.2,
+      "to": 46.8,
+      "td": 19.6,
+      "pct_fuera_ft": 41.8,
+      "pet": 36488.0,
+      "pet_15_28": 11267.3,
+      "fuerza_trabajo": 6562.1,
+      "ocupados": 5274.7,
+      "desocupados": 1287.5,
+      "fuera_ft": 4705.2
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Jan - Mar 19",
+      "pct_pet": 30.8,
+      "tgp": 57.1,
+      "to": 45.6,
+      "td": 20.2,
+      "pct_fuera_ft": 42.9,
+      "pet": 36570.2,
+      "pet_15_28": 11255.6,
+      "fuerza_trabajo": 6429.0,
+      "ocupados": 5127.3,
+      "desocupados": 1301.7,
+      "fuera_ft": 4826.6
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Feb - Apr 19",
+      "pct_pet": 30.7,
+      "tgp": 56.7,
+      "to": 45.7,
+      "td": 19.3,
+      "pct_fuera_ft": 43.3,
+      "pet": 36652.2,
+      "pet_15_28": 11249.2,
+      "fuerza_trabajo": 6374.7,
+      "ocupados": 5144.4,
+      "desocupados": 1230.2,
+      "fuera_ft": 4874.6
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Mar - May 19",
+      "pct_pet": 30.7,
+      "tgp": 56.4,
+      "to": 45.7,
+      "td": 18.9,
+      "pct_fuera_ft": 43.6,
+      "pet": 36732.7,
+      "pet_15_28": 11271.4,
+      "fuerza_trabajo": 6361.4,
+      "ocupados": 5156.1,
+      "desocupados": 1205.4,
+      "fuera_ft": 4909.9
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Apr - Jun 19",
+      "pct_pet": 30.8,
+      "tgp": 56.2,
+      "to": 46.1,
+      "td": 17.9,
+      "pct_fuera_ft": 43.8,
+      "pet": 36815.2,
+      "pet_15_28": 11334.6,
+      "fuerza_trabajo": 6366.4,
+      "ocupados": 5223.7,
+      "desocupados": 1142.7,
+      "fuera_ft": 4968.3
+    },
+    {
+      "anio": 2019,
+      "trimestre": "May - Jul 19",
+      "pct_pet": 30.6,
+      "tgp": 56.1,
+      "to": 45.8,
+      "td": 18.4,
+      "pct_fuera_ft": 43.9,
+      "pet": 36893.9,
+      "pet_15_28": 11305.4,
+      "fuerza_trabajo": 6339.0,
+      "ocupados": 5175.5,
+      "desocupados": 1163.5,
+      "fuera_ft": 4966.4
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Jun - Aug 19",
+      "pct_pet": 30.4,
+      "tgp": 55.7,
+      "to": 45.3,
+      "td": 18.6,
+      "pct_fuera_ft": 44.3,
+      "pet": 36972.1,
+      "pet_15_28": 11254.9,
+      "fuerza_trabajo": 6266.6,
+      "ocupados": 5099.5,
+      "desocupados": 1167.1,
+      "fuera_ft": 4988.4
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Jul - Sep 19",
+      "pct_pet": 30.5,
+      "tgp": 55.7,
+      "to": 45.1,
+      "td": 19.1,
+      "pct_fuera_ft": 44.3,
+      "pet": 37048.3,
+      "pet_15_28": 11314.7,
+      "fuerza_trabajo": 6304.6,
+      "ocupados": 5097.7,
+      "desocupados": 1207.0,
+      "fuera_ft": 5010.1
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Aug - Oct 19",
+      "pct_pet": 30.8,
+      "tgp": 56.4,
+      "to": 46.1,
+      "td": 18.3,
+      "pct_fuera_ft": 43.6,
+      "pet": 37124.6,
+      "pet_15_28": 11422.4,
+      "fuerza_trabajo": 6445.1,
+      "ocupados": 5266.0,
+      "desocupados": 1179.1,
+      "fuera_ft": 4977.3
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Sep - Nov 19",
+      "pct_pet": 30.9,
+      "tgp": 57.0,
+      "to": 47.1,
+      "td": 17.3,
+      "pct_fuera_ft": 43.0,
+      "pet": 37199.0,
+      "pet_15_28": 11489.3,
+      "fuerza_trabajo": 6551.4,
+      "ocupados": 5417.2,
+      "desocupados": 1134.2,
+      "fuera_ft": 4938.0
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Oct - Dec 19",
+      "pct_pet": 30.7,
+      "tgp": 57.8,
+      "to": 48.2,
+      "td": 16.6,
+      "pct_fuera_ft": 42.2,
+      "pet": 37271.2,
+      "pet_15_28": 11427.9,
+      "fuerza_trabajo": 6599.6,
+      "ocupados": 5504.1,
+      "desocupados": 1095.5,
+      "fuera_ft": 4828.3
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Nov 19 - Jan 20",
+      "pct_pet": 30.4,
+      "tgp": 57.1,
+      "to": 46.7,
+      "td": 18.2,
+      "pct_fuera_ft": 42.9,
+      "pet": 37343.3,
+      "pet_15_28": 11371.0,
+      "fuerza_trabajo": 6493.3,
+      "ocupados": 5309.8,
+      "desocupados": 1183.5,
+      "fuera_ft": 4877.8
+    },
+    {
+      "anio": 2019,
+      "trimestre": "Dec 19 - Feb 20",
+      "pct_pet": 30.4,
+      "tgp": 56.7,
+      "to": 45.6,
+      "td": 19.5,
+      "pct_fuera_ft": 43.3,
+      "pet": 37414.5,
+      "pet_15_28": 11387.0,
+      "fuerza_trabajo": 6458.8,
+      "ocupados": 5197.9,
+      "desocupados": 1260.8,
+      "fuera_ft": 4928.3
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Jan - Mar 20",
+      "pct_pet": 30.4,
+      "tgp": 54.7,
+      "to": 43.0,
+      "td": 21.5,
+      "pct_fuera_ft": 45.3,
+      "pet": 37484.1,
+      "pet_15_28": 11398.0,
+      "fuerza_trabajo": 6233.9,
+      "ocupados": 4895.9,
+      "desocupados": 1338.0,
+      "fuera_ft": 5164.1
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Feb - Apr 20",
+      "pct_pet": 30.4,
+      "tgp": 50.9,
+      "to": 38.7,
+      "td": 23.9,
+      "pct_fuera_ft": 49.1,
+      "pet": 37552.8,
+      "pet_15_28": 11399.8,
+      "fuerza_trabajo": 5798.8,
+      "ocupados": 4412.2,
+      "desocupados": 1386.6,
+      "fuera_ft": 5601.0
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Mar - May 20",
+      "pct_pet": 30.3,
+      "tgp": 48.1,
+      "to": 34.8,
+      "td": 27.6,
+      "pct_fuera_ft": 51.9,
+      "pet": 37620.3,
+      "pet_15_28": 11384.8,
+      "fuerza_trabajo": 5474.5,
+      "ocupados": 3962.7,
+      "desocupados": 1511.8,
+      "fuera_ft": 5910.4
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Apr - Jun 20",
+      "pct_pet": 30.4,
+      "tgp": 48.1,
+      "to": 33.4,
+      "td": 30.5,
+      "pct_fuera_ft": 51.9,
+      "pet": 37689.3,
+      "pet_15_28": 11459.8,
+      "fuerza_trabajo": 5510.0,
+      "ocupados": 3832.1,
+      "desocupados": 1677.9,
+      "fuera_ft": 5949.8
+    },
+    {
+      "anio": 2020,
+      "trimestre": "May - Jul 20",
+      "pct_pet": 30.3,
+      "tgp": 49.8,
+      "to": 34.5,
+      "td": 30.6,
+      "pct_fuera_ft": 50.2,
+      "pet": 37753.7,
+      "pet_15_28": 11453.4,
+      "fuerza_trabajo": 5703.3,
+      "ocupados": 3955.9,
+      "desocupados": 1747.4,
+      "fuera_ft": 5750.1
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Jun - Aug 20",
+      "pct_pet": 30.4,
+      "tgp": 51.5,
+      "to": 36.6,
+      "td": 29.1,
+      "pct_fuera_ft": 48.5,
+      "pet": 37814.8,
+      "pet_15_28": 11487.9,
+      "fuerza_trabajo": 5921.9,
+      "ocupados": 4200.7,
+      "desocupados": 1721.2,
+      "fuera_ft": 5566.0
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Jul - Sep 20",
+      "pct_pet": 30.2,
+      "tgp": 52.5,
+      "to": 38.3,
+      "td": 27.1,
+      "pct_fuera_ft": 47.5,
+      "pet": 37871.7,
+      "pet_15_28": 11444.9,
+      "fuerza_trabajo": 6005.2,
+      "ocupados": 4380.6,
+      "desocupados": 1624.7,
+      "fuera_ft": 5439.6
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Aug- Oct 20",
+      "pct_pet": 30.4,
+      "tgp": 54.8,
+      "to": 41.3,
+      "td": 24.7,
+      "pct_fuera_ft": 45.2,
+      "pet": 37928.6,
+      "pet_15_28": 11530.1,
+      "fuerza_trabajo": 6320.7,
+      "ocupados": 4761.1,
+      "desocupados": 1559.7,
+      "fuera_ft": 5209.4
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Sep - Nov 20",
+      "pct_pet": 30.3,
+      "tgp": 55.7,
+      "to": 42.7,
+      "td": 23.5,
+      "pct_fuera_ft": 44.3,
+      "pet": 37984.8,
+      "pet_15_28": 11495.9,
+      "fuerza_trabajo": 6405.2,
+      "ocupados": 4903.1,
+      "desocupados": 1502.1,
+      "fuera_ft": 5090.7
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Oct - Dec 20",
+      "pct_pet": 30.2,
+      "tgp": 55.9,
+      "to": 43.3,
+      "td": 22.6,
+      "pct_fuera_ft": 44.1,
+      "pet": 38039.9,
+      "pet_15_28": 11477.1,
+      "fuerza_trabajo": 6420.4,
+      "ocupados": 4967.0,
+      "desocupados": 1453.4,
+      "fuera_ft": 5056.7
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Nov 20 - Jan 21",
+      "pct_pet": 30.0,
+      "tgp": 55.3,
+      "to": 42.4,
+      "td": 23.3,
+      "pct_fuera_ft": 44.7,
+      "pet": 38095.3,
+      "pet_15_28": 11444.2,
+      "fuerza_trabajo": 6330.0,
+      "ocupados": 4857.8,
+      "desocupados": 1472.3,
+      "fuera_ft": 5114.2
+    },
+    {
+      "anio": 2020,
+      "trimestre": "Dec 20 - Feb 21",
+      "pct_pet": 30.1,
+      "tgp": 55.2,
+      "to": 42.0,
+      "td": 23.9,
+      "pct_fuera_ft": 44.8,
+      "pet": 38150.4,
+      "pet_15_28": 11482.5,
+      "fuerza_trabajo": 6335.3,
+      "ocupados": 4822.4,
+      "desocupados": 1512.8,
+      "fuera_ft": 5147.2
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Jan - Mar 21",
+      "pct_pet": 30.1,
+      "tgp": 55.0,
+      "to": 41.5,
+      "td": 24.6,
+      "pct_fuera_ft": 45.0,
+      "pet": 38204.0,
+      "pet_15_28": 11506.4,
+      "fuerza_trabajo": 6330.0,
+      "ocupados": 4770.3,
+      "desocupados": 1559.8,
+      "fuera_ft": 5176.4
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Feb - Apr 21",
+      "pct_pet": 30.1,
+      "tgp": 54.7,
+      "to": 41.7,
+      "td": 23.9,
+      "pct_fuera_ft": 45.3,
+      "pet": 38256.7,
+      "pet_15_28": 11518.0,
+      "fuerza_trabajo": 6304.3,
+      "ocupados": 4800.3,
+      "desocupados": 1504.0,
+      "fuera_ft": 5213.7
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Mar - May 21",
+      "pct_pet": 30.0,
+      "tgp": 54.1,
+      "to": 41.1,
+      "td": 23.9,
+      "pct_fuera_ft": 45.9,
+      "pet": 38308.4,
+      "pet_15_28": 11487.8,
+      "fuerza_trabajo": 6210.7,
+      "ocupados": 4724.4,
+      "desocupados": 1486.2,
+      "fuera_ft": 5277.1
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Apr - Jun 21",
+      "pct_pet": 30.0,
+      "tgp": 53.6,
+      "to": 40.8,
+      "td": 23.9,
+      "pct_fuera_ft": 46.4,
+      "pet": 38361.5,
+      "pet_15_28": 11493.8,
+      "fuerza_trabajo": 6160.8,
+      "ocupados": 4685.9,
+      "desocupados": 1474.9,
+      "fuera_ft": 5333.1
+    },
+    {
+      "anio": 2021,
+      "trimestre": "May - Jul 21",
+      "pct_pet": 29.8,
+      "tgp": 53.2,
+      "to": 40.7,
+      "td": 23.5,
+      "pct_fuera_ft": 46.8,
+      "pet": 38411.3,
+      "pet_15_28": 11463.6,
+      "fuerza_trabajo": 6104.2,
+      "ocupados": 4670.3,
+      "desocupados": 1433.9,
+      "fuera_ft": 5359.4
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Jun - Aug 21",
+      "pct_pet": 29.7,
+      "tgp": 53.1,
+      "to": 41.2,
+      "td": 22.5,
+      "pct_fuera_ft": 46.9,
+      "pet": 38460.8,
+      "pet_15_28": 11408.6,
+      "fuerza_trabajo": 6062.0,
+      "ocupados": 4697.3,
+      "desocupados": 1364.7,
+      "fuera_ft": 5346.7
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Jul - Sep 21",
+      "pct_pet": 29.6,
+      "tgp": 52.9,
+      "to": 41.6,
+      "td": 21.4,
+      "pct_fuera_ft": 47.1,
+      "pet": 38509.4,
+      "pet_15_28": 11399.2,
+      "fuerza_trabajo": 6033.9,
+      "ocupados": 4745.3,
+      "desocupados": 1288.7,
+      "fuera_ft": 5365.3
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Aug - Oct 21",
+      "pct_pet": 29.6,
+      "tgp": 53.3,
+      "to": 42.5,
+      "td": 20.3,
+      "pct_fuera_ft": 46.7,
+      "pet": 38559.2,
+      "pet_15_28": 11430.2,
+      "fuerza_trabajo": 6087.1,
+      "ocupados": 4853.8,
+      "desocupados": 1233.3,
+      "fuera_ft": 5343.0
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Sep - Nov 21",
+      "pct_pet": 29.6,
+      "tgp": 53.5,
+      "to": 43.1,
+      "td": 19.5,
+      "pct_fuera_ft": 46.5,
+      "pet": 38607.8,
+      "pet_15_28": 11438.9,
+      "fuerza_trabajo": 6122.0,
+      "ocupados": 4928.0,
+      "desocupados": 1194.0,
+      "fuera_ft": 5316.9
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Oct - Dec 21",
+      "pct_pet": 29.5,
+      "tgp": 54.0,
+      "to": 43.6,
+      "td": 19.2,
+      "pct_fuera_ft": 46.0,
+      "pet": 38655.0,
+      "pet_15_28": 11386.7,
+      "fuerza_trabajo": 6147.6,
+      "ocupados": 4967.8,
+      "desocupados": 1179.8,
+      "fuera_ft": 5239.2
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Nov 21 - Jan 22",
+      "pct_pet": 29.3,
+      "tgp": 54.3,
+      "to": 43.1,
+      "td": 20.6,
+      "pct_fuera_ft": 45.7,
+      "pet": 38702.3,
+      "pet_15_28": 11351.9,
+      "fuerza_trabajo": 6163.5,
+      "ocupados": 4891.4,
+      "desocupados": 1272.2,
+      "fuera_ft": 5188.4
+    },
+    {
+      "anio": 2021,
+      "trimestre": "Dec 21 - Feb 22",
+      "pct_pet": 29.5,
+      "tgp": 55.5,
+      "to": 43.8,
+      "td": 21.1,
+      "pct_fuera_ft": 44.5,
+      "pet": 38749.0,
+      "pet_15_28": 11423.0,
+      "fuerza_trabajo": 6334.7,
+      "ocupados": 4998.3,
+      "desocupados": 1336.4,
+      "fuera_ft": 5088.2
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Jan - Mar 22",
+      "pct_pet": 29.6,
+      "tgp": 55.9,
+      "to": 44.0,
+      "td": 21.3,
+      "pct_fuera_ft": 44.1,
+      "pet": 38794.5,
+      "pet_15_28": 11502.3,
+      "fuerza_trabajo": 6425.2,
+      "ocupados": 5058.8,
+      "desocupados": 1366.4,
+      "fuera_ft": 5077.1
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Feb - Apr 22",
+      "pct_pet": 29.6,
+      "tgp": 55.8,
+      "to": 44.6,
+      "td": 20.0,
+      "pct_fuera_ft": 44.2,
+      "pet": 38839.4,
+      "pet_15_28": 11502.5,
+      "fuerza_trabajo": 6414.4,
+      "ocupados": 5134.3,
+      "desocupados": 1280.1,
+      "fuera_ft": 5088.1
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Mar - May 22",
+      "pct_pet": 29.5,
+      "tgp": 55.0,
+      "to": 44.5,
+      "td": 19.0,
+      "pct_fuera_ft": 45.0,
+      "pet": 38883.8,
+      "pet_15_28": 11465.2,
+      "fuerza_trabajo": 6300.8,
+      "ocupados": 5100.7,
+      "desocupados": 1200.1,
+      "fuera_ft": 5164.4
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Apr - Jun 22",
+      "pct_pet": 29.3,
+      "tgp": 54.7,
+      "to": 44.6,
+      "td": 18.4,
+      "pct_fuera_ft": 45.3,
+      "pet": 38929.9,
+      "pet_15_28": 11417.2,
+      "fuerza_trabajo": 6244.2,
+      "ocupados": 5094.1,
+      "desocupados": 1150.1,
+      "fuera_ft": 5173.0
+    },
+    {
+      "anio": 2022,
+      "trimestre": "May - Jul 22",
+      "pct_pet": 29.2,
+      "tgp": 54.7,
+      "to": 44.9,
+      "td": 18.0,
+      "pct_fuera_ft": 45.3,
+      "pet": 38973.7,
+      "pet_15_28": 11383.9,
+      "fuerza_trabajo": 6225.2,
+      "ocupados": 5107.3,
+      "desocupados": 1117.9,
+      "fuera_ft": 5158.7
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Jun - Aug 22",
+      "pct_pet": 29.2,
+      "tgp": 54.6,
+      "to": 44.6,
+      "td": 18.2,
+      "pct_fuera_ft": 45.4,
+      "pet": 39018.0,
+      "pet_15_28": 11384.3,
+      "fuerza_trabajo": 6212.7,
+      "ocupados": 5079.9,
+      "desocupados": 1132.8,
+      "fuera_ft": 5171.6
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Jul - Sep 22",
+      "pct_pet": 29.0,
+      "tgp": 54.9,
+      "to": 44.9,
+      "td": 18.3,
+      "pct_fuera_ft": 45.1,
+      "pet": 39062.2,
+      "pet_15_28": 11325.6,
+      "fuerza_trabajo": 6220.9,
+      "ocupados": 5082.9,
+      "desocupados": 1138.0,
+      "fuera_ft": 5104.7
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Aug - Oct 22",
+      "pct_pet": 29.1,
+      "tgp": 55.3,
+      "to": 45.4,
+      "td": 17.9,
+      "pct_fuera_ft": 44.7,
+      "pet": 39108.4,
+      "pet_15_28": 11364.8,
+      "fuerza_trabajo": 6280.4,
+      "ocupados": 5154.4,
+      "desocupados": 1126.0,
+      "fuera_ft": 5084.4
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Sep - Nov 22",
+      "pct_pet": 28.9,
+      "tgp": 55.0,
+      "to": 45.6,
+      "td": 17.1,
+      "pct_fuera_ft": 45.0,
+      "pet": 39154.3,
+      "pet_15_28": 11318.5,
+      "fuerza_trabajo": 6227.3,
+      "ocupados": 5160.1,
+      "desocupados": 1067.2,
+      "fuera_ft": 5091.2
+    },
+    {
+      "anio": 2022,
+      "trimestre": "Oct - Dec 22",
+      "pct_pet": 28.8,
+      "tgp": 55.2,
+      "to": 46.0,
+      "td": 16.7,
+      "pct_fuera_ft": 44.8,
+      "pet": 39199.6,
+      "pet_15_28": 11302.8,
+      "fuerza_trabajo": 6237.8,
+      "ocupados": 5196.1,
+      "desocupados": 1041.7,
+      "fuera_ft": 5065.0
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Nov 22 - Jan 23",
+      "pct_pet": 28.9,
+      "tgp": 55.4,
+      "to": 45.3,
+      "td": 18.2,
+      "pct_fuera_ft": 44.6,
+      "pet": 39245.4,
+      "pet_15_28": 11359.2,
+      "fuerza_trabajo": 6293.3,
+      "ocupados": 5147.5,
+      "desocupados": 1145.8,
+      "fuera_ft": 5065.9
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Dec 22 - Feb 23",
+      "pct_pet": 29.0,
+      "tgp": 56.3,
+      "to": 45.8,
+      "td": 18.7,
+      "pct_fuera_ft": 43.7,
+      "pet": 39291.5,
+      "pet_15_28": 11403.6,
+      "fuerza_trabajo": 6421.4,
+      "ocupados": 5217.5,
+      "desocupados": 1203.8,
+      "fuera_ft": 4982.3
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Jan - Mar 23",
+      "pct_pet": 29.1,
+      "tgp": 55.9,
+      "to": 45.3,
+      "td": 19.0,
+      "pct_fuera_ft": 44.1,
+      "pet": 39336.9,
+      "pet_15_28": 11430.5,
+      "fuerza_trabajo": 6393.8,
+      "ocupados": 5182.1,
+      "desocupados": 1211.7,
+      "fuera_ft": 5036.7
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Feb - Apr 23",
+      "pct_pet": 28.7,
+      "tgp": 56.1,
+      "to": 46.0,
+      "td": 18.0,
+      "pct_fuera_ft": 43.9,
+      "pet": 39382.5,
+      "pet_15_28": 11320.6,
+      "fuerza_trabajo": 6350.9,
+      "ocupados": 5206.2,
+      "desocupados": 1144.6,
+      "fuera_ft": 4969.8
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Mar - May 23",
+      "pct_pet": 28.6,
+      "tgp": 55.5,
+      "to": 45.7,
+      "td": 17.7,
+      "pct_fuera_ft": 44.5,
+      "pet": 39428.2,
+      "pet_15_28": 11261.3,
+      "fuerza_trabajo": 6249.1,
+      "ocupados": 5143.5,
+      "desocupados": 1105.6,
+      "fuera_ft": 5012.2
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Apr - Jun 23",
+      "pct_pet": 28.5,
+      "tgp": 55.8,
+      "to": 46.3,
+      "td": 17.1,
+      "pct_fuera_ft": 44.2,
+      "pet": 39476.0,
+      "pet_15_28": 11270.2,
+      "fuerza_trabajo": 6289.1,
+      "ocupados": 5214.0,
+      "desocupados": 1075.1,
+      "fuera_ft": 4981.1
+    },
+    {
+      "anio": 2023,
+      "trimestre": "May - Jul 23",
+      "pct_pet": 28.3,
+      "tgp": 55.5,
+      "to": 46.3,
+      "td": 16.6,
+      "pct_fuera_ft": 44.5,
+      "pet": 39521.5,
+      "pet_15_28": 11185.4,
+      "fuerza_trabajo": 6204.4,
+      "ocupados": 5173.6,
+      "desocupados": 1030.8,
+      "fuera_ft": 4981.0
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Jun - Aug 23",
+      "pct_pet": 28.3,
+      "tgp": 55.7,
+      "to": 46.7,
+      "td": 16.2,
+      "pct_fuera_ft": 44.3,
+      "pet": 39568.1,
+      "pet_15_28": 11208.6,
+      "fuerza_trabajo": 6246.5,
+      "ocupados": 5232.7,
+      "desocupados": 1013.8,
+      "fuera_ft": 4962.1
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Jul - Sep 23",
+      "pct_pet": 28.2,
+      "tgp": 55.3,
+      "to": 46.3,
+      "td": 16.2,
+      "pct_fuera_ft": 44.7,
+      "pet": 39614.9,
+      "pet_15_28": 11181.0,
+      "fuerza_trabajo": 6181.7,
+      "ocupados": 5179.6,
+      "desocupados": 1002.1,
+      "fuera_ft": 4999.2
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Aug - Oct 23",
+      "pct_pet": 28.5,
+      "tgp": 54.9,
+      "to": 46.2,
+      "td": 15.8,
+      "pct_fuera_ft": 45.1,
+      "pet": 39664.1,
+      "pet_15_28": 11302.3,
+      "fuerza_trabajo": 6209.6,
+      "ocupados": 5225.7,
+      "desocupados": 983.9,
+      "fuera_ft": 5092.7
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Sep - Nov 23",
+      "pct_pet": 28.3,
+      "tgp": 54.8,
+      "to": 46.1,
+      "td": 16.0,
+      "pct_fuera_ft": 45.2,
+      "pet": 39712.9,
+      "pet_15_28": 11258.5,
+      "fuerza_trabajo": 6175.1,
+      "ocupados": 5187.7,
+      "desocupados": 987.4,
+      "fuera_ft": 5083.5
+    },
+    {
+      "anio": 2023,
+      "trimestre": "Oct - Dec 23",
+      "pct_pet": 28.3,
+      "tgp": 55.0,
+      "to": 46.0,
+      "td": 16.5,
+      "pct_fuera_ft": 45.0,
+      "pet": 39761.2,
+      "pet_15_28": 11239.9,
+      "fuerza_trabajo": 6186.1,
+      "ocupados": 5167.8,
+      "desocupados": 1018.3,
+      "fuera_ft": 5053.8
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Nov 23 - Jan 24",
+      "pct_pet": 28.1,
+      "tgp": 55.0,
+      "to": 45.1,
+      "td": 18.0,
+      "pct_fuera_ft": 45.0,
+      "pet": 39809.9,
+      "pet_15_28": 11180.3,
+      "fuerza_trabajo": 6152.0,
+      "ocupados": 5043.6,
+      "desocupados": 1108.4,
+      "fuera_ft": 5028.3
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Dec 23 - Feb 24",
+      "pct_pet": 28.1,
+      "tgp": 55.1,
+      "to": 44.5,
+      "td": 19.3,
+      "pct_fuera_ft": 44.9,
+      "pet": 39858.5,
+      "pet_15_28": 11183.1,
+      "fuerza_trabajo": 6165.7,
+      "ocupados": 4975.9,
+      "desocupados": 1189.8,
+      "fuera_ft": 5017.4
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Jan - Mar 24",
+      "pct_pet": 27.9,
+      "tgp": 54.9,
+      "to": 43.9,
+      "td": 20.0,
+      "pct_fuera_ft": 45.1,
+      "pet": 39906.6,
+      "pet_15_28": 11152.0,
+      "fuerza_trabajo": 6120.1,
+      "ocupados": 4898.8,
+      "desocupados": 1221.3,
+      "fuera_ft": 5031.9
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Feb - Apr 24",
+      "pct_pet": 27.9,
+      "tgp": 54.8,
+      "to": 44.3,
+      "td": 19.2,
+      "pct_fuera_ft": 45.2,
+      "pet": 39954.7,
+      "pet_15_28": 11128.1,
+      "fuerza_trabajo": 6097.7,
+      "ocupados": 4928.2,
+      "desocupados": 1169.5,
+      "fuera_ft": 5030.4
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Mar - May 24",
+      "pct_pet": 28.0,
+      "tgp": 55.0,
+      "to": 45.2,
+      "td": 17.9,
+      "pct_fuera_ft": 45.0,
+      "pet": 40002.5,
+      "pet_15_28": 11190.8,
+      "fuerza_trabajo": 6157.8,
+      "ocupados": 5053.3,
+      "desocupados": 1104.5,
+      "fuera_ft": 5033.0
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Apr - Jun 24",
+      "pct_pet": 28.0,
+      "tgp": 55.3,
+      "to": 45.5,
+      "td": 17.7,
+      "pct_fuera_ft": 44.7,
+      "pet": 40051.5,
+      "pet_15_28": 11217.1,
+      "fuerza_trabajo": 6202.9,
+      "ocupados": 5106.4,
+      "desocupados": 1096.5,
+      "fuera_ft": 5014.2
+    },
+    {
+      "anio": 2024,
+      "trimestre": "May - Jul 24",
+      "pct_pet": 28.0,
+      "tgp": 55.7,
+      "to": 46.1,
+      "td": 17.2,
+      "pct_fuera_ft": 44.3,
+      "pet": 40097.9,
+      "pet_15_28": 11226.3,
+      "fuerza_trabajo": 6252.6,
+      "ocupados": 5175.2,
+      "desocupados": 1077.4,
+      "fuera_ft": 4973.7
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Jun - Aug 24",
+      "pct_pet": 27.8,
+      "tgp": 55.6,
+      "to": 46.0,
+      "td": 17.3,
+      "pct_fuera_ft": 44.4,
+      "pet": 40144.7,
+      "pet_15_28": 11162.0,
+      "fuerza_trabajo": 6205.4,
+      "ocupados": 5133.8,
+      "desocupados": 1071.6,
+      "fuera_ft": 4956.6
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Jul - Sep 24",
+      "pct_pet": 27.8,
+      "tgp": 55.0,
+      "to": 45.9,
+      "td": 16.4,
+      "pct_fuera_ft": 45.0,
+      "pet": 40191.0,
+      "pet_15_28": 11189.0,
+      "fuerza_trabajo": 6149.5,
+      "ocupados": 5138.2,
+      "desocupados": 1011.2,
+      "fuera_ft": 5039.5
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Aug - Oct 24",
+      "pct_pet": 27.8,
+      "tgp": 54.8,
+      "to": 45.9,
+      "td": 16.2,
+      "pct_fuera_ft": 45.2,
+      "pet": 40238.8,
+      "pet_15_28": 11204.9,
+      "fuerza_trabajo": 6136.0,
+      "ocupados": 5143.9,
+      "desocupados": 992.2,
+      "fuera_ft": 5068.9
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Sep - Nov 24",
+      "pct_pet": 27.7,
+      "tgp": 53.5,
+      "to": 45.2,
+      "td": 15.7,
+      "pct_fuera_ft": 46.5,
+      "pet": 40285.8,
+      "pet_15_28": 11175.2,
+      "fuerza_trabajo": 5983.8,
+      "ocupados": 5046.7,
+      "desocupados": 937.1,
+      "fuera_ft": 5191.3
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Oct - Dec 24",
+      "pct_pet": 27.6,
+      "tgp": 54.2,
+      "to": 45.7,
+      "td": 15.6,
+      "pct_fuera_ft": 45.8,
+      "pet": 40332.0,
+      "pet_15_28": 11134.6,
+      "fuerza_trabajo": 6031.3,
+      "ocupados": 5092.9,
+      "desocupados": 938.4,
+      "fuera_ft": 5103.4
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Nov 24 - Jan 25",
+      "pct_pet": 27.5,
+      "tgp": 54.5,
+      "to": 45.6,
+      "td": 16.4,
+      "pct_fuera_ft": 45.5,
+      "pet": 40378.4,
+      "pet_15_28": 11110.0,
+      "fuerza_trabajo": 6055.4,
+      "ocupados": 5064.5,
+      "desocupados": 990.9,
+      "fuera_ft": 5054.6
+    },
+    {
+      "anio": 2024,
+      "trimestre": "Dec 24 - Feb 25",
+      "pct_pet": 27.4,
+      "tgp": 55.4,
+      "to": 46.1,
+      "td": 16.8,
+      "pct_fuera_ft": 44.6,
+      "pet": 40424.7,
+      "pet_15_28": 11090.1,
+      "fuerza_trabajo": 6149.0,
+      "ocupados": 5116.9,
+      "desocupados": 1032.1,
+      "fuera_ft": 4941.1
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Jan - Mar 25",
+      "pct_pet": 27.3,
+      "tgp": 55.4,
+      "to": 45.9,
+      "td": 17.1,
+      "pct_fuera_ft": 44.6,
+      "pet": 40469.9,
+      "pet_15_28": 11058.3,
+      "fuerza_trabajo": 6129.1,
+      "ocupados": 5080.9,
+      "desocupados": 1048.3,
+      "fuera_ft": 4929.2
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Feb - Apr 25",
+      "pct_pet": 27.2,
+      "tgp": 54.7,
+      "to": 45.9,
+      "td": 16.0,
+      "pct_fuera_ft": 45.3,
+      "pet": 40515.0,
+      "pet_15_28": 11038.1,
+      "fuerza_trabajo": 6033.9,
+      "ocupados": 5070.8,
+      "desocupados": 963.1,
+      "fuera_ft": 5004.2
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Mar - May 25",
+      "pct_pet": 27.4,
+      "tgp": 54.4,
+      "to": 45.9,
+      "td": 15.7,
+      "pct_fuera_ft": 45.6,
+      "pet": 40559.7,
+      "pet_15_28": 11101.5,
+      "fuerza_trabajo": 6043.7,
+      "ocupados": 5092.0,
+      "desocupados": 951.8,
+      "fuera_ft": 5057.8
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Apr - Jun 25",
+      "pct_pet": 27.4,
+      "tgp": 54.3,
+      "to": 46.0,
+      "td": 15.3,
+      "pct_fuera_ft": 45.7,
+      "pet": 40606.4,
+      "pet_15_28": 11140.6,
+      "fuerza_trabajo": 6050.4,
+      "ocupados": 5123.9,
+      "desocupados": 926.5,
+      "fuera_ft": 5090.2
+    },
+    {
+      "anio": 2025,
+      "trimestre": "May - Jul 25",
+      "pct_pet": 27.4,
+      "tgp": 54.8,
+      "to": 46.6,
+      "td": 15.0,
+      "pct_fuera_ft": 45.2,
+      "pet": 40650.7,
+      "pet_15_28": 11151.9,
+      "fuerza_trabajo": 6111.3,
+      "ocupados": 5193.8,
+      "desocupados": 917.5,
+      "fuera_ft": 5040.6
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Jun - Aug 25",
+      "pct_pet": 27.4,
+      "tgp": 55.0,
+      "to": 46.9,
+      "td": 14.8,
+      "pct_fuera_ft": 45.0,
+      "pet": 40695.9,
+      "pet_15_28": 11140.7,
+      "fuerza_trabajo": 6131.9,
+      "ocupados": 5225.0,
+      "desocupados": 906.9,
+      "fuera_ft": 5008.9
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Jul - Sep 25",
+      "pct_pet": 27.4,
+      "tgp": 54.7,
+      "to": 46.7,
+      "td": 14.6,
+      "pct_fuera_ft": 45.3,
+      "pet": 40740.8,
+      "pet_15_28": 11169.1,
+      "fuerza_trabajo": 6111.7,
+      "ocupados": 5221.2,
+      "desocupados": 890.5,
+      "fuera_ft": 5057.4
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Aug - Oct 25",
+      "pct_pet": 27.4,
+      "tgp": 55.1,
+      "to": 47.0,
+      "td": 14.7,
+      "pct_fuera_ft": 44.9,
+      "pet": 40787.6,
+      "pet_15_28": 11178.4,
+      "fuerza_trabajo": 6158.3,
+      "ocupados": 5253.8,
+      "desocupados": 904.5,
+      "fuera_ft": 5020.2
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Sep - Nov 25",
+      "pct_pet": 27.3,
+      "tgp": 54.8,
+      "to": 47.1,
+      "td": 14.0,
+      "pct_fuera_ft": 45.2,
+      "pet": 40834.1,
+      "pet_15_28": 11141.2,
+      "fuerza_trabajo": 6106.7,
+      "ocupados": 5251.3,
+      "desocupados": 855.3,
+      "fuera_ft": 5034.6
+    },
+    {
+      "anio": 2025,
+      "trimestre": "Oct - Dec 25",
+      "pct_pet": 27.1,
+      "tgp": 55.4,
+      "to": 47.5,
+      "td": 14.2,
+      "pct_fuera_ft": 44.6,
+      "pet": 40879.8,
+      "pet_15_28": 11071.8,
+      "fuerza_trabajo": 6132.0,
+      "ocupados": 5264.3,
+      "desocupados": 867.7,
+      "fuera_ft": 4939.7
+    }
+  ]
+};
+
+// Cargar datos
+Promise.all([
+  fetch('data/mercado_laboral.json').then(r => r.ok ? r.json() : Promise.reject()).catch(() => MERCADO_LABORAL_FALLBACK),
+  fetch('data/mercado_laboral_ciudades.json').then(r => r.ok ? r.json() : Promise.reject()).catch(() => MERCADO_LABORAL_CIUDADES_FALLBACK)
+]).then(([bogota, ciudades]) => {
+  BOGOTA = bogota.filter(d => d.anio >= 2018);
+  CIUDADES = ciudades;
+  initFiltros();
+  actualizarTodo();
+});
+
+function initFiltros() {
+  const anios = [...new Set(BOGOTA.map(d => d.anio))].sort();
+  const btnContainer = document.getElementById('anio-btns');
+  anios.forEach(a => {
+    const btn = document.createElement('button');
+    btn.className = 'anio-btn' + (a === anioActual ? ' activo' : '');
+    btn.textContent = a;
+    btn.onclick = () => {
+      anioActual = a;
+      document.querySelectorAll('.anio-btn').forEach(b => b.classList.remove('activo'));
+      btn.classList.add('activo');
+      actualizarTrimestres();
+      actualizarTodo();
+    };
+    btnContainer.appendChild(btn);
+  });
+  actualizarTrimestres();
+  document.getElementById('trim-select').onchange = function() {
+    trimActual = this.value;
+    actualizarTodo();
+  };
+}
+
+// Solo trimestres fijos (no móviles)
+const TRIM_FIJOS = ['Jan - Mar', 'Apr - Jun', 'Jul - Sep', 'Oct - Dec'];
+
+function actualizarTrimestres() {
+  const select = document.getElementById('trim-select');
+  // Filtrar solo los trimestres fijos disponibles para el año seleccionado
+  const trimestres = BOGOTA
+    .filter(d => d.anio === anioActual)
+    .filter(d => TRIM_FIJOS.some(tf => getTrimBase(d.trimestre).startsWith(tf)))
+    .map(d => d.trimestre);
+  select.innerHTML = '';
+  trimestres.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t; opt.textContent = t;
+    select.appendChild(opt);
+  });
+  if (trimestres.length > 0) {
+    trimActual = trimestres[trimestres.length - 1];
+    select.value = trimActual;
+  }
+}
+
+function getTrimBase(trim) {
+  return trim.replace(/\s*\d{2}$/, '').trim();
+}
+
+function actualizarTodo() {
+  actualizarCifras();
+  actualizarGraficoBogota();
+  actualizarGraficosCiudades();
+  actualizarTabla();
+}
+
+function actualizarCifras() {
+  const d = BOGOTA.find(d => d.anio === anioActual && d.trimestre === trimActual);
+  if (!d) return;
+  document.getElementById('lbl-anio').textContent = d.anio;
+  document.getElementById('lbl-trim').textContent = d.trimestre;
+  document.getElementById('v-pet').textContent = fmtMiles(d.pet_15_28);
+  document.getElementById('v-ft').textContent = fmtMiles(d.fuerza_trabajo);
+  document.getElementById('v-ocup').textContent = fmtMiles(d.ocupados);
+  document.getElementById('v-desoc').textContent = fmtMiles(d.desocupados);
+  document.getElementById('v-fuera').textContent = fmtMiles(d.fuera_ft);
+  document.getElementById('v-tgp').textContent = fmtDec(d.tgp);
+  document.getElementById('v-to').textContent = fmtDec(d.to);
+  document.getElementById('v-td').textContent = fmtDec(d.td);
+}
+
+function actualizarGraficoBogota() {
+  const trimBase = getTrimBase(trimActual);
+  const serie = BOGOTA.filter(d => getTrimBase(d.trimestre) === trimBase)
+    .sort((a, b) => a.anio - b.anio);
+
+  document.getElementById('lbl-trim-chart').textContent =
+    serie.length > 0 ? `(${trimBase})` : '';
+
+  if (chartTasas) chartTasas.destroy();
+  chartTasas = new Chart(document.getElementById('chart-tasas'), {
+    type: 'line',
+    data: {
+      labels: serie.map(d => d.anio),
+      datasets: [
+        { label: 'LFPR', data: serie.map(d => d.tgp), borderColor: '#663a93', backgroundColor: '#663a93', borderWidth: 2.5, pointRadius: 4, tension: 0.3 },
+        { label: 'ER', data: serie.map(d => d.to), borderColor: '#1e7895', backgroundColor: '#1e7895', borderWidth: 2.5, pointRadius: 4, tension: 0.3 },
+        { label: 'UR', data: serie.map(d => d.td), borderColor: '#f4676e', backgroundColor: '#f4676e', borderWidth: 2.5, pointRadius: 4, tension: 0.3 },
+      ]
+    },
+    options: chartOpts()
+  });
+}
+
+function actualizarGraficosCiudades() {
+  const trimBase = getTrimBase(trimActual);
+  const trimLabel = `(${trimBase})`;
+  document.getElementById('lbl-trim-td').textContent = trimLabel;
+  document.getElementById('lbl-trim-to').textContent = trimLabel;
+
+  // Construir series históricas para cada entidad comparada
+  function buildSeries(prop) {
+    const datasets = [];
+    COMPARAR.forEach(city => {
+      const datos = CIUDADES[city];
+      if (!datos) return;
+      const serie = datos.filter(d => getTrimBase(d.trimestre) === trimBase)
+        .sort((a, b) => a.anio - b.anio);
+      const dashes = city === 'Total nacional' ? [2, 3] : [];
+      datasets.push({
+        label: NOMBRES_CORTOS[city] || city,
+        data: serie.map(d => d[prop]),
+        borderColor: COLORES[city],
+        backgroundColor: COLORES[city],
+        borderWidth: city === 'Bogotá D.C.' ? 3 : 2,
+        borderDash: dashes,
+        pointRadius: city === 'Bogotá D.C.' ? 5 : 3,
+        pointHoverRadius: 6,
+        tension: 0.3,
+      });
+    });
+    // Los labels salen de Bogotá (todos tienen los mismos años)
+    const bogData = CIUDADES['Bogotá D.C.'] || [];
+    const labels = bogData.filter(d => getTrimBase(d.trimestre) === trimBase)
+      .sort((a, b) => a.anio - b.anio).map(d => d.anio);
+    return { labels, datasets };
+  }
+
+  // Gráfico TD comparativo
+  if (chartTD) chartTD.destroy();
+  const tdSeries = buildSeries('td');
+  chartTD = new Chart(document.getElementById('chart-td-ciudades'), {
+    type: 'line',
+    data: tdSeries,
+    options: chartOpts()
+  });
+
+  // Gráfico TO comparativo
+  if (chartTO) chartTO.destroy();
+  const toSeries = buildSeries('to');
+  chartTO = new Chart(document.getElementById('chart-to-ciudades'), {
+    type: 'line',
+    data: toSeries,
+    options: chartOpts()
+  });
+}
+
+function actualizarTabla() {
+  const trimBase = getTrimBase(trimActual);
+  const trimLabel = `${trimBase} ${anioActual}`;
+  document.getElementById('lbl-trim-tabla').textContent = trimLabel;
+
+  const tbody = document.getElementById('tabla-body');
+  tbody.innerHTML = '';
+
+  const orden = ['Total nacional', 'Bogotá D.C.'];
+
+  orden.forEach(city => {
+    const datos = CIUDADES[city];
+    if (!datos) return;
+    const d = datos.find(r => r.anio === anioActual && getTrimBase(r.trimestre) === trimBase);
+    if (!d) return;
+
+    const isBogota = city === 'Bogotá D.C.';
+    const nombre = NOMBRES_CORTOS[city] || city;
+
+    const tr = document.createElement('tr');
+    if (isBogota) tr.className = 'fila-bogota';
+    tr.innerHTML = `
+      <td>${nombre}</td>
+      <td class="num">${fmtMiles(d.pet_15_28)}</td>
+      <td class="num">${fmtDec(d.tgp)}</td>
+      <td class="num">${fmtDec(d.to)}</td>
+      <td class="num">${fmtDec(d.td)}</td>
+      <td class="num">${fmtDec(d.pct_fuera_ft)}</td>
+      <td class="num">${fmtMiles(d.ocupados)}</td>
+      <td class="num">${fmtMiles(d.desocupados)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function chartOpts() {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    plugins: {
+      legend: {
+        position: 'top',
+        labels: { usePointStyle: true, pointStyle: 'circle', padding: 15, font: { size: 11 } }
+      },
+      tooltip: {
+        callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtDec(ctx.parsed.y) + '%' }
+      }
+    },
+    scales: {
+      y: { ticks: { callback: v => fmtDec(v) + '%', font: { size: 11 } }, grid: { color: '#f4f2ee' } },
+      x: { ticks: { font: { size: 11 } }, grid: { display: false } }
+    }
+  };
+}
+
+</script>
+
+</body>
+</html>

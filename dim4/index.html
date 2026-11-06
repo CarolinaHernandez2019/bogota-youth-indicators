@@ -1,0 +1,1482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Youth Information Centre - Dimension 4. Health and Self-Care</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>Chart.defaults.locale = 'en-US';</script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Anton&family=Antonio:wght@700&family=Figtree:wght@400;500;600;700;800&display=swap');
+    :root {
+      /* Identidad de la dimensión 4 (Salud): teal, según mapeo de 7 colores oficiales x 7 dimensiones */
+      --acento: #1e9da3;
+      --acento-oscuro: #14666b;
+      --acento-claro: #5bb8bd;
+      --crema: #f5efd2;
+      --gris-oscuro: #2f2b28;
+      --gris: #83766c;
+      --gris-claro: #f4f2ee;
+      --blanco: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Figtree', 'Segoe UI', sans-serif;
+      background: var(--gris-claro);
+      color: var(--gris-oscuro);
+      line-height: 1.5;
+    }
+    .header-hero {
+      position: relative;
+      background: url('../imagenes/SDIS/Fondo azul 2.png') center/cover;
+      padding-top: 3rem;
+      overflow: hidden;
+    }
+    .header-hero .hero-texto { text-align: center; padding: 0 2rem 2.5rem; }
+    .header-hero .hero-title {
+      font-family: 'Anton', 'Segoe UI', sans-serif;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+      font-size: 3.4rem;
+      line-height: 1.08;
+      color: var(--crema);
+    }
+    .header-hero .hero-subtitle {
+      font-family: 'Antonio', 'Segoe UI', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 1.15rem;
+      color: var(--crema);
+      opacity: 0.85;
+      margin-top: 0.4rem;
+    }
+    .header-hero .btn-home {
+      position: absolute; top: 1.3rem; left: 2rem; z-index: 2;
+      color: var(--crema);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 14px;
+      border: 1.5px solid rgba(245,239,210,0.55);
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+    .header-hero .btn-home:hover { background: rgba(255,255,255,0.15); border-color: var(--crema); }
+    .footer-marca { display: block; width: 100%; height: auto; margin-top: 2rem; }
+    @media (max-width: 600px) {
+      .header-hero { padding-top: 2.2rem; }
+      .header-hero .hero-title { font-size: 2.2rem; }
+      .header-hero .hero-subtitle { font-size: 0.9rem; }
+      .header-hero .btn-home { top: 0.9rem; left: 1rem; font-size: 0.72rem; padding: 4px 10px; }
+    }
+    .container { max-width: 1320px; margin: 0 auto; padding: 1.5rem; }
+    .page-subtitle { font-size: 1.1rem; color: var(--gris); margin-bottom: 1rem; }
+    .page-subtitle span { font-weight: 600; color: var(--gris-oscuro); }
+    .filtros {
+      background: var(--blanco);
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .filtros label {
+      font-size: 0.85rem; font-weight: 600; color: var(--gris);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .filtro-grupo { display: flex; align-items: center; gap: 0.5rem; }
+    .filtro-select {
+      padding: 6px 12px; border: 2px solid var(--gris-claro); border-radius: 6px;
+      font-size: 0.9rem; color: var(--gris-oscuro); background: var(--blanco);
+      cursor: pointer; min-width: 100px;
+    }
+    .filtro-select:focus { outline: none; border-color: var(--acento); }
+
+    /* Franja de estadísticas: sin tarjetas ni bordes de color, separadores finos */
+    .stat-strip {
+      display: flex; background: var(--acento);
+      border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem;
+    }
+    .stat-tile {
+      position: relative; flex: 1; padding: 28px 24px 22px;
+    }
+    .stat-tile:not(:first-child)::before {
+      content: ''; position: absolute; left: 0; top: 50%;
+      width: 1px; height: 56%; background: rgba(255,255,255,0.2);
+      transform: translateY(-50%);
+    }
+    .stat-pill {
+      display: block; color: var(--crema);
+      font-family: 'Antonio', 'Figtree', sans-serif; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      font-size: 0.75rem; margin-bottom: 20px; opacity: 0.85;
+    }
+    .stat-numero {
+      font-family: 'Anton', 'Figtree', sans-serif; font-weight: 400;
+      font-size: 2.5rem; color: var(--blanco); line-height: 1; margin-bottom: 8px;
+    }
+    .stat-meta { font-size: 0.78rem; color: var(--crema); opacity: 0.75; }
+    @media (max-width: 800px) {
+      .stat-strip { flex-direction: column; }
+      .stat-tile:not(:first-child)::before {
+        left: 50%; top: 0; width: 56%; height: 1px; transform: translateX(-50%);
+      }
+    }
+
+    .grid-2col {
+      display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;
+    }
+    @media (max-width: 960px) { .grid-2col { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--blanco); border-radius: 10px;
+      padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card-title {
+      font-size: 0.85rem; font-weight: 700; color: var(--gris);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 1rem;
+    }
+    .chart-container { position: relative; height: 320px; }
+    .pendiente-msg {
+      background: var(--blanco); border-radius: 10px; padding: 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      text-align: center; color: var(--gris); margin-bottom: 1.5rem;
+    }
+    .pendiente-msg strong { color: var(--gris-oscuro); }
+    .footer {
+      margin-top: 1.5rem; padding: 1rem 1.5rem; font-size: 0.8rem; color: var(--gris);
+    }
+    .footer-top {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .footer-notas {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 0.8rem 1rem;
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: #666;
+    }
+    .footer-notas a { color: #666; }
+    .footer-notas p { margin-bottom: 0.3rem; }
+    .footer-notas p:last-child { margin-bottom: 0; }
+    /* Toggles de grupos */
+    .toggle-grupo {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 12px; border-radius: 20px; border: 2px solid;
+      font-size: 0.78rem; font-weight: 600; cursor: pointer;
+      opacity: 0.28; transition: opacity 0.18s, background 0.18s;
+      background: transparent;
+    }
+    .toggle-grupo.activo { opacity: 1; }
+    .toggle-grupo .toggle-dot {
+      width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-hero">
+    <a href="../index.html" class="btn-home">&#8592; Home</a>
+    <div class="hero-texto">
+      <h1 class="hero-title">Health and self-care</h1>
+      <p class="hero-subtitle">Dimension 4</p>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- ============================================================ -->
+    <!-- 4.1 SGSSS -->
+    <!-- ============================================================ -->
+    <p class="page-subtitle">
+      <span>4.1 Young people enrolled in the General Social Security Health System (SGSSS) — Bogotá</span><br>
+      Source: Ministry of Health – Enrollee characterisation (PISIS/BDUA)<br>
+      <span id="lbl-sgsss-corte" style="font-size:0.8em; font-weight:400; color:#888;"></span>
+    </p>
+
+    <div class="stat-strip">
+      <div class="stat-tile">
+        <span class="stat-pill">Ages 15 to 19</span>
+        <div class="stat-numero" id="kpi-sgsss-1519">–</div>
+        <div class="stat-meta">SGSSS enrollees</div>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-pill">Ages 20 to 24</span>
+        <div class="stat-numero" id="kpi-sgsss-2024">–</div>
+        <div class="stat-meta">SGSSS enrollees</div>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-pill">Ages 25 to 29</span>
+        <div class="stat-numero" id="kpi-sgsss-2529">–</div>
+        <div class="stat-meta">SGSSS enrollees</div>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-pill">Total, ages 15 to 29</span>
+        <div class="stat-numero" id="kpi-sgsss-total">–</div>
+        <div class="stat-meta">SGSSS enrollees</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Enrollees by scheme and age group</div>
+      <div class="chart-container" style="height:260px;">
+        <canvas id="chart-sgsss-regimen"></canvas>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 4.2 Discapacidad -->
+    <!-- ============================================================ -->
+    <p class="page-subtitle">
+      <span>4.2 Adolescents and young people with disabilities — Bogotá</span><br>
+      Source: SaludData – Bogotá Health Observatory. People with a disability certificate by life stage, in five groups; this section uses the Adolescence and Youth groups<br>
+      <span id="lbl-disc-anio" style="font-size:0.8em; font-weight:400; color:#888;"></span>
+    </p>
+
+    <div class="stat-strip">
+      <div class="stat-tile">
+        <span class="stat-pill">People with disabilities · Bogotá</span>
+        <div class="stat-numero" id="kpi-total-bogota-disc">–</div>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-pill">Adolescents and young people with a disability certificate</span>
+        <div class="stat-numero" id="kpi-total-disc">–</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Adolescents and young people by type of disability</div>
+      <div class="chart-container" style="height:220px;">
+        <canvas id="chart-disc-tipo"></canvas>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Adolescents and young people with disabilities by locality</div>
+      <div class="chart-container" style="height:400px;">
+        <canvas id="chart-disc-localidad"></canvas>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 4.3 Fecundidad adolescente -->
+    <!-- ============================================================ -->
+    <p class="page-subtitle" style="margin-top:2.5rem;">
+      <span>4.3 Age-specific fertility rate (ages 10-29) — Bogotá D.C.</span><br>
+      Source: SaludData – Bogotá Health Observatory · Population from DANE, 2018 census projections<br>
+      <span id="lbl-fec-corte" style="font-size:0.8em; font-weight:400; color:#888;"></span>
+    </p>
+
+
+    <!-- La nota de lectura va dentro de la franja teal para que se lea junto
+         a las tasas (comentario de David, 2026-07) -->
+    <div class="stat-strip" style="flex-wrap:wrap;">
+      <div class="stat-tile">
+        <span class="stat-pill">Ages 10 to 14 · <span id="lbl-fec-anio-1014"></span></span>
+        <div class="stat-numero" id="kpi-fec-tasa1014">–</div>
+        <div class="stat-meta">Fertility rate ‰</div>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-pill">Ages 15 to 19 · <span id="lbl-fec-anio-1519"></span></span>
+        <div class="stat-numero" id="kpi-fec-tasa1519">–</div>
+        <div class="stat-meta">Fertility rate ‰</div>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-pill">Ages 20 to 24 · <span id="lbl-fec-anio-2024"></span></span>
+        <div class="stat-numero" id="kpi-fec-tasa2024">–</div>
+        <div class="stat-meta">Fertility rate ‰</div>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-pill">Ages 25 to 29 · <span id="lbl-fec-anio-2529"></span></span>
+        <div class="stat-numero" id="kpi-fec-tasa2529">–</div>
+        <div class="stat-meta">Fertility rate ‰</div>
+      </div>
+      <div style="flex-basis:100%; margin:0 24px 18px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.25); font-size:0.78rem; line-height:1.5; color:var(--crema); opacity:0.9;">
+        <strong>How to read this rate</strong> Live births to women in that age group per 1,000 women of the same age. The ‰ symbol means per thousand (not per hundred like %), so it is neither a percentage nor the average number of children per woman.
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Age-specific fertility rate by age group — Bogotá D.C. (per 1,000 women)</div>
+      <div id="fec-hist-toggles" style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem;"></div>
+      <div class="chart-container" style="height:340px;">
+        <canvas id="chart-fec-historico"></canvas>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Fertility rate by locality — <span id="lbl-fec-loc-anio"></span></div>
+      <div id="fec-loc-toggles" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;"></div>
+      <div class="chart-container" style="height:600px;">
+        <canvas id="chart-fec-localidad"></canvas>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 4.4 Mortalidad -->
+    <!-- ============================================================ -->
+    <p class="page-subtitle" style="margin-top:2.5rem;">
+      <span>4.4 Mortality among young people (ages 15-29) — Bogotá</span><br>
+      Source: DANE – RUAF – ND / Bogotá Health Observatory – SaludData<br>
+      <span id="lbl-mort-corte" style="font-size:0.8em; font-weight:400; color:#888;"></span>
+    </p>
+
+    <div class="filtros">
+      <div class="filtro-grupo">
+        <label>Year</label>
+        <select class="filtro-select" id="filtro-anio-mort"></select>
+      </div>
+    </div>
+
+    <div class="stat-strip">
+      <div class="stat-tile">
+        <span class="stat-pill">Deaths of young people · ages 15 to 29</span>
+        <div class="stat-numero" id="kpi-mort-total">–</div>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-pill">Male deaths · ages 15 to 29</span>
+        <div class="stat-numero" id="kpi-mort-hombres">–</div>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-pill">Female deaths · ages 15 to 29</span>
+        <div class="stat-numero" id="kpi-mort-mujeres">–</div>
+      </div>
+      <div class="stat-tile">
+        <span class="stat-pill">Mortality rate per 100,000 young people</span>
+        <div class="stat-numero" id="kpi-mort-tasa">–</div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Deaths by sex</div>
+      <div class="chart-container" style="height:180px;">
+        <canvas id="chart-mort-sexo"></canvas>
+      </div>
+    </div>
+
+    <div class="grid-2col">
+      <div class="card">
+        <div class="card-title">Causes of death, 6/67 list — 2025p</div>
+        <div class="chart-container" style="height:350px;">
+          <canvas id="chart-mort-causas"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Mortality rate per 100,000 young people by locality — 2025p</div>
+        <div class="chart-container" style="height:420px;">
+          <canvas id="chart-mort-localidad"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-top">
+        <div>
+          Source: SaludData – Bogotá Health Observatory · DANE, 2018 census projections<br>
+          4.2 Certified disability · 4.3 Fertility (ages 10-29) · 4.4 Mortality (ages 15-29)<br>
+          Youth under Law 1622/2013 and Law 1885/2018 is ages 14 to 28.
+        </div>
+        <div style="text-align:right;">
+          District Secretariat of Social Integration<br>
+          Youth Subdirectorate – Youth Information Centre
+        </div>
+      </div>
+      <div class="footer-notas">
+        <p><strong>Note:</strong> the sources are — 4.1 SGSSS enrolment, <a href="https://www.minsalud.gov.co/Proteccion-Social/Paginas/cifras-aseguramiento-salud.aspx" target="_blank" rel="noopener">Ministry of Health, health insurance figures (PISIS/BDUA)</a> · 4.2 Disability, <a href="https://saludata.saludcapital.gov.co/osb/indicadores/personas-certificadas-con-discapacidad/" target="_blank" rel="noopener">SaludData, people with a disability certificate</a> · 4.3 Fertility, <a href="https://saludata.saludcapital.gov.co/osb/indicadores/fecundidad-de-10-a-14-y-15-a-19/" target="_blank" rel="noopener">SaludData, fertility at ages 10 to 14 and 15 to 19</a> · 4.4 Mortality, <a href="https://saludata.saludcapital.gov.co/osb/indicadores/mortalidad-general/" target="_blank" rel="noopener">SaludData, general mortality</a> — with DANE population projections as the denominator of the rates.</p>
+      </div>
+    </div>
+  </div>
+  <p style="max-width:1100px; margin:1.2rem auto 0.6rem; padding:0 1.5rem; text-align:center; font-size:0.75rem; line-height:1.5; color:#83766c;">English version prepared for a portfolio. The official dashboard, in Spanish, is at <a href="https://sdis-juventud.github.io/tablero-cij/dim4/" style="color:#83766c;">sdis-juventud.github.io/tablero-cij/dim4/</a>.</p>
+
+
+  <img src="../imagenes/SDIS/Distrito joven.png" alt="Distrito Joven — District Secretariat of Social Integration" class="footer-marca">
+
+<script>
+// ============================================================
+// Utilidades
+// ============================================================
+function fmtNum(n) {
+  if (n == null) return '–';
+  return Math.round(n).toLocaleString('en-US');
+}
+function fmtDec(n, d=2) {
+  if (n == null) return '–';
+  return n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+
+const COLORES_DISC = ['#a35c2f','#c06f34','#d97f3f','#f58b53','#f8a374','#fabb96','#fdd3b8'];
+
+// ============================================================
+// 4.1 SGSSS
+// ============================================================
+let chartSgsss = null;
+
+const SGSSS_FALLBACK = {
+  "corte": "MAY-2026",
+  "fuente": "Ministry of Health – Enrollee characterisation (PISIS/BDUA)",
+  "nota": "Bogotá D.C., young people aged 15 to 29.",
+  "regimenes": ["CONTRIBUTIVO", "SUBSIDIADO", "EXCEPCION", "INPEC INTRAMURAL"],
+  "por_cohorte": [
+    { "quinquenio": "15-19", "total": 529881, "regimen": { "CONTRIBUTIVO": 382688, "SUBSIDIADO": 139553, "EXCEPCION": 7602, "INPEC INTRAMURAL": 38 } },
+    { "quinquenio": "20-24", "total": 598973, "regimen": { "CONTRIBUTIVO": 443972, "SUBSIDIADO": 148327, "EXCEPCION": 5590, "INPEC INTRAMURAL": 1084 } },
+    { "quinquenio": "25-29", "total": 697261, "regimen": { "CONTRIBUTIVO": 521132, "SUBSIDIADO": 171345, "EXCEPCION": 1808, "INPEC INTRAMURAL": 2976 } }
+  ],
+  "totales_regimen": { "CONTRIBUTIVO": 1347792, "SUBSIDIADO": 459225, "EXCEPCION": 15000, "INPEC INTRAMURAL": 4098 },
+  "total_general": 1826115
+};
+
+const NOMBRES_REGIMEN = {
+  'CONTRIBUTIVO': 'Contributory', 'SUBSIDIADO': 'Subsidised',
+  'EXCEPCION': 'Special schemes', 'INPEC INTRAMURAL': 'Prison population (INPEC)',
+};
+const COLORES_REGIMEN = {
+  'CONTRIBUTIVO': '#1e9da3', 'SUBSIDIADO': '#5bb8bd',
+  'EXCEPCION': '#2f3e3c', 'INPEC INTRAMURAL': '#83766c',
+};
+
+fetch('data/sgsss.json')
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .catch(() => SGSSS_FALLBACK)
+  .then(d => renderSgsss(d));
+
+function renderSgsss(d) {
+  document.getElementById('lbl-sgsss-corte').textContent = 'Cut-off ' + d.corte + ' · ' + d.nota;
+
+  const porCohorte = d.por_cohorte;
+  document.getElementById('kpi-sgsss-1519').textContent = fmtNum(porCohorte.find(c => c.quinquenio === '15-19').total);
+  document.getElementById('kpi-sgsss-2024').textContent = fmtNum(porCohorte.find(c => c.quinquenio === '20-24').total);
+  document.getElementById('kpi-sgsss-2529').textContent = fmtNum(porCohorte.find(c => c.quinquenio === '25-29').total);
+  document.getElementById('kpi-sgsss-total').textContent = fmtNum(d.total_general);
+
+  const labels = porCohorte.map(c => c.quinquenio + ' years');
+  const datasets = d.regimenes.map(r => ({
+    label: NOMBRES_REGIMEN[r] || r,
+    data: porCohorte.map(c => c.regimen[r] || 0),
+    backgroundColor: COLORES_REGIMEN[r] || '#999',
+    stack: 'regimen',
+  }));
+
+  if (chartSgsss) chartSgsss.destroy();
+  chartSgsss = new Chart(document.getElementById('chart-sgsss-regimen'), {
+    type: 'bar',
+    data: { labels, datasets },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } },
+        tooltip: { callbacks: { label: ctx => {
+          const total = porCohorte[ctx.dataIndex].total;
+          const pct = (ctx.parsed.x / total * 100).toFixed(1);
+          return `${ctx.dataset.label}: ${fmtNum(ctx.parsed.x)} (${pct}%)`;
+        } } }
+      },
+      scales: {
+        x: { stacked: true, ticks: { callback: v => fmtNum(v), font: { size: 10 } }, grid: { color: '#ecf0f1' } },
+        y: { stacked: true, ticks: { font: { size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// 4.2 Discapacidad
+// ============================================================
+let DISC = null, chartDiscTipo = null, chartDiscLoc = null;
+
+const DISC_FALLBACK = {
+  "corte": "1 Jul 2020 – 31 May 2026",
+  "fecha_actualizacion": "11 Jun 2026",
+  "total_jovenes_discapacidad": 22598,
+  "total_bogota": 91455,
+  "nota": "Includes the Adolescence (5,876) and Youth (16,722) groups as classified by SaludData. A person can have more than one type of disability. Source: District Health Secretariat – Bogotá Health Observatory, SaludData. Download period 1 Jul 2020 – 31 May 2026. Cut-off 31 May 2026. Source updated on 11 Jun 2026. Data are preliminary and the source updates them continuously.",
+  "por_tipo": [
+    { "tipo": "multiple",    "nombre": "Multiple disability",    "cantidad": 11092 },
+    { "tipo": "intelectual", "nombre": "Intellectual disability", "cantidad": 5212  },
+    { "tipo": "fisica",      "nombre": "Physical disability",      "cantidad": 2883  },
+    { "tipo": "psicosocial", "nombre": "Psychosocial disability", "cantidad": 1504  },
+    { "tipo": "auditiva",    "nombre": "Hearing disability",    "cantidad": 1282  },
+    { "tipo": "visual",      "nombre": "Visual disability",      "cantidad": 617   },
+    { "tipo": "sordoceguera","nombre": "Deafblindness",             "cantidad": 1     }
+  ],
+  "por_localidad": [
+    { "localidad": "Kennedy",               "cantidad": 1615 },
+    { "localidad": "Bosa",                  "cantidad": 1596 },
+    { "localidad": "Suba",                  "cantidad": 1347 },
+    { "localidad": "Ciudad Bolívar",        "cantidad": 1153 },
+    { "localidad": "Engativá",              "cantidad": 1016 },
+    { "localidad": "Usme",                  "cantidad": 760  },
+    { "localidad": "San Cristóbal",         "cantidad": 674  },
+    { "localidad": "Rafael Uribe Uribe",    "cantidad": 595  },
+    { "localidad": "Fontibón",              "cantidad": 517  },
+    { "localidad": "Transfers",             "cantidad": 512  },
+    { "localidad": "Usaquén",               "cantidad": 365  },
+    { "localidad": "Tunjuelito",            "cantidad": 298  },
+    { "localidad": "Puente Aranda",         "cantidad": 295  },
+    { "localidad": "Santa Fe",              "cantidad": 147  },
+    { "localidad": "Barrios Unidos",        "cantidad": 128  },
+    { "localidad": "Teusaquillo",           "cantidad": 124  },
+    { "localidad": "Antonio Nariño",        "cantidad": 114  },
+    { "localidad": "Los Mártires",          "cantidad": 89   },
+    { "localidad": "Chapinero",             "cantidad": 75   },
+    { "localidad": "Unknown locality", "cantidad": 54   },
+    { "localidad": "La Candelaria",         "cantidad": 19   },
+    { "localidad": "Sumapaz",               "cantidad": 13   }
+  ]
+};
+
+const FEC_FALLBACK = {
+  "por_anio": [
+    {
+      "anio": "2014",
+      "nv_10_14": 417,
+      "tasa_10_14": 1.52,
+      "nv_15_19": 16747,
+      "tasa_15_19": 51.38,
+      "nv_20_24": 28428,
+      "tasa_20_24": 83.14,
+      "nv_25_29": 24452,
+      "tasa_25_29": 74.4
+    },
+    {
+      "anio": "2015",
+      "nv_10_14": 367,
+      "tasa_10_14": 1.38,
+      "nv_15_19": 15379,
+      "tasa_15_19": 48.45,
+      "nv_20_24": 27614,
+      "tasa_20_24": 79.62,
+      "nv_25_29": 25002,
+      "tasa_25_29": 75.73
+    },
+    {
+      "anio": "2016",
+      "nv_10_14": 315,
+      "tasa_10_14": 1.23,
+      "nv_15_19": 13757,
+      "tasa_15_19": 44.89,
+      "nv_20_24": 26505,
+      "tasa_20_24": 75.4,
+      "nv_25_29": 24373,
+      "tasa_25_29": 72.92
+    },
+    {
+      "anio": "2017",
+      "nv_10_14": 304,
+      "tasa_10_14": 1.22,
+      "nv_15_19": 12036,
+      "tasa_15_19": 40.82,
+      "nv_20_24": 24604,
+      "tasa_20_24": 69.46,
+      "nv_25_29": 23039,
+      "tasa_25_29": 67.75
+    },
+    {
+      "anio": "2018",
+      "nv_10_14": 275,
+      "tasa_10_14": 1.13,
+      "nv_15_19": 10676,
+      "tasa_15_19": 37.48,
+      "nv_20_24": 23358,
+      "tasa_20_24": 65.35,
+      "nv_25_29": 22275,
+      "tasa_25_29": 63.53
+    },
+    {
+      "anio": "2019",
+      "nv_10_14": 206,
+      "tasa_10_14": 0.85,
+      "nv_15_19": 9618,
+      "tasa_15_19": 34.44,
+      "nv_20_24": 22705,
+      "tasa_20_24": 63.03,
+      "nv_25_29": 22417,
+      "tasa_25_29": 61.51
+    },
+    {
+      "anio": "2020",
+      "nv_10_14": 181,
+      "tasa_10_14": 0.76,
+      "nv_15_19": 8408,
+      "tasa_15_19": 31.61,
+      "nv_20_24": 21119,
+      "tasa_20_24": 59.0,
+      "nv_25_29": 21318,
+      "tasa_25_29": 55.78
+    },
+    {
+      "anio": "2021",
+      "nv_10_14": 154,
+      "tasa_10_14": 0.66,
+      "nv_15_19": 6474,
+      "tasa_15_19": 25.12,
+      "nv_20_24": 16580,
+      "tasa_20_24": 47.89,
+      "nv_25_29": 18377,
+      "tasa_25_29": 46.84
+    },
+    {
+      "anio": "2022",
+      "nv_10_14": 139,
+      "tasa_10_14": 0.6,
+      "nv_15_19": 5716,
+      "tasa_15_19": 22.81,
+      "nv_20_24": 14665,
+      "tasa_20_24": 44.09,
+      "nv_25_29": 18402,
+      "tasa_25_29": 46.3
+    },
+    {
+      "anio": "2023",
+      "nv_10_14": 150,
+      "tasa_10_14": 0.65,
+      "nv_15_19": 5132,
+      "tasa_15_19": 21.03,
+      "nv_20_24": 13704,
+      "tasa_20_24": 42.97,
+      "nv_25_29": 17212,
+      "tasa_25_29": 43.31
+    },
+    {
+      "anio": "2024",
+      "nv_10_14": 172,
+      "tasa_10_14": 0.75,
+      "nv_15_19": 4353,
+      "tasa_15_19": 18.28,
+      "nv_20_24": 12561,
+      "tasa_20_24": 41.14,
+      "nv_25_29": 16086,
+      "tasa_25_29": 41.0
+    },
+    {
+      "anio": "2025p",
+      "nv_10_14": 143,
+      "tasa_10_14": 0.63,
+      "nv_15_19": 4131,
+      "tasa_15_19": 17.75,
+      "nv_20_24": 11961,
+      "tasa_20_24": 40.86,
+      "nv_25_29": 15769,
+      "tasa_25_29": 41.29
+    }
+  ],
+  "por_localidad": [
+    {
+      "localidad": "Sumapaz",
+      "nv_10_14": 0,
+      "tasa_10_14": 0.0,
+      "nv_15_19": 8,
+      "tasa_15_19": 62.5,
+      "nv_20_24": 6,
+      "tasa_20_24": 54.05,
+      "nv_25_29": 4,
+      "tasa_25_29": 32.0
+    },
+    {
+      "localidad": "Los Mártires",
+      "nv_10_14": 2,
+      "tasa_10_14": 0.83,
+      "nv_15_19": 93,
+      "tasa_15_19": 41.67,
+      "nv_20_24": 193,
+      "tasa_20_24": 63.89,
+      "nv_25_29": 211,
+      "tasa_25_29": 44.68
+    },
+    {
+      "localidad": "La Candelaria",
+      "nv_10_14": 0,
+      "tasa_10_14": 0.0,
+      "nv_15_19": 14,
+      "tasa_15_19": 36.65,
+      "nv_20_24": 23,
+      "tasa_20_24": 37.22,
+      "nv_25_29": 35,
+      "tasa_25_29": 41.37
+    },
+    {
+      "localidad": "Santa Fe",
+      "nv_10_14": 3,
+      "tasa_10_14": 0.97,
+      "nv_15_19": 93,
+      "tasa_15_19": 30.07,
+      "nv_20_24": 220,
+      "tasa_20_24": 54.73,
+      "nv_25_29": 230,
+      "tasa_25_29": 39.19
+    },
+    {
+      "localidad": "Ciudad Bolívar",
+      "nv_10_14": 28,
+      "tasa_10_14": 1.21,
+      "nv_15_19": 644,
+      "tasa_15_19": 28.21,
+      "nv_20_24": 1563,
+      "tasa_20_24": 50.88,
+      "nv_25_29": 1766,
+      "tasa_25_29": 49.4
+    },
+    {
+      "localidad": "Rafael Uribe Uribe",
+      "nv_10_14": 7,
+      "tasa_10_14": 0.61,
+      "nv_15_19": 285,
+      "tasa_15_19": 23.51,
+      "nv_20_24": 714,
+      "tasa_20_24": 47.13,
+      "nv_25_29": 846,
+      "tasa_25_29": 46.71
+    },
+    {
+      "localidad": "Usme",
+      "nv_10_14": 14,
+      "tasa_10_14": 0.99,
+      "nv_15_19": 308,
+      "tasa_15_19": 21.46,
+      "nv_20_24": 793,
+      "tasa_20_24": 47.08,
+      "nv_25_29": 888,
+      "tasa_25_29": 43.27
+    },
+    {
+      "localidad": "San Cristóbal",
+      "nv_10_14": 10,
+      "tasa_10_14": 0.81,
+      "nv_15_19": 250,
+      "tasa_15_19": 18.18,
+      "nv_20_24": 693,
+      "tasa_20_24": 41.51,
+      "nv_25_29": 829,
+      "tasa_25_29": 42.21
+    },
+    {
+      "localidad": "Antonio Nariño",
+      "nv_10_14": 0,
+      "tasa_10_14": 0.0,
+      "nv_15_19": 40,
+      "tasa_15_19": 18.0,
+      "nv_20_24": 147,
+      "tasa_20_24": 50.19,
+      "nv_25_29": 215,
+      "tasa_25_29": 54.89
+    },
+    {
+      "localidad": "Tunjuelito",
+      "nv_10_14": 2,
+      "tasa_10_14": 0.39,
+      "nv_15_19": 98,
+      "tasa_15_19": 17.86,
+      "nv_20_24": 303,
+      "tasa_20_24": 46.32,
+      "nv_25_29": 417,
+      "tasa_25_29": 49.04
+    },
+    {
+      "localidad": "Bosa",
+      "nv_10_14": 19,
+      "tasa_10_14": 0.71,
+      "nv_15_19": 472,
+      "tasa_15_19": 17.73,
+      "nv_20_24": 1426,
+      "tasa_20_24": 47.23,
+      "nv_25_29": 1747,
+      "tasa_25_29": 45.87
+    },
+    {
+      "localidad": "Kennedy",
+      "nv_10_14": 17,
+      "tasa_10_14": 0.53,
+      "nv_15_19": 563,
+      "tasa_15_19": 16.99,
+      "nv_20_24": 1789,
+      "tasa_20_24": 45.8,
+      "nv_25_29": 2371,
+      "tasa_25_29": 46.53
+    },
+    {
+      "localidad": "Barrios Unidos",
+      "nv_10_14": 7,
+      "tasa_10_14": 2.52,
+      "nv_15_19": 46,
+      "tasa_15_19": 14.73,
+      "nv_20_24": 114,
+      "tasa_20_24": 22.93,
+      "nv_25_29": 261,
+      "tasa_25_29": 37.83
+    },
+    {
+      "localidad": "Suba",
+      "nv_10_14": 16,
+      "tasa_10_14": 0.47,
+      "nv_15_19": 504,
+      "tasa_15_19": 14.62,
+      "nv_20_24": 1634,
+      "tasa_20_24": 35.47,
+      "nv_25_29": 2174,
+      "tasa_25_29": 36.11
+    },
+    {
+      "localidad": "Chapinero",
+      "nv_10_14": 4,
+      "tasa_10_14": 1.19,
+      "nv_15_19": 39,
+      "tasa_15_19": 13.6,
+      "nv_20_24": 97,
+      "tasa_20_24": 24.6,
+      "nv_25_29": 174,
+      "tasa_25_29": 23.37
+    },
+    {
+      "localidad": "Usaquén",
+      "nv_10_14": 3,
+      "tasa_10_14": 0.22,
+      "nv_15_19": 179,
+      "tasa_15_19": 13.37,
+      "nv_20_24": 469,
+      "tasa_20_24": 26.15,
+      "nv_25_29": 784,
+      "tasa_25_29": 30.72
+    },
+    {
+      "localidad": "Engativá",
+      "nv_10_14": 7,
+      "tasa_10_14": 0.33,
+      "nv_15_19": 289,
+      "tasa_15_19": 12.96,
+      "nv_20_24": 994,
+      "tasa_20_24": 35.09,
+      "nv_25_29": 1463,
+      "tasa_25_29": 37.89
+    },
+    {
+      "localidad": "Fontibón",
+      "nv_10_14": 3,
+      "tasa_10_14": 0.3,
+      "nv_15_19": 113,
+      "tasa_15_19": 10.58,
+      "nv_20_24": 422,
+      "tasa_20_24": 29.31,
+      "nv_25_29": 736,
+      "tasa_25_29": 39.15
+    },
+    {
+      "localidad": "Puente Aranda",
+      "nv_10_14": 1,
+      "tasa_10_14": 0.17,
+      "nv_15_19": 67,
+      "tasa_15_19": 10.17,
+      "nv_20_24": 276,
+      "tasa_20_24": 33.34,
+      "nv_25_29": 471,
+      "tasa_25_29": 42.64
+    },
+    {
+      "localidad": "Teusaquillo",
+      "nv_10_14": 0,
+      "tasa_10_14": 0.0,
+      "nv_15_19": 21,
+      "tasa_15_19": 7.09,
+      "nv_20_24": 77,
+      "tasa_20_24": 26.34,
+      "nv_25_29": 141,
+      "tasa_25_29": 22.36
+    }
+  ],
+  "ultimo_anio": "2025p",
+  "corte": "11 Jun 2026",
+  "fuente": "SaludData – Bogotá Health Observatory. Source updated on 11 Jun 2026. p = preliminary.",
+  "nota": "Age-specific fertility rate = live births to mothers in the age group per 1,000 women in the same group. Numerator from DANE–RUAF–ND (SDS), final series 2014–2023, 2024 preliminary. Denominator from DANE-FONDANE-SDP projections, 2018 census."
+};
+
+const MORT_FALLBACK = {
+  "por_anio": [
+    {
+      "anio": "2018",
+      "total": 1668,
+      "hombres": 1261,
+      "mujeres": 407,
+      "tasa_100k": 84.2,
+      "top_causas": [],
+      "por_localidad": []
+    },
+    {
+      "anio": "2019",
+      "total": 1738,
+      "hombres": 1280,
+      "mujeres": 458,
+      "tasa_100k": 86.7,
+      "top_causas": [],
+      "por_localidad": []
+    },
+    {
+      "anio": "2020",
+      "total": 1630,
+      "hombres": 1212,
+      "mujeres": 418,
+      "tasa_100k": 81.0,
+      "top_causas": [],
+      "por_localidad": []
+    },
+    {
+      "anio": "2021",
+      "total": 1838,
+      "hombres": 1389,
+      "mujeres": 449,
+      "tasa_100k": 92.2,
+      "top_causas": [],
+      "por_localidad": []
+    },
+    {
+      "anio": "2022",
+      "total": 1697,
+      "hombres": 1277,
+      "mujeres": 420,
+      "tasa_100k": 86.5,
+      "top_causas": [],
+      "por_localidad": []
+    },
+    {
+      "anio": "2023",
+      "total": 1666,
+      "hombres": 1258,
+      "mujeres": 408,
+      "tasa_100k": 86.5,
+      "top_causas": [],
+      "por_localidad": []
+    },
+    {
+      "anio": "2024",
+      "total": 1678,
+      "hombres": 1267,
+      "mujeres": 411,
+      "tasa_100k": 89.1,
+      "top_causas": [],
+      "por_localidad": []
+    },
+    {
+      "anio": "2025p",
+      "total": 1516,
+      "hombres": 1095,
+      "mujeres": 421,
+      "tasa_100k": 82.3,
+      "top_causas": [
+        {
+          "causa": "Assault (homicide)",
+          "casos": 452
+        },
+        {
+          "causa": "Land transport accidents",
+          "casos": 237
+        },
+        {
+          "causa": "Intentional self-harm (suicide)",
+          "casos": 149
+        },
+        {
+          "causa": "Ill-defined signs and symptoms",
+          "casos": 73
+        },
+        {
+          "causa": "Nervous system (excl. meningitis)",
+          "casos": 68
+        },
+        {
+          "causa": "Malignant tumours, other sites",
+          "casos": 50
+        },
+        {
+          "causa": "Leukaemia",
+          "casos": 43
+        },
+        {
+          "causa": "All other diseases",
+          "casos": 43
+        },
+        {
+          "causa": "Acute respiratory infections",
+          "casos": 37
+        },
+        {
+          "causa": "Events of undetermined intent",
+          "casos": 37
+        }
+      ],
+      "por_localidad": [
+        {
+          "localidad": "Santa Fe",
+          "casos": 37,
+          "tasa_100k": 144.1
+        },
+        {
+          "localidad": "Los Mártires",
+          "casos": 25,
+          "tasa_100k": 126.5
+        },
+        {
+          "localidad": "Ciudad Bolívar",
+          "casos": 198,
+          "tasa_100k": 119.3
+        },
+        {
+          "localidad": "Teusaquillo",
+          "casos": 36,
+          "tasa_100k": 118.2
+        },
+        {
+          "localidad": "Sumapaz",
+          "casos": 1,
+          "tasa_100k": 108.0
+        },
+        {
+          "localidad": "San Cristóbal",
+          "casos": 103,
+          "tasa_100k": 105.8
+        },
+        {
+          "localidad": "La Candelaria",
+          "casos": 6,
+          "tasa_100k": 105.1
+        },
+        {
+          "localidad": "Barrios Unidos",
+          "casos": 33,
+          "tasa_100k": 103.4
+        },
+        {
+          "localidad": "Rafael Uribe Uribe",
+          "casos": 91,
+          "tasa_100k": 100.6
+        },
+        {
+          "localidad": "Antonio Nariño",
+          "casos": 17,
+          "tasa_100k": 90.8
+        },
+        {
+          "localidad": "Bosa",
+          "casos": 168,
+          "tasa_100k": 90.9
+        },
+        {
+          "localidad": "Chapinero",
+          "casos": 30,
+          "tasa_100k": 88.8
+        },
+        {
+          "localidad": "Puente Aranda",
+          "casos": 47,
+          "tasa_100k": 84.8
+        },
+        {
+          "localidad": "Usme",
+          "casos": 86,
+          "tasa_100k": 82.4
+        },
+        {
+          "localidad": "Tunjuelito",
+          "casos": 34,
+          "tasa_100k": 80.6
+        },
+        {
+          "localidad": "Kennedy",
+          "casos": 184,
+          "tasa_100k": 74.7
+        },
+        {
+          "localidad": "Fontibón",
+          "casos": 58,
+          "tasa_100k": 63.7
+        },
+        {
+          "localidad": "Engativá",
+          "casos": 115,
+          "tasa_100k": 62.6
+        },
+        {
+          "localidad": "Usaquén",
+          "casos": 71,
+          "tasa_100k": 60.6
+        },
+        {
+          "localidad": "Suba",
+          "casos": 176,
+          "tasa_100k": 59.4
+        }
+      ]
+    }
+  ],
+  "ultimo_anio": "2025p",
+  "corte": "11 Jun 2026",
+  "nota": "Deaths of young people aged 15-29 living in Bogotá. Rate per 100,000 young people aged 15-29. Causes grouped by the 6/67 list. Source: DANE–RUAF–ND / Bogotá Health Observatory – SaludData. p = preliminary."
+};
+
+fetch('data/discapacidad.json')
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .catch(() => DISC_FALLBACK)
+  .then(d => { DISC = d; renderDisc(); });
+
+function renderDisc() {
+  if (DISC.corte) {
+    let lbl = 'Period: ' + DISC.corte;
+    if (DISC.fecha_actualizacion) lbl += ' · Source updated: ' + DISC.fecha_actualizacion;
+    document.getElementById('lbl-disc-anio').textContent = lbl;
+  }
+  if (DISC.total_bogota) document.getElementById('kpi-total-bogota-disc').textContent = fmtNum(DISC.total_bogota);
+  document.getElementById('kpi-total-disc').textContent = fmtNum(DISC.total_jovenes_discapacidad);
+
+  const tipos = DISC.por_tipo;
+  if (chartDiscTipo) chartDiscTipo.destroy();
+  chartDiscTipo = new Chart(document.getElementById('chart-disc-tipo'), {
+    type: 'bar',
+    data: {
+      labels: tipos.map(t => t.nombre),
+      datasets: [{ data: tipos.map(t => t.cantidad), backgroundColor: COLORES_DISC, borderRadius: 4 }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => fmtNum(ctx.parsed.x) + ' young people' } } },
+      scales: {
+        x: { ticks: { callback: v => fmtNum(v), font: { size: 10 } }, grid: { color: '#ecf0f1' } },
+        y: { ticks: { font: { size: 10 } }, grid: { display: false } }
+      }
+    },
+    plugins: [{
+      id: 'bl', afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        chart.getDatasetMeta(0).data.forEach((bar, i) => {
+          if (bar.x - bar.base > 50) {
+            ctx.save(); ctx.fillStyle='#fff'; ctx.font='bold 11px Segoe UI,system-ui,sans-serif';
+            ctx.textAlign='right'; ctx.textBaseline='middle';
+            ctx.fillText(fmtNum(chart.data.datasets[0].data[i]), bar.x-8, bar.y); ctx.restore();
+          }
+        });
+      }
+    }]
+  });
+
+  const locs = DISC.por_localidad;
+  if (chartDiscLoc) chartDiscLoc.destroy();
+  chartDiscLoc = new Chart(document.getElementById('chart-disc-localidad'), {
+    type: 'bar',
+    data: { labels: locs.map(l => l.localidad), datasets: [{ data: locs.map(l => l.cantidad), backgroundColor: '#f58b53', borderRadius: 3 }] },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => fmtNum(ctx.parsed.x) + ' young people' } } },
+      scales: {
+        x: { ticks: { callback: v => fmtNum(v), font: { size: 10 } }, grid: { color: '#ecf0f1' } },
+        y: { ticks: { font: { size: 10 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// 4.3 Fecundidad adolescente y jóvenes
+// ============================================================
+let FEC = null, chartFecHist = null, chartFecLoc = null;
+
+const FEC_SERIES = [
+  // 10-14 se quitó un tiempo y se restauró el 2026-07-16 a pedido del equipo
+  { key: 'tasa_10_14', label: 'Ages 10 to 14', color: '#93c4e4' },
+  { key: 'tasa_15_19', label: 'Ages 15 to 19', color: '#1e9da3' },
+  { key: 'tasa_20_24', label: 'Ages 20 to 24', color: '#1eaf76' },
+  { key: 'tasa_25_29', label: 'Ages 25 to 29', color: '#1e7895' },
+];
+
+fetch('data/fecundidad_adolescente.json')
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .catch(() => FEC_FALLBACK)
+  .then(d => { FEC = d; renderFec(); });
+
+function renderFec() {
+  const ultimo = FEC.ultimo_anio;
+  ['lbl-fec-anio-1014', 'lbl-fec-anio-1519', 'lbl-fec-anio-2024', 'lbl-fec-anio-2529', 'lbl-fec-loc-anio'].forEach(id => {
+    document.getElementById(id).textContent = ultimo;
+  });
+  const primerAnio = FEC.por_anio[0].anio;
+  const corteStr = FEC.corte ? ' · Source updated: ' + FEC.corte : '';
+  document.getElementById('lbl-fec-corte').textContent =
+    'Period: ' + primerAnio + ' – ' + ultimo + corteStr + ', young people by five-year age group';
+
+  const ult = FEC.por_anio[FEC.por_anio.length - 1];
+  document.getElementById('kpi-fec-tasa1014').textContent = ult.tasa_10_14 != null ? fmtDec(ult.tasa_10_14, 2) + ' ‰' : '–';
+  document.getElementById('kpi-fec-tasa1519').textContent = ult.tasa_15_19 != null ? fmtDec(ult.tasa_15_19, 2) + ' ‰' : '–';
+  document.getElementById('kpi-fec-tasa2024').textContent = ult.tasa_20_24 != null ? fmtDec(ult.tasa_20_24, 2) + ' ‰' : '–';
+  document.getElementById('kpi-fec-tasa2529').textContent = ult.tasa_25_29 != null ? fmtDec(ult.tasa_25_29, 2) + ' ‰' : '–';
+
+  renderFecHistorico();
+  renderFecLocalidad();
+}
+
+function renderFecHistorico() {
+  const labels = FEC.por_anio.map(d => d.anio);
+  if (chartFecHist) chartFecHist.destroy();
+  chartFecHist = new Chart(document.getElementById('chart-fec-historico'), {
+    type: 'line',
+    data: {
+      labels,
+      datasets: FEC_SERIES.map(s => ({
+        label: s.label,
+        data: FEC.por_anio.map(d => d[s.key]),
+        borderColor: s.color,
+        backgroundColor: s.color,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointBackgroundColor: '#fff',
+        pointBorderColor: s.color,
+        pointBorderWidth: 2,
+        tension: 0.25,
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: {
+          label: ctx => {
+            const nvKey = FEC_SERIES[ctx.datasetIndex].key.replace('tasa_', 'nv_');
+            return ctx.dataset.label + ': ' + fmtDec(ctx.parsed.y, 2) + ' ‰'
+              + ' (' + fmtNum(FEC.por_anio[ctx.dataIndex][nvKey]) + ' live births)';
+          }
+        } }
+      },
+      scales: {
+        y: {
+          ticks: { callback: v => fmtDec(v, 0) + ' ‰', font: { size: 10 } },
+          grid: { color: '#ecf0f1' },
+          title: { display: true, text: 'Live births per 1,000 women in the age group', font: { size: 10 }, color: '#7f8c8d' }
+        },
+        x: { ticks: { font: { size: 11 } }, grid: { display: false } }
+      }
+    },
+    plugins: [{
+      id: 'lblFecHist',
+      afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        FEC_SERIES.forEach((s, si) => {
+          if (!chart.isDatasetVisible(si)) return;
+          const meta = chart.getDatasetMeta(si);
+          const lastPt = meta.data[meta.data.length - 1];
+          if (!lastPt) return;
+          const val = FEC.por_anio[FEC.por_anio.length - 1][s.key];
+          if (val == null) return;
+          ctx.save();
+          ctx.fillStyle = s.color;
+          ctx.font = 'bold 10px Segoe UI,system-ui,sans-serif';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(fmtDec(val, 1) + ' ‰', lastPt.x + 5, lastPt.y);
+          ctx.restore();
+        });
+      }
+    }]
+  });
+
+  // Crear toggles — todos activos por defecto en la vista histórica
+  const cont = document.getElementById('fec-hist-toggles');
+  cont.innerHTML = '';
+  FEC_SERIES.forEach((s, si) => {
+    const btn = document.createElement('button');
+    btn.className = 'toggle-grupo activo';
+    btn.style.borderColor = s.color;
+    btn.style.color = s.color;
+    btn.innerHTML = '<span class="toggle-dot" style="background:' + s.color + '"></span>' + s.label;
+    btn.addEventListener('click', () => {
+      const visible = chartFecHist.isDatasetVisible(si);
+      chartFecHist.setDatasetVisibility(si, !visible);
+      chartFecHist.update();
+      btn.classList.toggle('activo', !visible);
+    });
+    cont.appendChild(btn);
+  });
+}
+
+function renderFecLocalidad() {
+  const locs = FEC.por_localidad;
+  const nvKeys = ['nv_10_14', 'nv_15_19', 'nv_20_24', 'nv_25_29'];
+
+  if (chartFecLoc) chartFecLoc.destroy();
+  chartFecLoc = new Chart(document.getElementById('chart-fec-localidad'), {
+    type: 'bar',
+    data: {
+      labels: locs.map(l => l.localidad),
+      datasets: FEC_SERIES.map((s, si) => ({
+        label: s.label,
+        data: locs.map(l => l[s.key]),
+        backgroundColor: s.color,
+        borderRadius: 2,
+        hidden: s.key !== 'tasa_15_19',  // solo 15-19 visible por defecto
+      }))
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: {
+          label: ctx => {
+            const l = locs[ctx.dataIndex];
+            const nv = l[nvKeys[ctx.datasetIndex]];
+            return ctx.dataset.label + ': ' + fmtDec(ctx.parsed.x, 2) + ' ‰ (' + fmtNum(nv) + ' live births)';
+          }
+        } }
+      },
+      scales: {
+        x: { ticks: { callback: v => fmtDec(v, 0) + ' ‰', font: { size: 10 } }, grid: { color: '#ecf0f1' } },
+        y: { ticks: { font: { size: 10 } }, grid: { display: false } }
+      }
+    }
+  });
+
+  // Crear toggles
+  const cont = document.getElementById('fec-loc-toggles');
+  cont.innerHTML = '';
+  FEC_SERIES.forEach((s, si) => {
+    const btn = document.createElement('button');
+    btn.className = 'toggle-grupo' + (s.key === 'tasa_15_19' ? ' activo' : '');
+    btn.style.borderColor = s.color;
+    btn.style.color = s.color;
+    btn.innerHTML = '<span class="toggle-dot" style="background:' + s.color + '"></span>' + s.label;
+    btn.addEventListener('click', () => {
+      const visible = chartFecLoc.isDatasetVisible(si);
+      chartFecLoc.setDatasetVisibility(si, !visible);
+      chartFecLoc.update();
+      btn.classList.toggle('activo', !visible);
+    });
+    cont.appendChild(btn);
+  });
+}
+
+// ============================================================
+// 4.4 Mortalidad
+// ============================================================
+let MORT = null, chartMortSexo = null, chartMortCausas = null, chartMortLoc = null;
+
+fetch('data/mortalidad.json')
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .catch(() => MORT_FALLBACK)
+  .then(d => { MORT = d; initMort(); actualizarMort(); });
+
+function initMort() {
+  const sel = document.getElementById('filtro-anio-mort');
+  // Ordenar respetando "2025p" al final
+  const anios = MORT.por_anio.map(d => String(d.anio)).sort((a, b) => {
+    const na = parseInt(a), nb = parseInt(b);
+    return na !== nb ? na - nb : a.localeCompare(b);
+  });
+  anios.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a; opt.textContent = a;
+    sel.appendChild(opt);
+  });
+  sel.value = anios[anios.length - 1];
+  sel.onchange = actualizarMort;
+
+  // Período y actualización
+  const primerAnioM = anios[0];
+  const corteStrM = MORT.corte ? ' · Source updated: ' + MORT.corte : '';
+  document.getElementById('lbl-mort-corte').textContent =
+    'Period: ' + primerAnioM + ' – ' + anios[anios.length - 1] + corteStrM + ', young people aged 15-29';
+
+  // Causas y localidades fijas al último año disponible (siempre más completo)
+  const ultimo = MORT.por_anio[MORT.por_anio.length - 1];
+  renderMortCausas(ultimo);
+  renderMortLocalidad(ultimo);
+}
+
+function actualizarMort() {
+  const anioSel = document.getElementById('filtro-anio-mort').value;
+  const d = MORT.por_anio.find(r => String(r.anio) === anioSel);
+  if (!d) return;
+
+  // KPIs
+  document.getElementById('kpi-mort-total').textContent   = fmtNum(d.total);
+  document.getElementById('kpi-mort-hombres').textContent = fmtNum(d.hombres);
+  document.getElementById('kpi-mort-mujeres').textContent = fmtNum(d.mujeres);
+  document.getElementById('kpi-mort-tasa').textContent    = d.tasa_100k != null ? fmtDec(d.tasa_100k, 1) : '–';
+
+  // Donut sexo
+  const pctH = d.total > 0 ? (d.hombres / d.total * 100).toFixed(1) : 0;
+  const pctM = d.total > 0 ? (d.mujeres / d.total * 100).toFixed(1) : 0;
+  if (chartMortSexo) chartMortSexo.destroy();
+  chartMortSexo = new Chart(document.getElementById('chart-mort-sexo'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Men ' + fmtNum(d.hombres) + ' (' + pctH + '%)', 'Women ' + fmtNum(d.mujeres) + ' (' + pctM + '%)'],
+      datasets: [{ data: [d.hombres, d.mujeres], backgroundColor: ['#1e9da3', '#f58b53'], borderWidth: 2 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, usePointStyle: true, pointStyle: 'circle' } } }
+    }
+  });
+}
+
+function renderMortCausas(d) {
+  const causas = (d.top_causas || []);
+  if (!causas.length) return;
+  if (chartMortCausas) chartMortCausas.destroy();
+  chartMortCausas = new Chart(document.getElementById('chart-mort-causas'), {
+    type: 'bar',
+    data: {
+      labels: causas.map(c => c.causa.length > 40 ? c.causa.substring(0, 37) + '...' : c.causa),
+      datasets: [{ data: causas.map(c => c.casos), backgroundColor: '#f58b53', borderRadius: 3 }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: {
+        title: ctx => causas[ctx[0].dataIndex].causa,
+        label: ctx => fmtNum(ctx.parsed.x) + ' deaths'
+      } } },
+      scales: {
+        x: { ticks: { callback: v => fmtNum(v), font: { size: 10 } }, grid: { color: '#ecf0f1' } },
+        y: { ticks: { font: { size: 10 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function renderMortLocalidad(d) {
+  const locs = (d.por_localidad || []).filter(l => l.tasa_100k != null);
+  if (!locs.length) return;
+  if (chartMortLoc) chartMortLoc.destroy();
+  chartMortLoc = new Chart(document.getElementById('chart-mort-localidad'), {
+    type: 'bar',
+    data: {
+      labels: locs.map(l => l.localidad),
+      datasets: [{ data: locs.map(l => l.tasa_100k), backgroundColor: '#f58b53', borderRadius: 3 }]
+    },
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: {
+        label: ctx => fmtDec(ctx.parsed.x, 1) + ' per 100,000 · ' + fmtNum(locs[ctx.dataIndex].casos) + ' deaths'
+      } } },
+      scales: {
+        x: { ticks: { callback: v => fmtDec(v, 0), font: { size: 10 } }, grid: { color: '#ecf0f1' } },
+        y: { ticks: { font: { size: 10 } }, grid: { display: false } }
+      }
+    },
+    plugins: [{
+      id: 'blmort', afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        chart.getDatasetMeta(0).data.forEach((bar, i) => {
+          if (bar.x - bar.base > 35) {
+            ctx.save(); ctx.fillStyle = '#fff'; ctx.font = 'bold 10px Segoe UI,system-ui,sans-serif';
+            ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+            ctx.fillText(fmtDec(chart.data.datasets[0].data[i], 1), bar.x - 6, bar.y); ctx.restore();
+          }
+        });
+      }
+    }]
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Youth Information Centre - Dimension 6: Peace, Coexistence and Justice</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>Chart.defaults.locale = 'en-US';</script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Anton&family=Antonio:wght@700&family=Figtree:wght@400;500;600;700;800&display=swap');
+    :root {
+      /* Identidad de la dimensión 6 (Paz, convivencia y justicia): azul cielo, según mapeo
+         de 7 colores oficiales. El azul cielo base es muy claro para texto encima de blanco
+         o texto blanco encima — --acento-oscuro es la variante con contraste suficiente. */
+      --acento: #2fa4d4;
+      --acento-oscuro: #217394;
+      /* Semáforo de percepción (mismo criterio que dim7): bueno/seguro a la izquierda con
+         el azul propio de la dimensión, malo/inseguro a la derecha en rosa coral oscuro. */
+      --positivo: #217394;
+      --negativo: #c35258;
+      --crema: #f5efd2;
+      --gris-oscuro: #2f2b28;
+      --gris: #83766c;
+      --gris-claro: #f4f2ee;
+      --blanco: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Figtree', 'Segoe UI', sans-serif;
+      background: var(--gris-claro);
+      color: var(--gris-oscuro);
+      line-height: 1.5;
+    }
+    .header-hero {
+      position: relative;
+      background: url('../imagenes/SDIS/Fondo azul 1.png') center/cover;
+      padding-top: 3rem;
+      overflow: hidden;
+    }
+    .header-hero .hero-texto { text-align: center; padding: 0 2rem 2.5rem; }
+    .header-hero .hero-title {
+      font-family: 'Anton', 'Segoe UI', sans-serif;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+      font-size: 3.4rem;
+      line-height: 1.08;
+      color: var(--crema);
+    }
+    .header-hero .hero-subtitle {
+      font-family: 'Antonio', 'Segoe UI', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 1.15rem;
+      color: var(--crema);
+      opacity: 0.85;
+      margin-top: 0.4rem;
+    }
+    .header-hero .btn-home {
+      position: absolute; top: 1.3rem; left: 2rem; z-index: 2;
+      color: var(--crema);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 14px;
+      border: 1.5px solid rgba(245,239,210,0.55);
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+    .header-hero .btn-home:hover { background: rgba(255,255,255,0.15); border-color: var(--crema); }
+    .footer-marca { display: block; width: 100%; height: auto; margin-top: 2rem; }
+    @media (max-width: 600px) {
+      .header-hero { padding-top: 2.2rem; }
+      .header-hero .hero-title { font-size: 2.2rem; }
+      .header-hero .hero-subtitle { font-size: 0.9rem; }
+      .header-hero .btn-home { top: 0.9rem; left: 1rem; font-size: 0.72rem; padding: 4px 10px; }
+    }
+    .container { max-width: 1320px; margin: 0 auto; padding: 1.5rem; }
+    .page-subtitle { font-size: 1.1rem; color: var(--gris); margin-bottom: 1rem; }
+    .page-subtitle span { font-weight: 600; color: var(--gris-oscuro); }
+    .kpis-row {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;
+    }
+    @media (max-width: 800px) { .kpis-row { grid-template-columns: 1fr 1fr; } }
+    .kpi-card {
+      background: var(--blanco); border-radius: 10px;
+      padding: 1.2rem; text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .kpi-valor { font-family: 'Anton', 'Figtree', sans-serif; font-size: 1.8rem; font-weight: 400; color: var(--acento-oscuro); }
+    .kpi-label { font-size: 0.78rem; color: var(--gris); margin-top: 4px; }
+    .grid-2col {
+      display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;
+    }
+    @media (max-width: 960px) { .grid-2col { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--blanco); border-radius: 10px;
+      padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card-title {
+      font-size: 0.85rem; font-weight: 700; color: var(--gris);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 1rem;
+    }
+    .chart-container { position: relative; height: 320px; }
+    .footer {
+      margin-top: 1.5rem; padding: 1rem 1.5rem; font-size: 0.8rem; color: var(--gris);
+    }
+    .footer-top {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .footer-notas {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 0.8rem 1rem;
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: #666;
+    }
+    .footer-notas a { color: #666; }
+    .footer-notas p { margin-bottom: 0.3rem; }
+    .footer-notas p:last-child { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+
+  <div class="header-hero">
+    <a href="../index.html" class="btn-home">&#8592; Home</a>
+    <div class="hero-texto">
+      <h1 class="hero-title">Peace, coexistence and justice</h1>
+      <p class="hero-subtitle">Dimension 6</p>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <p class="page-subtitle">
+      <span>Young people’s perceived safety — Bogotá</span><br>
+      Source: Citizen Perception Survey – Bogotá Cómo Vamos 2025 · Young people aged 18 to 25
+    </p>
+
+    <!-- Víctima de delito (barra apilada) -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Have you been a victim of a crime?</div>
+      <div class="chart-container" style="height:120px;">
+        <canvas id="chart-victima"></canvas>
+      </div>
+    </div>
+
+    <!-- Percepción seguridad barrio (barra apilada) -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Perceived safety in the neighbourhood</div>
+      <div class="chart-container" style="height:120px;">
+        <canvas id="chart-barrio"></canvas>
+      </div>
+    </div>
+
+    <!-- Percepción seguridad ciudad (barra apilada) -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Perceived safety in the city</div>
+      <div class="chart-container" style="height:120px;">
+        <canvas id="chart-ciudad"></canvas>
+      </div>
+    </div>
+
+    <!-- Problemas del barrio (barras horizontales) -->
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Main safety problems in the neighbourhood</div>
+      <p style="font-size:0.8rem; color:var(--gris); margin:-0.5rem 0 1rem;">Multiple answers — percentage of all young people surveyed</p>
+      <div class="chart-container" style="height:420px;">
+        <canvas id="chart-problemas"></canvas>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-top">
+        <div>
+          Source: Citizen Perception Survey – Bogotá Cómo Vamos 2025<br>
+          Processing: Youth Subdirectorate – SDIS
+        </div>
+        <div style="text-align:right;">
+          District Secretariat of Social Integration<br>
+          Youth Subdirectorate – Youth Information Centre
+        </div>
+      </div>
+      <div class="footer-notas">
+        <p><strong>Note:</strong> results are calculated from the microdata of the Bogotá Cómo Vamos 2025 Citizen Perception Survey, filtered to young people aged 18 to 25, an unweighted subsample of 225 cases. The youth subsample was not designed to be statistically representative on its own, so these percentages should be read as indicative of the views of the young people surveyed. The full technical sheet of the survey is published by <a href="https://bogotacomovamos.org" target="_blank" rel="noopener">Bogotá Cómo Vamos</a>.</p>
+      </div>
+    </div>
+
+  </div>
+  <p style="max-width:1100px; margin:1.2rem auto 0.6rem; padding:0 1.5rem; text-align:center; font-size:0.75rem; line-height:1.5; color:#83766c;">English version prepared for a portfolio. The official dashboard, in Spanish, is at <a href="https://sdis-juventud.github.io/tablero-cij/dim6/" style="color:#83766c;">sdis-juventud.github.io/tablero-cij/dim6/</a>.</p>
+
+
+  <img src="../imagenes/SDIS/Distrito joven.png" alt="Distrito Joven — District Secretariat of Social Integration" class="footer-marca">
+
+<script>
+// ============================================================
+// Carga de datos
+// ============================================================
+let SEG = {};
+
+const SEGURIDAD_FALLBACK = {
+  "fuente": "Citizen Perception Survey - Bogotá Cómo Vamos - 2025",
+  "poblacion": "Young people aged 18 to 25 in Bogotá",
+  "n_jovenes": 225,
+  "problemas_barrio": [
+    {
+      "problema": "Street muggings",
+      "porcentaje": 61.33,
+      "respuestas": 138
+    },
+    {
+      "problema": "Drug addiction",
+      "porcentaje": 33.33,
+      "respuestas": 75
+    },
+    {
+      "problema": "Gangs",
+      "porcentaje": 19.56,
+      "respuestas": 44
+    },
+    {
+      "problema": "Drug trafficking",
+      "porcentaje": 17.78,
+      "respuestas": 40
+    },
+    {
+      "problema": "Theft of cars or car parts",
+      "porcentaje": 16.44,
+      "respuestas": 37
+    },
+    {
+      "problema": "Burglaries of houses or flats",
+      "porcentaje": 16.0,
+      "respuestas": 36
+    },
+    {
+      "problema": "Robberies of local shops or businesses",
+      "porcentaje": 16.0,
+      "respuestas": 36
+    },
+    {
+      "problema": "No serious problems in my neighbourhood",
+      "porcentaje": 13.33,
+      "respuestas": 30
+    },
+    {
+      "problema": "Vandalism of buildings and parks",
+      "porcentaje": 11.56,
+      "respuestas": 26
+    },
+    {
+      "problema": "Extortion",
+      "porcentaje": 4.0,
+      "respuestas": 9
+    },
+    {
+      "problema": "Homicides",
+      "porcentaje": 3.56,
+      "respuestas": 8
+    },
+    {
+      "problema": "Rapes",
+      "porcentaje": 1.78,
+      "respuestas": 4
+    },
+    {
+      "problema": "Other",
+      "porcentaje": 0.89,
+      "respuestas": 2
+    }
+  ],
+  "victima_delito": {
+    "si": 16.89,
+    "no": 83.11,
+    "n": 225
+  },
+  "percepcion_barrio": {
+    "seguro": 40.0,
+    "ni_seguro_ni_inseguro": 24.0,
+    "inseguro": 36.0,
+    "n": 225
+  },
+  "percepcion_ciudad": {
+    "seguro": 21.78,
+    "ni_seguro_ni_inseguro": 22.22,
+    "inseguro": 56.0,
+    "n": 225
+  }
+};
+
+fetch('data/seguridad.json')
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .catch(() => SEGURIDAD_FALLBACK)
+  .then(data => {
+    SEG = data;
+    renderAll();
+  });
+
+// Formato colombiano
+function fmtPct(v) {
+  return v.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+}
+function fmtNum(v) {
+  return v.toLocaleString('en-US');
+}
+
+// ============================================================
+// Render
+// ============================================================
+let chartProblemas, chartVictima, chartBarrio, chartCiudad;
+
+function renderAll() {
+  renderProblemas();
+  renderVictima();
+  renderBarrio();
+  renderCiudad();
+}
+
+// --- Barras horizontales: problemas del barrio ---
+function renderProblemas() {
+  const probs = SEG.problemas_barrio;
+  if (!probs || probs.length === 0) return;
+
+  // Plugin para mostrar valor dentro de la barra
+  const inBarPlugin = {
+    id: 'inBarLabels',
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      chart.data.datasets.forEach((ds, di) => {
+        const meta = chart.getDatasetMeta(di);
+        meta.data.forEach((bar, i) => {
+          const val = ds.data[i];
+          if (val == null) return;
+          const { x, y, width, height } = bar.getProps(['x', 'y', 'width', 'height']);
+          ctx.save();
+          ctx.fillStyle = '#fff';
+          ctx.font = 'bold 11px Segoe UI, sans-serif';
+          ctx.textAlign = 'right';
+          ctx.textBaseline = 'middle';
+          const xPos = bar.x - 6;
+          const yPos = bar.y;
+          // Solo mostrar si la barra es lo suficientemente ancha
+          if (bar.x - bar.base > 40) {
+            ctx.fillText(fmtPct(val), xPos, yPos);
+          }
+          ctx.restore();
+        });
+      });
+    }
+  };
+
+  if (chartProblemas) chartProblemas.destroy();
+  chartProblemas = new Chart(document.getElementById('chart-problemas'), {
+    type: 'bar',
+    data: {
+      labels: probs.map(p => p.problema),
+      datasets: [{
+        data: probs.map(p => p.porcentaje),
+        backgroundColor: probs.map((_, i) => i === 0 ? '#8a232c' : '#c35258'),
+        borderRadius: 3,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => fmtPct(ctx.raw) + ' (' + fmtNum(probs[ctx.dataIndex].respuestas) + ' responses)'
+          }
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          max: 70,
+          ticks: { callback: v => v + '%' },
+          grid: { color: '#f4f2ee' }
+        },
+        y: {
+          ticks: {
+            font: { size: 11 },
+            callback: function(value) {
+              const label = this.getLabelForValue(value);
+              return label.length > 40 ? label.substring(0, 37) + '...' : label;
+            }
+          },
+          grid: { display: false }
+        }
+      }
+    },
+    plugins: [inBarPlugin]
+  });
+}
+
+// Plugin para mostrar porcentaje dentro de cada segmento
+const stackedLabelPlugin = {
+  id: 'stackedLabels',
+  afterDatasetsDraw(chart) {
+    const { ctx } = chart;
+    chart.data.datasets.forEach((ds, di) => {
+      const meta = chart.getDatasetMeta(di);
+      meta.data.forEach((bar, i) => {
+        const val = ds.data[0];
+        if (val < 8) return;
+        const x = (bar.x + bar.base) / 2;
+        const y = bar.y;
+        ctx.save();
+        // El segmento "Neither safe nor unsafe" es gris claro — necesita texto oscuro, no blanco
+        ctx.fillStyle = ds.label === 'Neither safe nor unsafe' ? '#2f2b28' : '#fff';
+        ctx.font = 'bold 13px Segoe UI, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(fmtPct(val), x, y);
+        ctx.restore();
+      });
+    });
+  }
+};
+
+// --- Barra apilada: víctima de delito ---
+function renderVictima() {
+  const v = SEG.victima_delito;
+  if (!v) return;
+
+  if (chartVictima) chartVictima.destroy();
+  chartVictima = new Chart(document.getElementById('chart-victima'), {
+    type: 'bar',
+    data: {
+      labels: ['Have you been a victim of a crime?'],
+      datasets: [
+        { label: 'No', data: [v.no], backgroundColor: '#217394', borderRadius: 3 },
+        { label: 'Yes', data: [v.si], backgroundColor: '#c35258', borderRadius: 3 }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 16 } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtPct(ctx.raw) } }
+      },
+      scales: {
+        x: { stacked: true, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#f4f2ee' } },
+        y: { stacked: true, display: false }
+      }
+    },
+    plugins: [stackedLabelPlugin]
+  });
+}
+
+// --- Barra apilada: percepción barrio ---
+function renderBarrio() {
+  const p = SEG.percepcion_barrio;
+  if (!p) return;
+
+  if (chartBarrio) chartBarrio.destroy();
+  chartBarrio = new Chart(document.getElementById('chart-barrio'), {
+    type: 'bar',
+    data: {
+      labels: ['Perceived safety in the neighbourhood'],
+      datasets: [
+        { label: 'Safe', data: [p.seguro], backgroundColor: '#217394', borderRadius: 3 },
+        { label: 'Neither safe nor unsafe', data: [p.ni_seguro_ni_inseguro], backgroundColor: '#bbb4ae' },
+        { label: 'Unsafe', data: [p.inseguro], backgroundColor: '#c35258', borderRadius: 3 }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 16 } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtPct(ctx.raw) } }
+      },
+      scales: {
+        x: { stacked: true, max: 100, ticks: { callback: v => v + '%' }, grid: { color: '#f4f2ee' } },
+        y: { stacked: true, display: false }
+      }
+    },
+    plugins: [stackedLabelPlugin]
+  });
+}
+
+// --- Barras horizontales apiladas: percepción ciudad ---
+function renderCiudad() {
+  const p = SEG.percepcion_ciudad;
+  if (!p) return;
+
+  if (chartCiudad) chartCiudad.destroy();
+  chartCiudad = new Chart(document.getElementById('chart-ciudad'), {
+    type: 'bar',
+    data: {
+      labels: ['Perceived safety in Bogotá'],
+      datasets: [
+        {
+          label: 'Safe',
+          data: [p.seguro],
+          backgroundColor: '#217394',
+          borderRadius: 3,
+        },
+        {
+          label: 'Neither safe nor unsafe',
+          data: [p.ni_seguro_ni_inseguro],
+          backgroundColor: '#bbb4ae',
+        },
+        {
+          label: 'Unsafe',
+          data: [p.inseguro],
+          backgroundColor: '#c35258',
+          borderRadius: 3,
+        }
+      ]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { font: { size: 12 }, padding: 16 }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => ctx.dataset.label + ': ' + fmtPct(ctx.raw)
+          }
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          max: 100,
+          ticks: { callback: v => v + '%' },
+          grid: { color: '#f4f2ee' }
+        },
+        y: {
+          stacked: true,
+          display: false
+        }
+      }
+    },
+    plugins: [stackedLabelPlugin]
+  });
+}
+</script>
+
+</body>
+</html>

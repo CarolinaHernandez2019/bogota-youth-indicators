@@ -1,0 +1,57 @@
+{
+  "fuente": "Citizen Perception Survey - Bogotá Cómo Vamos - 2025",
+  "poblacion": "Young people aged 18 to 25 in Bogotá",
+  "n_jovenes": 225,
+  "satisfaccion_agua": {
+    "satisfecho": 25.6,
+    "ni_satisfecho_ni_insatisfecho": 13.04,
+    "insatisfecho": 61.35,
+    "n": 207
+  },
+  "satisfaccion_ruido": {
+    "satisfecho": 19.18,
+    "ni_satisfecho_ni_insatisfecho": 19.63,
+    "insatisfecho": 61.19,
+    "n": 219
+  },
+  "satisfaccion_vivienda": {
+    "satisfecho": 59.11,
+    "ni_satisfecho_ni_insatisfecho": 17.33,
+    "insatisfecho": 23.56,
+    "n": 225
+  },
+  "satisfaccion_agua_servicio": {
+    "satisfecho": 70.54,
+    "ni_satisfecho_ni_insatisfecho": 12.05,
+    "insatisfecho": 17.41,
+    "n": 224
+  },
+  "satisfaccion_aseo": {
+    "satisfecho": 67.11,
+    "ni_satisfecho_ni_insatisfecho": 11.56,
+    "insatisfecho": 21.33,
+    "n": 225
+  },
+  "percepcion_normas_ambientales": {
+    "satisfecho": 18.26,
+    "ni_satisfecho_ni_insatisfecho": 28.77,
+    "insatisfecho": 52.97,
+    "n": 219
+  },
+  "notas": "satisfaccion_vivienda here is GOB_3 (satisfaction with Bogotá as a place to live in general, not with housing). Satisfaction with housing itself is in acciones_ambientales.satisfaccion_vivienda (another survey, see section 7.2).",
+  "acciones_ambientales": {
+    "fuente": "Biennial Culture Survey 2025 — Environmental Culture module",
+    "poblacion": "Young people aged 13 to 28 in Bogotá",
+    "n_jovenes": 1345,
+    "separa_residuos": 34.3,
+    "limpia_reciclables": 28.4,
+    "compostaje": 6.7,
+    "satisfaccion_vivienda": {
+      "nada": 3.3,
+      "poco": 17.6,
+      "satisfecho": 70.8,
+      "muy_satisfecho": 8.4
+    },
+    "nota": "This section comes from a different survey (Biennial Culture Survey, Environmental Culture module), with a different age range (13-28) from the rest of the page (18-25, Bogotá Cómo Vamos). Satisfaction with housing replaces the earlier proxy (GOB_3), which measured satisfaction with Bogotá in general rather than with housing."
+  }
+}

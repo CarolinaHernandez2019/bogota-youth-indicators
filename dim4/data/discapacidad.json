@@ -1,0 +1,40 @@
+{
+  "corte": "1 Jul 2020 – 31 May 2026",
+  "fecha_actualizacion": "11 Jun 2026",
+  "total_jovenes_discapacidad": 22598,
+  "total_bogota": 91455,
+  "nota": "Includes the Adolescence (5,876) and Youth (16,722) groups as classified by SaludData. A person can have more than one type of disability. Source: District Health Secretariat – Bogotá Health Observatory, SaludData. Download period 1 Jul 2020 – 31 May 2026. Cut-off 31 May 2026. Source updated on 11 Jun 2026. Data are preliminary and the source updates them continuously.",
+  "por_tipo": [
+    { "tipo": "multiple",    "nombre": "Multiple disability",    "cantidad": 11092 },
+    { "tipo": "intelectual", "nombre": "Intellectual disability", "cantidad": 5212  },
+    { "tipo": "fisica",      "nombre": "Physical disability",      "cantidad": 2883  },
+    { "tipo": "psicosocial", "nombre": "Psychosocial disability", "cantidad": 1504  },
+    { "tipo": "auditiva",    "nombre": "Hearing disability",    "cantidad": 1282  },
+    { "tipo": "visual",      "nombre": "Visual disability",      "cantidad": 617   },
+    { "tipo": "sordoceguera","nombre": "Deafblindness",             "cantidad": 1     }
+  ],
+  "por_localidad": [
+    { "localidad": "Kennedy",               "cantidad": 1615 },
+    { "localidad": "Bosa",                  "cantidad": 1596 },
+    { "localidad": "Suba",                  "cantidad": 1347 },
+    { "localidad": "Ciudad Bolívar",        "cantidad": 1153 },
+    { "localidad": "Engativá",              "cantidad": 1016 },
+    { "localidad": "Usme",                  "cantidad": 760  },
+    { "localidad": "San Cristóbal",         "cantidad": 674  },
+    { "localidad": "Rafael Uribe Uribe",    "cantidad": 595  },
+    { "localidad": "Fontibón",              "cantidad": 517  },
+    { "localidad": "Transfers",             "cantidad": 512  },
+    { "localidad": "Usaquén",               "cantidad": 365  },
+    { "localidad": "Tunjuelito",            "cantidad": 298  },
+    { "localidad": "Puente Aranda",         "cantidad": 295  },
+    { "localidad": "Santa Fe",              "cantidad": 147  },
+    { "localidad": "Barrios Unidos",        "cantidad": 128  },
+    { "localidad": "Teusaquillo",           "cantidad": 124  },
+    { "localidad": "Antonio Nariño",        "cantidad": 114  },
+    { "localidad": "Los Mártires",          "cantidad": 89   },
+    { "localidad": "Chapinero",             "cantidad": 75   },
+    { "localidad": "Unknown locality", "cantidad": 54   },
+    { "localidad": "La Candelaria",         "cantidad": 19   },
+    { "localidad": "Sumapaz",               "cantidad": 13   }
+  ]
+}

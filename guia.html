@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigation guide – Youth Information Centre</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #fff;
+      color: #333;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 8px;
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      z-index: 10;
+    }
+    .icon-btn {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 2px solid #888;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: #555;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .icon-btn:hover { border-color: #333; color: #333; }
+
+    /* Contenido principal */
+    .main-content {
+      max-width: 1300px;
+      margin: 0 auto;
+      padding: 1.5rem 1.5rem;
+    }
+    .intro-text {
+      text-align: center;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      max-width: 550px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Layout de 3 columnas */
+    .guide-layout {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 1.2rem;
+      align-items: start;
+    }
+    @media (max-width: 950px) {
+      .guide-layout {
+        grid-template-columns: 1fr;
+      }
+      .col-left, .col-right { order: 2; }
+      .col-center { order: 1; }
+    }
+
+    /* Columnas laterales */
+    .col-left, .col-right {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* Tarjetas de descripción */
+    .desc-card {
+      border: 1.5px solid #ddd;
+      border-radius: 6px;
+      padding: 14px 16px;
+    }
+    .desc-card h3 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .desc-card p {
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: #444;
+    }
+
+    /* Colores de tarjetas — mismo mapeo de dimensión → color del index */
+    .desc-card.dim1 h3 { color: #f4676e; }
+    .desc-card.dim2 h3 { color: #1eaf76; }
+    .desc-card.dim3 h3 { color: #663a93; }
+    .desc-card.dim4 h3 { color: #1e9da3; }
+    .desc-card.dim5 h3 { color: #f58b53; }
+    .desc-card.dim6 h3 { color: #2fa4d4; }
+    .desc-card.dim7 h3 { color: #1e7895; }
+
+    /* Spacer para alinear tarjetas con cintas */
+    .spacer { height: 30px; }
+
+    /* Cintas centrales */
+    .col-center {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 320px;
+    }
+    .dim-arrow {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      height: 52px;
+      text-align: center;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+      transition: transform 0.15s;
+      margin-left: 20px;
+      margin-right: 20px;
+    }
+    .dim-arrow::before,
+    .dim-arrow::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 0;
+      height: 0;
+      border-top: 26px solid transparent;
+      border-bottom: 26px solid transparent;
+    }
+    .dim-arrow:nth-child(odd) {
+      border-radius: 2px 0 0 2px;
+    }
+    .dim-arrow:nth-child(odd)::after {
+      right: -20px;
+      border-left: 20px solid;
+      border-left-color: inherit;
+    }
+    .dim-arrow:nth-child(odd)::before { display: none; }
+    .dim-arrow:nth-child(even) {
+      border-radius: 0 2px 2px 0;
+    }
+    .dim-arrow:nth-child(even)::before {
+      left: -20px;
+      border-right: 20px solid;
+      border-right-color: inherit;
+    }
+    .dim-arrow:nth-child(even)::after { display: none; }
+    .dim-arrow:hover {
+      transform: scale(1.03);
+    }
+
+    .dim-arrow:nth-child(1) { background: #f4676e; }
+    .dim-arrow:nth-child(2) { background: #1eaf76; }
+    .dim-arrow:nth-child(3) { background: #663a93; }
+    .dim-arrow:nth-child(4) { background: #1e9da3; }
+    .dim-arrow:nth-child(5) { background: #f58b53; }
+    .dim-arrow:nth-child(6) { background: #2fa4d4; }
+    .dim-arrow:nth-child(7) { background: #1e7895; }
+  </style>
+</head>
+<body>
+
+  <!-- Barra institucional -->
+  <div class="header-right">
+    <a class="icon-btn" href="index.html" title="Home">&#8962;</a>
+  </div>
+
+  <!-- Contenido -->
+  <div class="main-content">
+    <p class="intro-text">
+      Below is a summary of the indicators shown
+      <strong>in this dashboard for each dimension</strong> of
+      <strong>Bogotá’s youth policy</strong>.
+    </p>
+
+    <div class="guide-layout">
+      <!-- Columna izquierda: dimensiones pares (2, 4, 6) -->
+      <div class="col-left">
+        <div class="spacer"></div>
+
+        <div class="desc-card dim2">
+          <h3>2. Education</h3>
+          <p>The main indicators for upper secondary and higher education, including the main rates and their history, based on data from the Ministry of Education (MEN), SNIES and SIMAT.</p>
+        </div>
+
+        <div class="desc-card dim4">
+          <h3>4. Health and Self-Care</h3>
+          <p>The main health and mortality indicators for young people, based on the Bogotá Health Observatory.</p>
+        </div>
+
+        <div class="desc-card dim6">
+          <h3>6. Peace, Coexistence and Justice</h3>
+          <p>Results of the Bogotá Cómo Vamos 2025 Citizen Perception Survey on peace, justice and coexistence.</p>
+        </div>
+      </div>
+
+      <!-- Columna central: cintas -->
+      <div class="col-center">
+        <a href="dim1/" class="dim-arrow">1. Being Young</a>
+        <a href="dim2/" class="dim-arrow">2. Education</a>
+        <a href="dim3/" class="dim-arrow">3. Productive Inclusion</a>
+        <a href="dim4/" class="dim-arrow">4. Health and<br>Self-Care</a>
+        <a href="dim5/" class="dim-arrow">5. Culture, Recreation<br>and Sport</a>
+        <a href="dim6/" class="dim-arrow">6. Peace, Coexistence<br>and Justice</a>
+        <a href="dim7/" class="dim-arrow">7. Habitat</a>
+      </div>
+
+      <!-- Columna derecha: dimensiones impares (1, 3, 5, 7) -->
+      <div class="col-right">
+        <div class="desc-card dim1">
+          <h3>1. Being Young</h3>
+          <p>Demographic characteristics of young people in Bogotá, based on DANE census-based population projections.</p>
+        </div>
+
+        <div class="desc-card dim3">
+          <h3>3. Productive Inclusion</h3>
+          <p>The labour market situation of young people in Bogotá, based on DANE’s Integrated Household Survey (GEIH).</p>
+        </div>
+
+        <div class="desc-card dim5">
+          <h3>5. Culture, Recreation and Sport</h3>
+          <p>Results of the Biennial Culture Survey 2025 and the Sports Practice and Quality of Life Survey 2024 on cultural, recreational and sports activities for young people.</p>
+        </div>
+
+        <div class="desc-card dim7">
+          <h3>7. Habitat</h3>
+          <p>Results of the Bogotá Cómo Vamos 2025 Citizen Perception Survey and the Biennial Culture Survey 2025 (Environmental Culture module) on habitat.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nota metodológica -->
+    <div style="max-width:750px; margin:2rem auto 0; background:#f8f9fa; border-radius:8px; padding:1.2rem 1.5rem; font-size:0.82rem; line-height:1.6; color:#555;">
+      <strong style="color:#333;">Note on age ranges.</strong>
+      Age ranges differ across dimensions, because each source breaks down its data according to its own methodology. Please check the age range of each statistic.
+    </div>
+
+    <!-- Contacto y fecha de actualización -->
+    <p style="max-width:750px; margin:1rem auto 0; text-align:center; font-size:0.82rem; line-height:1.6; color:#555;">
+      For questions about the information, please write to
+      <a href="mailto:politicasjuventud@sdis.gov.co" style="color:#333; font-weight:600;">politicasjuventud@sdis.gov.co</a><br>
+      Dashboard last updated on 15 July 2026
+    </p>
+  </div>
+
+<p style="max-width:1100px; margin:1.2rem auto 0.6rem; padding:0 1.5rem; text-align:center; font-size:0.75rem; line-height:1.5; color:#83766c;">English version prepared for a portfolio. The official dashboard, in Spanish, is at <a href="https://sdis-juventud.github.io/tablero-cij/" style="color:#83766c;">sdis-juventud.github.io/tablero-cij/</a>.</p>
+</body>
+</html>

@@ -1,0 +1,8 @@
+Notes/
+historico/
+__pycache__/
+*.pyc
+~$*
+Thumbs.db
+.DS_Store
+desktop.ini

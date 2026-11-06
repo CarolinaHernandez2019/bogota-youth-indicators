@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Youth Information Centre - Dimension 2: Education</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>Chart.defaults.locale = 'en-US';</script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Anton&family=Antonio:wght@700&family=Figtree:wght@400;500;600;700;800&display=swap');
+    :root {
+      /* Identidad de la dimensión 2 (Educación): verde, según mapeo de 7 colores oficiales x 7 dimensiones.
+         --acento-oscuro se usa como fondo de la franja de estadísticas (el verde base es
+         demasiado claro para texto blanco encima); --acento queda para líneas de gráfico y acentos finos. */
+      --acento: #1eaf76;
+      --acento-oscuro: #14734e;
+      --acento-claro: #5cc59c;
+      /* Naranja coral (paleta oficial, color de dim5) oscurecido apenas lo necesario para
+         que el texto blanco tenga contraste — oscurecerlo tanto como el verde (factor ~0,657)
+         lo hacía ver café en vez de naranja, un efecto conocido de los tonos cálidos muy oscuros. */
+      --alerta-oscuro: #c46f42;
+      --crema: #f5efd2;
+      --gris-oscuro: #2f2b28;
+      --gris: #83766c;
+      --gris-claro: #f4f2ee;
+      --blanco: #ffffff;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Figtree', 'Segoe UI', sans-serif;
+      background: var(--gris-claro);
+      color: var(--gris-oscuro);
+      line-height: 1.5;
+    }
+    .header-hero {
+      position: relative;
+      background: url('../imagenes/SDIS/Fonde verde.png') center/cover;
+      padding-top: 3rem;
+      overflow: hidden;
+    }
+    .header-hero .hero-texto { text-align: center; padding: 0 2rem 2.5rem; }
+    .header-hero .hero-title {
+      font-family: 'Anton', 'Segoe UI', sans-serif;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+      font-size: 3.4rem;
+      line-height: 1;
+      color: var(--crema);
+    }
+    .header-hero .hero-subtitle {
+      font-family: 'Antonio', 'Segoe UI', sans-serif;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 1.15rem;
+      color: var(--crema);
+      opacity: 0.85;
+      margin-top: 0.4rem;
+    }
+    .header-hero .btn-home {
+      position: absolute; top: 1.3rem; left: 2rem; z-index: 2;
+      color: var(--crema);
+      text-decoration: none;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 5px 14px;
+      border: 1.5px solid rgba(245,239,210,0.55);
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+    .header-hero .btn-home:hover { background: rgba(255,255,255,0.15); border-color: var(--crema); }
+    /* Barra de marca Distrito Joven / Secretaría de Integración Social al final de la
+       página, a todo el ancho — por eso va fuera de .container, que tiene padding y max-width. */
+    .footer-marca { display: block; width: 100%; height: auto; margin-top: 2rem; }
+    @media (max-width: 600px) {
+      .header-hero { padding-top: 2.2rem; }
+      .header-hero .hero-title { font-size: 2.2rem; }
+      .header-hero .hero-subtitle { font-size: 0.9rem; }
+      .header-hero .btn-home { top: 0.9rem; left: 1rem; font-size: 0.72rem; padding: 4px 10px; }
+    }
+    .container { max-width: 1320px; margin: 0 auto; padding: 1.5rem; }
+    .page-subtitle { font-size: 1.1rem; color: var(--gris); margin-bottom: 1rem; }
+    .page-subtitle span { font-weight: 600; color: var(--gris-oscuro); }
+    .filtros {
+      background: var(--blanco);
+      border-radius: 10px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .filtros label {
+      font-size: 0.85rem; font-weight: 600; color: var(--gris);
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .filtro-grupo { display: flex; align-items: center; gap: 0.5rem; }
+    .filtro-select {
+      padding: 6px 12px; border: 2px solid var(--gris-claro); border-radius: 6px;
+      font-size: 0.9rem; color: var(--gris-oscuro); background: var(--blanco);
+      cursor: pointer; min-width: 100px;
+    }
+    .filtro-select:focus { outline: none; border-color: var(--acento); }
+
+    /* Franja de estadísticas: sin tarjetas ni bordes de color, separadores finos */
+    .stat-strip {
+      display: flex; background: var(--acento-oscuro);
+      border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem;
+    }
+    .stat-strip.alerta { background: var(--alerta-oscuro); }
+    /* Fila de franjas: pone dos (o más) .stat-strip lado a lado en vez de apiladas */
+    .stat-strip-row {
+      display: flex; gap: 1.5rem; margin-bottom: 1.5rem;
+    }
+    .stat-strip-row .stat-strip { flex: 1; margin-bottom: 0; }
+    @media (max-width: 800px) {
+      .stat-strip-row { flex-direction: column; }
+    }
+    .stat-tile {
+      position: relative; flex: 1; padding: 28px 24px 22px;
+    }
+    .stat-tile:not(:first-child)::before {
+      content: ''; position: absolute; left: 0; top: 50%;
+      width: 1px; height: 56%; background: rgba(255,255,255,0.2);
+      transform: translateY(-50%);
+    }
+    .stat-pill {
+      display: block; color: var(--crema);
+      font-family: 'Antonio', 'Figtree', sans-serif; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.04em;
+      font-size: 0.75rem; margin-bottom: 20px; opacity: 0.85;
+    }
+    .stat-numero {
+      font-family: 'Anton', 'Figtree', sans-serif; font-weight: 400;
+      font-size: 2.5rem; color: var(--blanco); line-height: 1; margin-bottom: 8px;
+    }
+    .stat-meta { font-size: 0.78rem; color: var(--crema); opacity: 0.75; }
+    @media (max-width: 800px) {
+      .stat-strip { flex-direction: column; }
+      .stat-tile:not(:first-child)::before {
+        left: 50%; top: 0; width: 56%; height: 1px; transform: translateX(-50%);
+      }
+    }
+
+    /* Grupos de tasas en card blanca (cobertura/aprobación vs. permanencia): reemplaza
+       la franja de color sólido por tarjetas planas dentro de un .card estándar. */
+    .stat-group-row {
+      display: flex; gap: 1.5rem; margin-bottom: 1.5rem;
+    }
+    .stat-group-row .card { flex: 1; margin-bottom: 0; }
+    @media (max-width: 800px) { .stat-group-row { flex-direction: column; } }
+    .stat-group-header {
+      display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 1.1rem;
+    }
+    .stat-group-header svg { flex-shrink: 0; }
+    .stat-group-title {
+      font-size: 0.95rem; font-weight: 700; color: var(--gris-oscuro);
+    }
+    .stat-mini-row { display: flex; }
+    .stat-mini-tile {
+      position: relative; flex: 1; padding: 16px 12px; text-align: center;
+    }
+    .stat-mini-tile:not(:first-child)::before {
+      content: ''; position: absolute; left: 0; top: 50%;
+      width: 1px; height: 56%; background: rgba(0,0,0,0.1);
+      transform: translateY(-50%);
+    }
+    .stat-mini-numero {
+      font-family: 'Anton', 'Figtree', sans-serif; font-weight: 400;
+      font-size: 1.8rem; line-height: 1; margin-bottom: 6px;
+    }
+    .stat-mini-tile.positiva .stat-mini-numero { color: var(--acento-oscuro); }
+    .stat-mini-tile.alerta .stat-mini-numero { color: var(--alerta-oscuro); }
+    .stat-mini-label { font-size: 0.78rem; color: var(--gris); font-weight: 600; }
+    @media (max-width: 480px) {
+      .stat-mini-row { flex-direction: column; }
+      .stat-mini-tile:not(:first-child)::before {
+        left: 50%; top: 0; width: 56%; height: 1px; transform: translateX(-50%);
+      }
+    }
+
+    .grid-2col {
+      display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;
+    }
+    @media (max-width: 960px) { .grid-2col { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--blanco); border-radius: 10px;
+      padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card-title {
+      font-size: 0.85rem; font-weight: 700; color: var(--gris);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 1rem;
+    }
+    .chart-container { position: relative; height: 320px; }
+    .col-right {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .footer {
+      margin-top: 1.5rem; padding: 1rem 1.5rem; font-size: 0.8rem; color: var(--gris);
+    }
+    .footer-top {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .footer-notas {
+      background: #f8f9fa;
+      border-radius: 6px;
+      padding: 0.8rem 1rem;
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: #666;
+    }
+    .footer-notas p { margin-bottom: 0.3rem; }
+    .footer-notas p:last-child { margin-bottom: 0; }
+    .footer-notas a { color: #666; }
+  </style>
+</head>
+<body>
+
+  <div class="header-hero">
+    <a href="../index.html" class="btn-home">&#8592; Home</a>
+    <div class="hero-texto">
+      <h1 class="hero-title">Education</h1>
+      <p class="hero-subtitle">Dimension 2</p>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- ============================================================ -->
+    <!-- 2.1 Educación media -->
+    <!-- ============================================================ -->
+    <p class="page-subtitle">
+      <span>2.1 Upper secondary education indicators</span><br>
+      Source: Ministry of Education (MEN) – Pre-school, primary and secondary education statistics (datos.gov.co)
+    </p>
+
+    <div class="filtros">
+      <div class="filtro-grupo">
+        <label>Year</label>
+        <select class="filtro-select" id="filtro-anio"></select>
+      </div>
+    </div>
+
+    <div class="stat-group-row">
+      <div class="card">
+        <div class="stat-group-header" style="color: var(--acento-oscuro);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8l10-4 10 4-10 4-10-4Z"/><path d="M6 10.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-5.5"/><path d="M22 8v6"/></svg>
+          <span class="stat-group-title">Enrolment and pass rates</span>
+        </div>
+        <div class="stat-mini-row">
+          <div class="stat-mini-tile positiva">
+            <div class="stat-mini-numero" id="kpi-cob-bruta">–</div>
+            <div class="stat-mini-label">Gross enrolment</div>
+          </div>
+          <div class="stat-mini-tile positiva">
+            <div class="stat-mini-numero" id="kpi-cob-neta">–</div>
+            <div class="stat-mini-label">Net enrolment</div>
+          </div>
+          <div class="stat-mini-tile positiva">
+            <div class="stat-mini-numero" id="kpi-aprobacion">–</div>
+            <div class="stat-mini-label">Pass rate</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="stat-group-header" style="color: var(--alerta-oscuro);">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 1 3 6.7"/><path d="M3 4v5h5"/><path d="M12 7v5l3 3"/></svg>
+          <span class="stat-group-title">Retention</span>
+        </div>
+        <div class="stat-mini-row">
+          <div class="stat-mini-tile alerta">
+            <div class="stat-mini-numero" id="kpi-reprobacion">–</div>
+            <div class="stat-mini-label">Failure rate</div>
+          </div>
+          <div class="stat-mini-tile alerta">
+            <div class="stat-mini-numero" id="kpi-repitencia">–</div>
+            <div class="stat-mini-label">Repetition</div>
+          </div>
+          <div class="stat-mini-tile alerta">
+            <div class="stat-mini-numero" id="kpi-desercion">–</div>
+            <div class="stat-mini-label">Dropout</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2col">
+      <div class="card">
+        <div class="card-title">Gross enrolment, net enrolment and pass rates by year</div>
+        <div class="chart-container">
+          <canvas id="chart-cobertura"></canvas>
+        </div>
+      </div>
+
+      <div class="col-right">
+        <div class="card">
+          <div class="card-title">Failure and repetition rates over time</div>
+          <div class="chart-container" style="height:200px;">
+            <canvas id="chart-reprobacion"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Dropout rate over time</div>
+          <div class="chart-container" style="height:200px;">
+            <canvas id="chart-desercion"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- 2.2 Educación superior -->
+    <!-- ============================================================ -->
+    <p class="page-subtitle" style="margin-top:2.5rem;">
+      <span>2.2 Higher education enrolment</span><br>
+      Source: MEN – SNIES higher education indicators summary, and HECAA enrolment dashboard
+    </p>
+
+    <div class="filtros">
+      <div class="filtro-grupo">
+        <label>Year</label>
+        <select class="filtro-select" id="filtro-anio-sup"></select>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Enrolment in Bogotá and Colombia — <span id="lbl-bogcol-anio"></span></div>
+      <div class="chart-container" style="height:200px;">
+        <canvas id="chart-bogota-col"></canvas>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Total enrolment over time — Bogotá and Colombia</div>
+      <div class="chart-container">
+        <canvas id="chart-matriculas-bc"></canvas>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Enrolment by level — <span id="lbl-niveles-anio"></span></div>
+      <div class="chart-container" style="height:280px;">
+        <canvas id="chart-niveles"></canvas>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:1.5rem;">
+      <div class="card-title">Enrolment by level over time — Bogotá</div>
+      <div class="chart-container">
+        <canvas id="chart-historico-sup"></canvas>
+      </div>
+    </div>
+
+    <div class="grid-2col">
+      <div class="card">
+        <div class="card-title">Higher education enrolment rate</div>
+        <div class="chart-container" style="height:240px;">
+          <canvas id="chart-cobertura-bc"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Immediate transition rate to higher education</div>
+        <div class="chart-container" style="height:240px;">
+          <canvas id="chart-transito-bc"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="footer-top">
+        <div>
+          Source: Ministry of National Education – MEN · Data filtered for Bogotá D.C.
+        </div>
+        <div style="text-align:right;">
+          District Secretariat of Social Integration<br>
+          Youth Subdirectorate – Youth Information Centre
+        </div>
+      </div>
+      <div class="footer-notas">
+        <p><strong>Note:</strong> the MEN sources are —
+          2.1 Upper secondary education: <a href="https://www.datos.gov.co/Educaci-n/MEN_ESTADISTICAS_EN_EDUCACION_EN_PREESCOLAR-B-SICA/ji8i-4anb/about_data" target="_blank" rel="noopener">Pre-school, primary and secondary education statistics (datos.gov.co)</a> ·
+          2.2 Higher education: <a href="https://snies.mineducacion.gov.co/portal/Informes-e-indicadores/Resumen-indicadores-Educacion-Superior/" target="_blank" rel="noopener">SNIES – Higher education indicators summary</a> and
+          <a href="https://hecaa.mineducacion.gov.co/consultaspublicas/tableros/matricula" target="_blank" rel="noopener">HECAA – Enrolment dashboard</a>.</p>
+        <p>The gross enrolment rate compares everyone enrolled in a level, whatever their age, with the population of the official age for that level, so it can exceed 100% when there are over-age students. The net enrolment rate counts only students of the official age, so it is always equal to or lower than the gross rate. The official age for upper secondary education is 15 and 16.</p>
+      </div>
+    </div>
+  </div>
+  <p style="max-width:1100px; margin:1.2rem auto 0.6rem; padding:0 1.5rem; text-align:center; font-size:0.75rem; line-height:1.5; color:#83766c;">English version prepared for a portfolio. The official dashboard, in Spanish, is at <a href="https://sdis-juventud.github.io/tablero-cij/dim2/" style="color:#83766c;">sdis-juventud.github.io/tablero-cij/dim2/</a>.</p>
+
+
+  <img src="../imagenes/SDIS/Distrito joven.png" alt="Distrito Joven — District Secretariat of Social Integration" class="footer-marca">
+
+<script>
+// Formato colombiano
+function fmtDec(n, d=2) {
+  if (n == null) return '–';
+  return n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+function fmtPct(n) {
+  if (n == null) return '–';
+  return fmtDec(n, 2) + '%';
+}
+function fmtNum(n) {
+  if (n == null) return '–';
+  return Math.round(n).toLocaleString('en-US');
+}
+
+let DATOS = [];
+let chartCobertura = null;
+let chartReprobacion = null;
+let chartDesercion = null;
+
+const EDUC_MEDIA_FALLBACK = [
+  {
+    "anio": 2011,
+    "cobertura_bruta": 87.76,
+    "cobertura_neta": 55.01,
+    "aprobacion": 97.45,
+    "reprobacion": 0.0,
+    "repitencia": 2.57,
+    "desercion": 2.55
+  },
+  {
+    "anio": 2012,
+    "cobertura_bruta": 78.59,
+    "cobertura_neta": 51.78,
+    "aprobacion": 95.55,
+    "reprobacion": 0.0,
+    "repitencia": 4.08,
+    "desercion": 4.45
+  },
+  {
+    "anio": 2013,
+    "cobertura_bruta": 85.53,
+    "cobertura_neta": 52.67,
+    "aprobacion": 96.26,
+    "reprobacion": 0.0,
+    "repitencia": 5.54,
+    "desercion": 3.74
+  },
+  {
+    "anio": 2014,
+    "cobertura_bruta": 78.68,
+    "cobertura_neta": 49.97,
+    "aprobacion": 97.35,
+    "reprobacion": 0.17,
+    "repitencia": 8.14,
+    "desercion": 2.48
+  },
+  {
+    "anio": 2015,
+    "cobertura_bruta": 81.94,
+    "cobertura_neta": 50.61,
+    "aprobacion": 96.57,
+    "reprobacion": 0.23,
+    "repitencia": 7.94,
+    "desercion": 3.2
+  },
+  {
+    "anio": 2016,
+    "cobertura_bruta": 82.07,
+    "cobertura_neta": 49.73,
+    "aprobacion": 95.98,
+    "reprobacion": 2.0,
+    "repitencia": 2.09,
+    "desercion": 2.02
+  },
+  {
+    "anio": 2017,
+    "cobertura_bruta": 82.66,
+    "cobertura_neta": 49.3,
+    "aprobacion": 96.18,
+    "reprobacion": 2.27,
+    "repitencia": 0.06,
+    "desercion": 1.55
+  },
+  {
+    "anio": 2018,
+    "cobertura_bruta": 93.18,
+    "cobertura_neta": 56.01,
+    "aprobacion": 96.32,
+    "reprobacion": 2.15,
+    "repitencia": 0.21,
+    "desercion": 1.53
+  },
+  {
+    "anio": 2019,
+    "cobertura_bruta": 92.09,
+    "cobertura_neta": 55.49,
+    "aprobacion": 96.25,
+    "reprobacion": 2.34,
+    "repitencia": 1.44,
+    "desercion": 1.41
+  },
+  {
+    "anio": 2020,
+    "cobertura_bruta": 97.06,
+    "cobertura_neta": 57.3,
+    "aprobacion": 92.12,
+    "reprobacion": 7.33,
+    "repitencia": 2.27,
+    "desercion": 0.55
+  },
+  {
+    "anio": 2021,
+    "cobertura_bruta": 99.55,
+    "cobertura_neta": 58.84,
+    "aprobacion": 87.15,
+    "reprobacion": 10.97,
+    "repitencia": 2.39,
+    "desercion": 1.88
+  },
+  {
+    "anio": 2022,
+    "cobertura_bruta": 103.61,
+    "cobertura_neta": 62.05,
+    "aprobacion": 91.74,
+    "reprobacion": 5.46,
+    "repitencia": 3.45,
+    "desercion": 2.8
+  },
+  {
+    "anio": 2023,
+    "cobertura_bruta": 107.3,
+    "cobertura_neta": 64.42,
+    "aprobacion": 91.35,
+    "reprobacion": 6.5,
+    "repitencia": 3.2,
+    "desercion": 2.16
+  },
+  {
+    "anio": 2024,
+    "cobertura_bruta": 106.07,
+    "cobertura_neta": 65.32,
+    "aprobacion": 92.37,
+    "reprobacion": 5.63,
+    "repitencia": 3.75,
+    "desercion": 2.0
+  }
+];
+
+const EDUC_SUPERIOR_FALLBACK = [
+  {
+    "anio": 2005,
+    "tecnica_profesional": 63098,
+    "tecnologica": 40178,
+    "universitaria": 279544,
+    "especializacion": 23603,
+    "maestria": 7399,
+    "doctorado": 492,
+    "total_bogota": 414314,
+    "total_colombia": 1133767,
+    "ies_con_oferta": 106,
+    "pct_bogota": 36.5,
+    "tasa_cobertura_bogota": null,
+    "tasa_cobertura_nacional": null,
+    "tasa_transito_bogota": null,
+    "tasa_transito_nacional": null
+  },
+  {
+    "anio": 2006,
+    "tecnica_profesional": 67084,
+    "tecnologica": 50468,
+    "universitaria": 306747,
+    "especializacion": 23660,
+    "maestria": 7451,
+    "doctorado": 545,
+    "total_bogota": 455955,
+    "total_colombia": 1216043,
+    "ies_con_oferta": 112,
+    "pct_bogota": 37.5,
+    "tasa_cobertura_bogota": null,
+    "tasa_cobertura_nacional": null,
+    "tasa_transito_bogota": null,
+    "tasa_transito_nacional": null
+  },
+  {
+    "anio": 2007,
+    "tecnica_profesional": 61383,
+    "tecnologica": 43609,
+    "universitaria": 290200,
+    "especializacion": 17929,
+    "maestria": 7615,
+    "doctorado": 647,
+    "total_bogota": 421383,
+    "total_colombia": 1286900,
+    "ies_con_oferta": 113,
+    "pct_bogota": 32.7,
+    "tasa_cobertura_bogota": null,
+    "tasa_cobertura_nacional": null,
+    "tasa_transito_bogota": null,
+    "tasa_transito_nacional": null
+  },
+  {
+    "anio": 2008,
+    "tecnica_profesional": 72772,
+    "tecnologica": 49896,
+    "universitaria": 302426,
+    "especializacion": 20893,
+    "maestria": 8349,
+    "doctorado": 690,
+    "total_bogota": 455026,
+    "total_colombia": 1407325,
+    "ies_con_oferta": 109,
+    "pct_bogota": 32.3,
+    "tasa_cobertura_bogota": null,
+    "tasa_cobertura_nacional": null,
+    "tasa_transito_bogota": null,
+    "tasa_transito_nacional": null
+  },
+  {
+    "anio": 2009,
+    "tecnica_profesional": 59095,
+    "tecnologica": 75624,
+    "universitaria": 319586,
+    "especializacion": 29493,
+    "maestria": 9225,
+    "doctorado": 748,
+    "total_bogota": 493771,
+    "total_colombia": 1500249,
+    "ies_con_oferta": 106,
+    "pct_bogota": 32.9,
+    "tasa_cobertura_bogota": null,
+    "tasa_cobertura_nacional": null,
+    "tasa_transito_bogota": null,
+    "tasa_transito_nacional": null
+  },
+  {
+    "anio": 2010,
+    "tecnica_profesional": 44862,
+    "tecnologica": 101371,
+    "universitaria": 326124,
+    "especializacion": 31901,
+    "maestria": 11508,
+    "doctorado": 1005,
+    "total_bogota": 516771,
+    "total_colombia": 1580642,
+    "ies_con_oferta": 102,
+    "pct_bogota": 32.7,
+    "tasa_cobertura_bogota": null,
+    "tasa_cobertura_nacional": null,
+    "tasa_transito_bogota": null,
+    "tasa_transito_nacional": null
+  },
+  {
+    "anio": 2011,
+    "tecnica_profesional": 47183,
+    "tecnologica": 120114,
+    "universitaria": 359741,
+    "especializacion": 30380,
+    "maestria": 14210,
+    "doctorado": 1395,
+    "total_bogota": 573023,
+    "total_colombia": 1751166,
+    "ies_con_oferta": 113,
+    "pct_bogota": 32.7,
+    "tasa_cobertura_bogota": null,
+    "tasa_cobertura_nacional": null,
+    "tasa_transito_bogota": null,
+    "tasa_transito_nacional": null
+  },
+  {
+    "anio": 2012,
+    "tecnica_profesional": 46763,
+    "tecnologica": 129516.5,
+    "universitaria": 381539.3,
+    "especializacion": 29105,
+    "maestria": 15819,
+    "doctorado": 1538,
+    "total_bogota": 604280.8,
+    "total_colombia": 1820337.6,
+    "ies_con_oferta": 121,
+    "pct_bogota": 33.2,
+    "tasa_cobertura_bogota": null,
+    "tasa_cobertura_nacional": null,
+    "tasa_transito_bogota": null,
+    "tasa_transito_nacional": null
+  },
+  {
+    "anio": 2013,
+    "tecnica_profesional": 39971,
+    "tecnologica": 150728,
+    "universitaria": 413636,
+    "especializacion": 30151,
+    "maestria": 17636,
+    "doctorado": 1758,
+    "total_bogota": 653880,
+    "total_colombia": 1975574,
+    "ies_con_oferta": 118,
+    "pct_bogota": 33.1,
+    "tasa_cobertura_bogota": null,
+    "tasa_cobertura_nacional": null,
+    "tasa_transito_bogota": null,
+    "tasa_transito_nacional": null
+  },
+  {
+    "anio": 2014,
+    "tecnica_profesional": 42224,
+    "tecnologica": 160226,
+    "universitaria": 442999,
+    "especializacion": 39324,
+    "maestria": 21581,
+    "doctorado": 1891,
+    "total_bogota": 708245,
+    "total_colombia": 2220652,
+    "ies_con_oferta": 122,
+    "pct_bogota": 31.9,
+    "tasa_cobertura_bogota": 0.9477,
+    "tasa_cobertura_nacional": 0.4982,
+    "tasa_transito_bogota": null,
+    "tasa_transito_nacional": null
+  },
+  {
+    "anio": 2015,
+    "tecnica_profesional": 39403,
+    "tecnologica": 162508,
+    "universitaria": 465501,
+    "especializacion": 41576,
+    "maestria": 23115,
+    "doctorado": 2210,
+    "total_bogota": 734313,
+    "total_colombia": 2293550,
+    "ies_con_oferta": 123,
+    "pct_bogota": 32,
+    "tasa_cobertura_bogota": 0.9843,
+    "tasa_cobertura_nacional": 0.5135,
+    "tasa_transito_bogota": 0.503,
+    "tasa_transito_nacional": 0.374
+  },
+  {
+    "anio": 2016,
+    "tecnica_profesional": 33441,
+    "tecnologica": 170898,
+    "universitaria": 507209,
+    "especializacion": 43745,
+    "maestria": 25120,
+    "doctorado": 2374,
+    "total_bogota": 782787,
+    "total_colombia": 2394434,
+    "ies_con_oferta": 126,
+    "pct_bogota": 32.7,
+    "tasa_cobertura_bogota": 1.0633,
+    "tasa_cobertura_nacional": 0.5332,
+    "tasa_transito_bogota": 0.483,
+    "tasa_transito_nacional": 0.38
+  },
+  {
+    "anio": 2017,
+    "tecnica_profesional": 31459,
+    "tecnologica": 179321,
+    "universitaria": 519284,
+    "especializacion": 42123,
+    "maestria": 25916,
+    "doctorado": 2286,
+    "total_bogota": 800389,
+    "total_colombia": 2446314,
+    "ies_con_oferta": 124,
+    "pct_bogota": 32.7,
+    "tasa_cobertura_bogota": 1.1179,
+    "tasa_cobertura_nacional": 0.5443,
+    "tasa_transito_bogota": 0.538,
+    "tasa_transito_nacional": 0.424
+  },
+  {
+    "anio": 2018,
+    "tecnica_profesional": 38061,
+    "tecnologica": 169548,
+    "universitaria": 525513,
+    "especializacion": 43687,
+    "maestria": 25431,
+    "doctorado": 2215,
+    "total_bogota": 804455,
+    "total_colombia": 2440367,
+    "ies_con_oferta": 126,
+    "pct_bogota": 33,
+    "tasa_cobertura_bogota": 1.1553,
+    "tasa_cobertura_nacional": 0.5397,
+    "tasa_transito_bogota": 0.482,
+    "tasa_transito_nacional": 0.387
+  },
+  {
+    "anio": 2019,
+    "tecnica_profesional": 33981,
+    "tecnologica": 146778,
+    "universitaria": 512491,
+    "especializacion": 49294,
+    "maestria": 26471,
+    "doctorado": 2298,
+    "total_bogota": 771313,
+    "total_colombia": 2396250,
+    "ies_con_oferta": 125,
+    "pct_bogota": 32.2,
+    "tasa_cobertura_bogota": 1.1145,
+    "tasa_cobertura_nacional": 0.5223,
+    "tasa_transito_bogota": 0.466,
+    "tasa_transito_nacional": 0.397
+  },
+  {
+    "anio": 2020,
+    "tecnica_profesional": 26251,
+    "tecnologica": 143609,
+    "universitaria": 472038,
+    "especializacion": 45328,
+    "maestria": 26474,
+    "doctorado": 2065,
+    "total_bogota": 715765,
+    "total_colombia": 2355603,
+    "ies_con_oferta": 125,
+    "pct_bogota": 30.4,
+    "tasa_cobertura_bogota": 1.0797,
+    "tasa_cobertura_nacional": 0.5158,
+    "tasa_transito_bogota": 0.482,
+    "tasa_transito_nacional": 0.4
+  },
+  {
+    "anio": 2021,
+    "tecnica_profesional": 29369,
+    "tecnologica": 254058,
+    "universitaria": 460279,
+    "especializacion": 56147,
+    "maestria": 31302,
+    "doctorado": 2410,
+    "total_bogota": 833565,
+    "total_colombia": 2448271,
+    "ies_con_oferta": 133,
+    "pct_bogota": 34,
+    "tasa_cobertura_bogota": 1.3038,
+    "tasa_cobertura_nacional": 0.5383,
+    "tasa_transito_bogota": 0.493,
+    "tasa_transito_nacional": 0.397
+  },
+  {
+    "anio": 2022,
+    "tecnica_profesional": 37150,
+    "tecnologica": 250838,
+    "universitaria": 457445,
+    "especializacion": 52910,
+    "maestria": 32834,
+    "doctorado": 2385,
+    "total_bogota": 833562,
+    "total_colombia": 2466228,
+    "ies_con_oferta": null,
+    "pct_bogota": null,
+    "tasa_cobertura_bogota": 1.355,
+    "tasa_cobertura_nacional": 0.5492,
+    "tasa_transito_bogota": 0.515,
+    "tasa_transito_nacional": 0.411
+  },
+  {
+    "anio": 2023,
+    "tecnica_profesional": 40452,
+    "tecnologica": 252203,
+    "universitaria": 457723,
+    "especializacion": 60132,
+    "maestria": 35104,
+    "doctorado": 2675,
+    "total_bogota": 848289,
+    "total_colombia": 2475833,
+    "ies_con_oferta": null,
+    "pct_bogota": null,
+    "tasa_cobertura_bogota": 1.4077,
+    "tasa_cobertura_nacional": 0.5538,
+    "tasa_transito_bogota": 0.522,
+    "tasa_transito_nacional": 0.431
+  },
+  {
+    "anio": 2024,
+    "tecnica_profesional": 44856,
+    "tecnologica": 256981,
+    "universitaria": 463211,
+    "especializacion": 66342,
+    "maestria": 36800,
+    "doctorado": 2980,
+    "total_bogota": 871170,
+    "total_colombia": 2553560,
+    "ies_con_oferta": null,
+    "pct_bogota": null,
+    "tasa_cobertura_bogota": 1.4782,
+    "tasa_cobertura_nacional": 0.5753,
+    "tasa_transito_bogota": 0.539,
+    "tasa_transito_nacional": 0.459
+  }
+];
+
+// Cargar datos educación media
+fetch('data/educacion_media.json')
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .catch(() => EDUC_MEDIA_FALLBACK)
+  .then(datos => {
+    DATOS = datos.filter(d => d.anio >= 2018);
+    initFiltros();
+    actualizarTodo();
+  });
+
+function initFiltros() {
+  const selAnio = document.getElementById('filtro-anio');
+  const anios = DATOS.map(d => d.anio).sort();
+  anios.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a; opt.textContent = a;
+    if (a === Math.max(...anios)) opt.selected = true;
+    selAnio.appendChild(opt);
+  });
+  selAnio.onchange = actualizarTodo;
+}
+
+function getAnio() {
+  return parseInt(document.getElementById('filtro-anio').value);
+}
+
+function actualizarTodo() {
+  const anio = getAnio();
+  actualizarKPIs(anio);
+  actualizarChartCobertura();
+  actualizarChartReprobacion();
+  actualizarChartDesercion();
+}
+
+function actualizarKPIs(anio) {
+  const d = DATOS.find(r => r.anio === anio);
+  if (!d) return;
+
+  document.getElementById('kpi-cob-bruta').textContent = fmtPct(d.cobertura_bruta);
+  document.getElementById('kpi-cob-neta').textContent = fmtPct(d.cobertura_neta);
+  document.getElementById('kpi-aprobacion').textContent = fmtPct(d.aprobacion);
+  document.getElementById('kpi-reprobacion').textContent = fmtPct(d.reprobacion);
+  document.getElementById('kpi-repitencia').textContent = fmtPct(d.repitencia);
+  document.getElementById('kpi-desercion').textContent = fmtPct(d.desercion);
+}
+
+function actualizarChartCobertura() {
+  const datos = DATOS.sort((a, b) => a.anio - b.anio);
+
+  if (chartCobertura) chartCobertura.destroy();
+  chartCobertura = new Chart(document.getElementById('chart-cobertura'), {
+    type: 'line',
+    data: {
+      labels: datos.map(d => d.anio),
+      datasets: [
+        {
+          label: 'Gross enrolment rate',
+          data: datos.map(d => d.cobertura_bruta),
+          borderColor: '#1eaf76',
+          backgroundColor: '#1eaf76',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#1eaf76',
+          pointBorderWidth: 2,
+          tension: 0.3,
+        },
+        {
+          label: 'Net enrolment rate',
+          data: datos.map(d => d.cobertura_neta),
+          borderColor: '#1e9da3',
+          backgroundColor: '#1e9da3',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#1e9da3',
+          pointBorderWidth: 2,
+          tension: 0.3,
+        },
+        {
+          label: 'Pass rate',
+          data: datos.map(d => d.aprobacion),
+          borderColor: '#2fa4d4',
+          backgroundColor: '#2fa4d4',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#2fa4d4',
+          pointBorderWidth: 2,
+          tension: 0.3,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { usePointStyle: true, pointStyle: 'circle', font: { size: 11 } }
+        },
+        tooltip: {
+          callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtDec(ctx.parsed.y) + '%' }
+        }
+      },
+      scales: {
+        y: {
+          ticks: {
+            callback: v => fmtDec(v, 0) + '%',
+            font: { size: 11 }
+          },
+          grid: { color: '#ecf0f1' }
+        },
+        x: { ticks: { font: { size: 11 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function actualizarChartReprobacion() {
+  const datos = DATOS.sort((a, b) => a.anio - b.anio);
+
+  if (chartReprobacion) chartReprobacion.destroy();
+  chartReprobacion = new Chart(document.getElementById('chart-reprobacion'), {
+    type: 'line',
+    data: {
+      labels: datos.map(d => d.anio),
+      datasets: [
+        {
+          label: 'Failure rate',
+          data: datos.map(d => d.reprobacion),
+          borderColor: '#f4676e',
+          backgroundColor: '#f4676e',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#f4676e',
+          pointBorderWidth: 2,
+          tension: 0.3,
+        },
+        {
+          label: 'Repetition rate',
+          data: datos.map(d => d.repitencia),
+          borderColor: '#f58b53',
+          backgroundColor: '#f58b53',
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#f58b53',
+          pointBorderWidth: 2,
+          tension: 0.3,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { usePointStyle: true, pointStyle: 'circle', font: { size: 10 } }
+        },
+        tooltip: {
+          callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtDec(ctx.parsed.y) + '%' }
+        }
+      },
+      scales: {
+        y: {
+          ticks: {
+            callback: v => fmtDec(v, 0) + '%',
+            font: { size: 10 }
+          },
+          grid: { color: '#ecf0f1' }
+        },
+        x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function actualizarChartDesercion() {
+  const datos = DATOS.sort((a, b) => a.anio - b.anio);
+
+  if (chartDesercion) chartDesercion.destroy();
+  chartDesercion = new Chart(document.getElementById('chart-desercion'), {
+    type: 'line',
+    data: {
+      labels: datos.map(d => d.anio),
+      datasets: [{
+        label: 'Dropout rate',
+        data: datos.map(d => d.desercion),
+        borderColor: '#f4676e',
+        backgroundColor: 'rgba(244, 103, 110, 0.12)',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointBackgroundColor: '#fff',
+        pointBorderColor: '#f4676e',
+        pointBorderWidth: 2,
+        tension: 0.3,
+        fill: true,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => 'Dropout rate: ' + fmtDec(ctx.parsed.y) + '%' }
+        }
+      },
+      scales: {
+        y: {
+          ticks: {
+            callback: v => fmtDec(v, 1) + '%',
+            font: { size: 10 }
+          },
+          grid: { color: '#ecf0f1' }
+        },
+        x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// SECCIÓN 2.2: Educación Superior
+// ============================================================
+
+let DATOS_SUP = [];
+let chartNiveles = null;
+let chartHistoricoSup = null;
+let chartBogotaCol = null;
+let chartMatriculasBC = null;
+let chartCoberturaBC = null;
+let chartTransitoBC = null;
+
+fetch('data/educacion_superior.json')
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .catch(() => EDUC_SUPERIOR_FALLBACK)
+  .then(datos => {
+    DATOS_SUP = datos.filter(d => d.anio >= 2018);
+    initFiltrosSup();
+    actualizarTodoSup();
+  });
+
+function initFiltrosSup() {
+  const sel = document.getElementById('filtro-anio-sup');
+  const anios = DATOS_SUP.map(d => d.anio).sort();
+  anios.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a; opt.textContent = a;
+    if (a === Math.max(...anios)) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  sel.onchange = actualizarTodoSup;
+}
+
+function getAnioSup() {
+  return parseInt(document.getElementById('filtro-anio-sup').value);
+}
+
+function actualizarTodoSup() {
+  const anio = getAnioSup();
+  actualizarChartNiveles(anio);
+  actualizarChartHistoricoSup();
+  actualizarChartBogotaCol();
+  actualizarChartMatriculasBC();
+  actualizarChartCoberturaBC();
+  actualizarChartTransitoBC();
+}
+
+// Rampa secuencial en verde (identidad de la dimensión), de más claro a más oscuro
+// según el nivel de formación — mismo concepto usado también en el histórico de abajo.
+const NIVELES_SUP = [
+  { label: 'Technical professional', key: 'tecnica_profesional', color: '#a8dfc4' },
+  { label: 'Technological', key: 'tecnologica', color: '#6cc9a0' },
+  { label: 'University', key: 'universitaria', color: '#1eaf76' },
+  { label: 'Specialisation', key: 'especializacion', color: '#17925f' },
+  { label: 'Master’s', key: 'maestria', color: '#14734e' },
+  { label: 'Doctorate', key: 'doctorado', color: '#2f3e3c' },
+];
+
+function actualizarChartNiveles(anio) {
+  const d = DATOS_SUP.find(r => r.anio === anio);
+  if (!d) return;
+
+  document.getElementById('lbl-niveles-anio').textContent = anio;
+
+  if (chartNiveles) chartNiveles.destroy();
+  chartNiveles = new Chart(document.getElementById('chart-niveles'), {
+    type: 'bar',
+    data: {
+      labels: NIVELES_SUP.map(n => n.label),
+      datasets: [{
+        data: NIVELES_SUP.map(n => d[n.key] || 0),
+        backgroundColor: NIVELES_SUP.map(n => n.color),
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => fmtNum(ctx.parsed.x) + ' enrolled' }
+        }
+      },
+      scales: {
+        x: {
+          ticks: { callback: v => fmtNum(v), font: { size: 10 } },
+          grid: { color: '#ecf0f1' }
+        },
+        y: { ticks: { font: { size: 10 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function actualizarChartHistoricoSup() {
+  const datos = DATOS_SUP.sort((a, b) => a.anio - b.anio);
+
+  if (chartHistoricoSup) chartHistoricoSup.destroy();
+  chartHistoricoSup = new Chart(document.getElementById('chart-historico-sup'), {
+    type: 'line',
+    data: {
+      labels: datos.map(d => d.anio),
+      datasets: [
+        {
+          label: 'Technical professional',
+          data: datos.map(d => d.tecnica_profesional),
+          borderColor: '#a8dfc4',
+          backgroundColor: '#a8dfc4',
+          borderWidth: 2.5,
+          pointRadius: 3,
+          tension: 0.3,
+        },
+        {
+          label: 'Technological',
+          data: datos.map(d => d.tecnologica),
+          borderColor: '#6cc9a0',
+          backgroundColor: '#6cc9a0',
+          borderWidth: 2.5,
+          pointRadius: 3,
+          tension: 0.3,
+        },
+        {
+          label: 'University',
+          data: datos.map(d => d.universitaria),
+          borderColor: '#1eaf76',
+          backgroundColor: '#1eaf76',
+          borderWidth: 2.5,
+          pointRadius: 3,
+          tension: 0.3,
+        },
+        {
+          label: 'Postgraduate (specialisation, master’s, doctorate)',
+          data: datos.map(d => (d.especializacion || 0) + (d.maestria || 0) + (d.doctorado || 0)),
+          borderColor: '#2f3e3c',
+          backgroundColor: '#2f3e3c',
+          borderWidth: 2.5,
+          pointRadius: 3,
+          tension: 0.3,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { usePointStyle: true, pointStyle: 'circle', font: { size: 10 } }
+        },
+        tooltip: {
+          callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtNum(ctx.parsed.y) }
+        }
+      },
+      scales: {
+        y: {
+          ticks: { callback: v => fmtNum(v), font: { size: 10 } },
+          grid: { color: '#ecf0f1' }
+        },
+        x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function actualizarChartBogotaCol() {
+  const anio = getAnioSup();
+  const d = DATOS_SUP.find(r => r.anio === anio);
+  if (!d) return;
+
+  document.getElementById('lbl-bogcol-anio').textContent = anio;
+
+  // Porcentaje para mostrar en el tooltip
+  const pctBog = d.total_colombia > 0
+    ? (d.total_bogota / d.total_colombia * 100).toFixed(1)
+    : '–';
+
+  if (chartBogotaCol) chartBogotaCol.destroy();
+  chartBogotaCol = new Chart(document.getElementById('chart-bogota-col'), {
+    type: 'bar',
+    data: {
+      labels: ['Colombia', 'Bogotá, D.C.'],
+      datasets: [{
+        data: [d.total_colombia, d.total_bogota],
+        backgroundColor: ['#2f2b28', '#14734e'],
+        borderRadius: 4,
+        barThickness: 40,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      // padding.right fijo (no porcentual) reserva espacio para la etiqueta de la barra
+      // más larga sin importar el ancho de pantalla — con un % del valor máximo, en móvil
+      // ese % equivale a muy pocos píxeles y el número queda cortado (bug ya presente en
+      // la versión anterior, corregido aquí).
+      layout: { padding: { right: 66 } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => fmtNum(ctx.parsed.x) + ' enrolled',
+            afterLabel: function(ctx) {
+              if (ctx.dataIndex === 1) {
+                return pctBog + '% of the national total';
+              }
+              return '';
+            }
+          }
+        }
+      },
+      scales: {
+        x: { display: false, grid: { display: false }, beginAtZero: true },
+        y: {
+          ticks: { font: { size: 12, weight: 'bold' } },
+          grid: { display: false },
+        }
+      },
+    },
+    plugins: [{
+      id: 'barLabels',
+      afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        chart.data.datasets[0].data.forEach((val, i) => {
+          const meta = chart.getDatasetMeta(0).data[i];
+          const x = meta.x + 8;
+          const y = meta.y;
+          ctx.save();
+          ctx.fillStyle = '#2f2b28';
+          ctx.font = 'bold 13px Segoe UI, system-ui, sans-serif';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(fmtNum(val), x, y);
+          ctx.restore();
+        });
+      }
+    }]
+  });
+}
+
+function actualizarChartMatriculasBC() {
+  const datos = DATOS_SUP.sort((a, b) => a.anio - b.anio);
+
+  if (chartMatriculasBC) chartMatriculasBC.destroy();
+  chartMatriculasBC = new Chart(document.getElementById('chart-matriculas-bc'), {
+    type: 'line',
+    data: {
+      labels: datos.map(d => d.anio),
+      datasets: [
+        {
+          label: 'Bogotá',
+          data: datos.map(d => d.total_bogota),
+          borderColor: '#1eaf76', backgroundColor: '#1eaf76',
+          borderWidth: 2.5, pointRadius: 3, tension: 0.3,
+        },
+        {
+          // comparación con Colombia (comentario de David, 2026-07)
+          label: 'Colombia',
+          data: datos.map(d => d.total_colombia),
+          borderColor: '#2f2b28', backgroundColor: '#2f2b28',
+          borderWidth: 2.5, pointRadius: 3, tension: 0.3,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', font: { size: 10 } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtNum(ctx.parsed.y) + ' enrolled' } }
+      },
+      scales: {
+        y: { ticks: { callback: v => fmtNum(v), font: { size: 10 } }, grid: { color: '#ecf0f1' } },
+        x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function actualizarChartCoberturaBC() {
+  const datos = DATOS_SUP.filter(d => d.tasa_cobertura_bogota != null).sort((a, b) => a.anio - b.anio);
+
+  if (chartCoberturaBC) chartCoberturaBC.destroy();
+  chartCoberturaBC = new Chart(document.getElementById('chart-cobertura-bc'), {
+    type: 'line',
+    data: {
+      labels: datos.map(d => d.anio),
+      datasets: [
+        {
+          label: 'Bogotá',
+          data: datos.map(d => d.tasa_cobertura_bogota * 100),
+          borderColor: '#1eaf76', backgroundColor: '#1eaf76',
+          borderWidth: 2.5, pointRadius: 3, tension: 0.3,
+        },
+        {
+          label: 'Colombia',
+          data: datos.map(d => d.tasa_cobertura_nacional * 100),
+          borderColor: '#2f2b28', backgroundColor: '#2f2b28',
+          borderWidth: 2.5, pointRadius: 3, tension: 0.3,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', font: { size: 10 } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtDec(ctx.parsed.y, 1) + '%' } }
+      },
+      scales: {
+        y: { ticks: { callback: v => fmtDec(v, 0) + '%', font: { size: 10 } }, grid: { color: '#ecf0f1' } },
+        x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function actualizarChartTransitoBC() {
+  const datos = DATOS_SUP.filter(d => d.tasa_transito_bogota != null).sort((a, b) => a.anio - b.anio);
+
+  if (chartTransitoBC) chartTransitoBC.destroy();
+  chartTransitoBC = new Chart(document.getElementById('chart-transito-bc'), {
+    type: 'line',
+    data: {
+      labels: datos.map(d => d.anio),
+      datasets: [
+        {
+          label: 'Bogotá',
+          data: datos.map(d => d.tasa_transito_bogota * 100),
+          borderColor: '#1eaf76', backgroundColor: '#1eaf76',
+          borderWidth: 2.5, pointRadius: 3, tension: 0.3,
+        },
+        {
+          label: 'Colombia',
+          data: datos.map(d => d.tasa_transito_nacional * 100),
+          borderColor: '#2f2b28', backgroundColor: '#2f2b28',
+          borderWidth: 2.5, pointRadius: 3, tension: 0.3,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top', labels: { usePointStyle: true, pointStyle: 'circle', font: { size: 10 } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + fmtDec(ctx.parsed.y, 1) + '%' } }
+      },
+      scales: {
+        y: { ticks: { callback: v => fmtDec(v, 0) + '%', font: { size: 10 } }, grid: { color: '#ecf0f1' } },
+        x: { ticks: { font: { size: 10 } }, grid: { display: false } }
+      }
+    }
+  });
+}
+</script>
+
+</body>
+</html>
